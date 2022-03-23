@@ -16,6 +16,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -392,10 +393,15 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             IServiceProvider requestContainer = request.ODataFeature().RequestContainer;
+
             if (requestContainer != null)
             {
+                request.LogInfo($"Get RC from ODataFeature");
+
                 return requestContainer;
             }
+
+            request.LogInfo($"Get RC starting calling CreateRequestContainer");
 
             // HTTP routes will not have chance to call CreateRequestContainer. We have to call it.
             return request.CreateRequestContainer(request.ODataFeature().RouteName);
@@ -414,16 +420,26 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
+            string msg = request.ODataFeature().RequestContainer != null ? "has RC on ODataFeature" : "NO RC on ODataFeature";
+            request.LogInfo($"Starting CreateRequestContainer, {msg}");
+
             if (request.ODataFeature().RequestContainer != null)
             {
+                request.LogInfo($"Starting CreateRequestContainer: A request container already exists on the request");
+
                 throw Error.InvalidOperation(SRResources.RequestContainerAlreadyExists);
             }
+
+            request.LogInfo($"Creating CreateRequestContainer........");
 
             IServiceScope requestScope = request.CreateRequestScope(routeName);
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 
             request.ODataFeature().RequestScope = requestScope;
             request.ODataFeature().RequestContainer = requestContainer;
+
+            msg = requestContainer != null ? "Created RC Successful" : "Created RC failed.";
+            request.LogInfo(msg);
 
             return requestContainer;
         }
@@ -438,6 +454,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </param>
         public static void DeleteRequestContainer(this HttpRequest request, bool dispose)
         {
+            string msg = request.ODataFeature().RequestScope != null ? "has scope" : "no scope";
+            request.LogInfo($"Del.{msg}");
+
             if (request.ODataFeature().RequestScope != null)
             {
                 IServiceScope requestScope = request.ODataFeature().RequestScope;
@@ -448,6 +467,22 @@ namespace Microsoft.AspNet.OData.Extensions
                 {
                     requestScope.Dispose();
                 }
+            }
+        }
+
+        internal static void LogInfo(this HttpRequest request, string message)
+        {
+            try
+            {
+                string newMessage = $"{request.Path.Value}: {message}";
+                ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+                ILogger newlogger = loggeFactory.CreateLogger<ODataFeature>();
+
+                newlogger.LogInformation(newMessage);
+            }
+            catch
+            {
+                // do nothing
             }
         }
 

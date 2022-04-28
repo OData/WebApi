@@ -6,9 +6,11 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Security;
+using System.Threading;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Instancing
 {
@@ -19,6 +21,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Instancing
         private const string SeedOverrideFileName = @"C:\RandomSeed.txt";
 
         #endregion
+
+        /// <summary>
+        /// The seed that should be used for random number generation
+        /// </summary>
+        private static int? Seed = null;
 
         #region Public Methods and Operators
 
@@ -44,10 +51,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Instancing
             {
             }
 
-            // Keep the randomness per hour instead of per day.
-            DateTime now = DateTime.UtcNow;
-            int seed = (now.Year * 10000) + (now.Month * 100) + now.Day + now.Hour;
-            return seed;
+            if (Seed == null)
+            {
+                // Keep the randomness per hour instead of per day.
+                DateTime now = DateTime.UtcNow;
+                Seed = (now.Year * 10000) + (now.Month * 100) + now.Day + now.Hour;
+                Console.WriteLine($"Generated seed for random number generator: {Seed}");
+            }
+
+            return Seed.Value;
         }
 
         #endregion

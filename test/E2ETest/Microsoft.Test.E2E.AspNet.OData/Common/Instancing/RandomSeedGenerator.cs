@@ -6,11 +6,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Security;
-using System.Threading;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Instancing
 {

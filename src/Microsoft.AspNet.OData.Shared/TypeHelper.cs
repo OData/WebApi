@@ -491,5 +491,80 @@ namespace Microsoft.AspNet.OData
 
             return null;
         }
+
+        /// <summary>
+        /// Searches the public property with the specified name from the target type and its base types safely,
+        /// circumventing <see cref="AmbiguousMatchException"/> where a property has been redeclared in a derived type.
+        /// </summary>
+        /// <param name="targetType">The type to search from.</param>
+        /// <param name="propertyName">The name of the public property to get.</param>
+        /// <returns>
+        /// An object representing the public property with the specified name from the most derived class,
+        /// if found; otherwise, null.
+        /// </returns>
+        internal static PropertyInfo GetProperty(Type targetType, string propertyName)
+        {
+            // NOTE: Designed to avoid costly closure lambda allocations since method might be used in hot path
+            PropertyInfo matchedProperty = null;
+            List<PropertyInfo> matchedProperties = null;
+
+            PropertyInfo[] properties = targetType.GetProperties();
+            for (int i = 0; i < properties.Length; i++)
+            {
+                PropertyInfo propertyInfo = properties[i];
+
+                if (!propertyInfo.Name.Equals(propertyName))
+                {
+                    continue;
+                }
+
+                // Property declared on target type - opportunity to exit early
+                if (propertyInfo.DeclaringType.Equals(targetType))
+                {
+                    return propertyInfo;
+                }
+
+                if (matchedProperty == null)
+                {
+                    matchedProperty = propertyInfo;
+                }
+                else
+                {
+                    // Deferred initialization
+                    // We only initialize the list if we have more than one matched property
+                    if (matchedProperties == null)
+                    {
+                        matchedProperties = new List<PropertyInfo>(4);
+                        matchedProperties.Add(matchedProperty);
+                    }
+
+                    matchedProperties.Add(propertyInfo);
+                }
+            }
+
+            // Property not found in the inheritance hierarchy
+            if (matchedProperties == null)
+            {
+                return matchedProperty; // null will be returned if we didn't find the property
+            }
+
+            // We only get here if property has been redeclared in a derived type
+            // We find the property declared in the most derived type
+            Type parentType = targetType.BaseType;
+            while (parentType != null)
+            {
+                for (int i = 0; i < matchedProperties.Count; i++)
+                {
+                    if (matchedProperties[i].DeclaringType.Equals(parentType))
+                    {
+                        return matchedProperties[i];
+                    }
+                }
+
+                parentType = parentType.BaseType;
+            }
+
+            return null; // In actual sense unreachable
+        }
     }
 }

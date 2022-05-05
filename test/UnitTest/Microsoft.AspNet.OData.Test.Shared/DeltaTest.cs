@@ -468,6 +468,26 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void CanPatch_ReturnsCorrectly()
+        {
+            AddressEntity original = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+
+            dynamic delta = new Delta<AddressEntity>();
+            delta.City = "Sammamish";
+            delta.StreetAddress = "23213 NE 15th Ct";
+
+            var neworiginal = delta.Patch(original);
+            // unchanged
+            Assert.True(original == neworiginal);
+            Assert.Equal(1, original.ID);
+            Assert.Equal(98074, original.ZipCode);
+            Assert.Equal("WA", original.State);
+            // changed
+            Assert.Equal("Sammamish", original.City);
+            Assert.Equal("23213 NE 15th Ct", original.StreetAddress);
+        }
+
+        [Fact]
         public void CanPatch_OpenType()
         {
             // Arrange

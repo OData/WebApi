@@ -240,6 +240,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="name">The name of the nested Property</param>
         /// <param name="value">The value of the nested Property</param>
         /// <returns><c>True</c> if the Property was found and is a nested Property</returns>
+        [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
         public bool TryGetNestedPropertyValue(string name, out object value)
         {
             if (name == null)
@@ -343,7 +344,7 @@ namespace Microsoft.AspNet.OData
         /// to the <paramref name="original"/> entity recursively.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void CopyChangedValues(TStructuralType original)
+        public TStructuralType CopyChangedValues(TStructuralType original)
         {
             if (original == null)
             {
@@ -402,19 +403,27 @@ namespace Microsoft.AspNet.OData
 
                     if (deltaNestedResource.IsComplexType && newType != originalType)
                     {
-                        originalNestedResource = ReAssignComplexDerivedType(original, nestedResourceName, originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
+                        originalNestedResource = ReAssignComplexDerivedType(originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
+                        _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
                     }
 
                     deltaNestedResource.CopyChangedValues(originalNestedResource);
                 }
             }
+
+            return original;
         }
 
-        private dynamic ReAssignComplexDerivedType(TStructuralType parent, string nestedPropertyName, dynamic originalValue, Type newType, Type originalType, Type declaredType)
+        private dynamic ReAssignComplexDerivedType(dynamic originalValue, Type newType, Type originalType, Type declaredType)
         {
             //As per OASIS discussion, changing a complex type from 1 derived type to another is allowed if both derived type have a common ancestor and the property
             //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.
             //And copy the common properties.
+
+            if(newType == originalType)
+            {
+                return originalValue;
+            }
 
             Type newBaseType = newType;
             HashSet<Type> newBaseTypes = new HashSet<Type>();
@@ -451,8 +460,6 @@ namespace Microsoft.AspNet.OData
                         property.SetValue(newOriginalNestedResource, value);
                     }
 
-                    _structuredType.GetProperty(nestedPropertyName).SetValue(parent, (object)newOriginalNestedResource);
-
                     break;
                 }
 
@@ -488,14 +495,21 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedDynamicValues(original);
         }
 
+
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void Patch(TStructuralType original)
+        /// <returns>The original value after Patching</returns>
+        public TStructuralType Patch(TStructuralType original)
         {
-            CopyChangedValues(original);
+            if (IsComplexType)
+            {
+                original = ReAssignComplexDerivedType(original, _structuredType, original.GetType(), ExpectedClrType) as TStructuralType;                
+            }
+
+            return CopyChangedValues(original);           
         }
 
         /// <summary>
@@ -643,7 +657,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private bool IsIgnoredProperty(bool isTypeDataContract, PropertyInfo propertyInfo)
+        private static bool IsIgnoredProperty(bool isTypeDataContract, PropertyInfo propertyInfo)
         {
             //This is for Ignoring the property that matches below criteria
             //1. Its marked as NotMapped

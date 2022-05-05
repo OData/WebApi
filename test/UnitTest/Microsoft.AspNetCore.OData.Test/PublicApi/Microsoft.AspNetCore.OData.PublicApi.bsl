@@ -278,12 +278,12 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
 
 	public virtual void Clear ()
-	public void CopyChangedValues (TStructuralType original)
+	public TStructuralType CopyChangedValues (TStructuralType original)
 	public void CopyUnchangedValues (TStructuralType original)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
-	public void Patch (TStructuralType original)
+	public TStructuralType Patch (TStructuralType original)
 	public void Put (TStructuralType original)
 	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
@@ -745,11 +745,13 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchHandler {
 public abstract class Microsoft.AspNet.OData.Batch.ODataBatchRequestItem {
 	protected ODataBatchRequestItem ()
 
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ContentIdToLocationMapping  { public get; public set; }
+
 	public abstract System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler)
 	[
 	AsyncStateMachineAttribute(),
 	]
-	public static System.Threading.Tasks.Task SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler, Microsoft.AspNetCore.Http.HttpContext context, System.Collections.Generic.Dictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
+	public static System.Threading.Tasks.Task SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler, Microsoft.AspNetCore.Http.HttpContext context, System.Collections.Generic.IDictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
 }
 
 public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem {

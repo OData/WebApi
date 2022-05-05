@@ -44,37 +44,38 @@ namespace Microsoft.AspNet.OData.Batch
             HttpRequest request = context.Request;
             IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
-
-            ODataMessageReader reader = request.GetODataMessageReader(requestContainer);
-
-            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
-            Guid batchId = Guid.NewGuid();
 
-            ODataOptions options = context.RequestServices.GetRequiredService<ODataOptions>();
-            bool enableContinueOnErrorHeader = (options != null)
-                ? options.EnableContinueOnErrorHeader
-                : false;
-
-            SetContinueOnError(new WebApiRequestHeaders(request.Headers), enableContinueOnErrorHeader);
-
-            while (await batchReader.ReadAsync())
+            using (ODataMessageReader reader = request.GetODataMessageReader(requestContainer))
             {
-                ODataBatchResponseItem responseItem = null;
-                if (batchReader.State == ODataBatchReaderState.ChangesetStart)
+                ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
+                Guid batchId = Guid.NewGuid();
+
+                ODataOptions options = context.RequestServices.GetRequiredService<ODataOptions>();
+                bool enableContinueOnErrorHeader = (options != null)
+                    ? options.EnableContinueOnErrorHeader
+                    : false;
+
+                SetContinueOnError(new WebApiRequestHeaders(request.Headers), enableContinueOnErrorHeader);
+
+                while (await batchReader.ReadAsync())
                 {
-                    responseItem = await ExecuteChangeSetAsync(batchReader, batchId, request, nextHandler);
-                }
-                else if (batchReader.State == ODataBatchReaderState.Operation)
-                {
-                    responseItem = await ExecuteOperationAsync(batchReader, batchId, request, nextHandler);
-                }
-                if (responseItem != null)
-                {
-                    responses.Add(responseItem);
-                    if (responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
+                    ODataBatchResponseItem responseItem = null;
+                    if (batchReader.State == ODataBatchReaderState.ChangesetStart)
                     {
-                        break;
+                        responseItem = await ExecuteChangeSetAsync(batchReader, batchId, request, nextHandler);
+                    }
+                    else if (batchReader.State == ODataBatchReaderState.Operation)
+                    {
+                        responseItem = await ExecuteOperationAsync(batchReader, batchId, request, nextHandler);
+                    }
+                    if (responseItem != null)
+                    {
+                        responses.Add(responseItem);
+                        if (responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -113,6 +114,14 @@ namespace Microsoft.AspNet.OData.Batch
             operationContext.Request.DeleteRequestContainer(false);
             OperationRequestItem operation = new OperationRequestItem(operationContext);
 
+            IDictionary<string, string> contentIdToLocationMapping = originalRequest.HttpContext.ODataBatchFeature().ContentIdMapping;
+            if (contentIdToLocationMapping == null)
+            {
+                contentIdToLocationMapping = new Dictionary<string, string>();
+                originalRequest.HttpContext.ODataBatchFeature().ContentIdMapping = contentIdToLocationMapping;
+            }
+
+            operation.ContentIdToLocationMapping = contentIdToLocationMapping;
             ODataBatchResponseItem responseItem = await operation.SendRequestAsync(handler);
 
             return responseItem;
@@ -143,7 +152,15 @@ namespace Microsoft.AspNet.OData.Batch
 
             Guid changeSetId = Guid.NewGuid();
             List<HttpContext> changeSetResponse = new List<HttpContext>();
-            Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
+            IDictionary<string, string> contentIdToLocationMapping = originalRequest.HttpContext.ODataBatchFeature().ContentIdMapping;
+
+            if (contentIdToLocationMapping == null)
+            {
+                contentIdToLocationMapping = new Dictionary<string, string>();
+                originalRequest.HttpContext.ODataBatchFeature().ContentIdMapping = contentIdToLocationMapping;
+            }
+
+
             while (await batchReader.ReadAsync() && batchReader.State != ODataBatchReaderState.ChangesetEnd)
             {
                 if (batchReader.State == ODataBatchReaderState.Operation)

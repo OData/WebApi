@@ -110,7 +110,7 @@ namespace Microsoft.AspNet.OData.Test
         </Key>
         <Property Name=""Id"" Type=""Edm.Int32"" Nullable=""false"" />
         <Property Name=""OrderName"" Type=""Edm.String"" />
-        <Property Name=""OrderValue"" Type=""Edm.Decimal"" Nullable=""false""  Scale=""Variable"" />
+        <Property Name=""OrderValue"" Type=""Edm.Decimal"" Nullable=""false"" Scale=""Variable"" />
       </EntityType>
       <EntityType Name=""DerivedQueryLimitCustomer"" BaseType=""Microsoft.AspNet.OData.Test.QueryLimitCustomer"">
         <Property Name=""DerivedName"" Type=""Edm.String"" />

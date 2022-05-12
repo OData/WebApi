@@ -174,6 +174,7 @@ namespace Microsoft.AspNet.OData
             // Add parsers for requests targeted at resource paths ending in $query
             builder.AddService(ServiceLifetime.Singleton, typeof(IEnumerable<IODataQueryOptionsParser>), sp => ODataQueryOptionsParserFactory.Create());
 
+            // Comments for an extra commit
             return builder;
         }
     }

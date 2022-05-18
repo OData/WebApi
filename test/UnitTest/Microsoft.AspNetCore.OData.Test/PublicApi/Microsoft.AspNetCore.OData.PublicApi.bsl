@@ -449,6 +449,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	int MaxSkip  { public get; public set; }
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
+	ODataQuerySettings QuerySettings  { protected get; }
 
 	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
 	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)

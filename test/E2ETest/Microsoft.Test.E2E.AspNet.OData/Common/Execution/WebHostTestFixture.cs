@@ -140,6 +140,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                     .UseKestrel(options =>
                                     {
                                         options.Listen(IPAddress.Loopback, _port);
+                                        options.AllowSynchronousIO = true;
                                     })
                                     .UseStartup<WebHostTestStartup>()
                                     .ConfigureServices(services =>

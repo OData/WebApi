@@ -44,6 +44,7 @@ namespace Microsoft.AspNet.OData.Test
                 config.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             });
+            
             return TestServerFactory.CreateClient(server);
         }
 

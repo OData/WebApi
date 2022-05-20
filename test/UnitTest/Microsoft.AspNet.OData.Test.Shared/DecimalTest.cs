@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Test
             _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.001m, 10.00m));
             _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.999m, 11m));
             _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.335m, 10.34m));
-            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(-10.335m, -10.32m));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(-10.335m, -10.34m));
         }
 
         public IEnumerable<DecimalRoundTestEntity> DecimalRoundTestEntities { get { return _decimalRoundTestEntities; } }

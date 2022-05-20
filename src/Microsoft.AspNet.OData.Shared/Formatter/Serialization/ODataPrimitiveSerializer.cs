@@ -172,6 +172,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
                 {
                     TimeOfDay tod = (TimeSpan)value;
+                    
                     return tod;
                 }
 

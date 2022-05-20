@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNet.OData.Builder;
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Test
                 config.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             });
-            
+
             return TestServerFactory.CreateClient(server);
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.AspNet.OData.Test
         async Task<IEnumerable<T>> ReadEntitiesFromResponse<T>(HttpResponseMessage httpResponseMessage) where T : class
         {
             string jsonContent = await httpResponseMessage.Content.ReadAsStringAsync();
-            
+
             return JsonConvert.DeserializeObject<ODataResponse<T>>(jsonContent).Value;
         }
     }

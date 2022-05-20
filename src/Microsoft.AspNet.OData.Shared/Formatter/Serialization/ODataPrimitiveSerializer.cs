@@ -165,6 +165,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (primitiveType.IsDate() && TypeHelper.IsDateTime(type))
                 {
                     Date dt = (DateTime)value;
+                    
                     return dt;
                 }
 

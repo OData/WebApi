@@ -58,6 +58,7 @@ namespace Microsoft.AspNet.OData.Test
         async Task<IEnumerable<T>> ReadEntitiesFromResponse<T>(HttpResponseMessage httpResponseMessage) where T : class
         {
             string jsonContent = await httpResponseMessage.Content.ReadAsStringAsync();
+            
             return JsonConvert.DeserializeObject<ODataResponse<T>>(jsonContent).Value;
         }
     }

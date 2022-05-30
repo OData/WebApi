@@ -142,6 +142,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     }
 
                     logger.LogError(ex, String.Empty);
+                    throw ex;
                 };
 
                 List<IDisposable> toDispose = new List<IDisposable>();

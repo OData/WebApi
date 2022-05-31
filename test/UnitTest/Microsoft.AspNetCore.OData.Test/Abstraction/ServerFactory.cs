@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -47,9 +48,11 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 services.AddMvc();
 #else
                 services.AddMvc(options => options.EnableEndpointRouting = false)
-                    .AddNewtonsoftJson();
+                    .AddNewtonsoftJson();              
 #endif
+
                 services.AddOData();
+                services.AddSingleton<ILogger, TestLogger>();
                 configureService?.Invoke(services);
             });
 
@@ -154,6 +157,23 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 }
 
                 return true;
+            }
+        }
+
+        public class TestLogger : ILogger
+        {
+            public IDisposable BeginScope<TState>(TState state)
+            {
+                return null;
+            }
+
+            public bool IsEnabled(LogLevel logLevel)
+            {
+                return true;
+            }
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            {
             }
         }
     }

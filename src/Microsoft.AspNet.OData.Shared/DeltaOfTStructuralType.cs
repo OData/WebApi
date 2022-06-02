@@ -414,7 +414,7 @@ namespace Microsoft.AspNet.OData
             return original;
         }
 
-        private dynamic ReAssignComplexDerivedType(dynamic originalValue, Type newType, Type originalType, Type declaredType)
+        private static dynamic ReAssignComplexDerivedType(dynamic originalValue, Type newType, Type originalType, Type declaredType)
         {
             //As per OASIS discussion, changing a complex type from 1 derived type to another is allowed if both derived type have a common ancestor and the property
             //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.

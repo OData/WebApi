@@ -160,7 +160,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             }
         }
 
-        public class TestLogger : ILogger
+        private class TestLogger : ILogger
         {
             public IDisposable BeginScope<TState>(TState state)
             {

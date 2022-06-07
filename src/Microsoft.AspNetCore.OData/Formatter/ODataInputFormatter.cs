@@ -140,9 +140,11 @@ namespace Microsoft.AspNet.OData.Formatter
                     {
                         throw ex;
                     }
-
                     logger.LogError(ex, String.Empty);
-                    throw ex;
+                    if (context.HttpContext.Request.GetCompatibilityOptions().HasFlag(CompatibilityOptions.ThrowModelStateExceptionIfILoggerDefined))
+                    {
+                        throw ex;
+                    }
                 };
 
                 List<IDisposable> toDispose = new List<IDisposable>();

@@ -1,4 +1,10 @@
-﻿#if NETCORE
+﻿//-----------------------------------------------------------------------------
+// <copyright file="ODataInputFormatterTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +12,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -47,7 +54,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
     {
 
         [Fact]
-        public async Task ErrorsAddedToModelStateWhenILoggerServiceIsRegiatered()
+        public async Task  ExceptionNotThrownWhenILoggerServiceIsDefinedAndFlagIsNotSet()
         {
             // Arrange
             const string requestbody = "{\"ID\":2,\"Name\":2}";
@@ -67,6 +74,38 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
                 request.Content = new StringContent(requestbody);
                 
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task ExceptionThrownWhenILoggerServiceIsDefinedAndFlagIsSet()
+        {
+            // Arrange
+            const string requestbody = "{\"ID\":2,\"Name\":2}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+                config.SetCompatibilityOptions(CompatibilityOptions.ThrowModelStateExceptionIfILoggerDefined);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+                request.Content = new StringContent(requestbody);
+
                 // Act
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -103,7 +142,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 }
 
                 customers.Add(customer);
-                return Ok(customers.LastOrDefault(c => c.ID == customer.ID));
+                return Ok();
 
             }
         }

@@ -36,13 +36,16 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.OData.Client, Version=7.11.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.11.0\lib\net45\Microsoft.OData.Client.dll</HintPath>
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.11.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.OData.Core, Version=7.11.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.11.0\lib\net45\Microsoft.OData.Core.dll</HintPath>
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.11.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.OData.Edm, Version=7.11.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.11.0\lib\net45\Microsoft.OData.Edm.dll</HintPath>
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.11.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -57,7 +60,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Spatial, Version=7.11.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.11.0\lib\net45\Microsoft.Spatial.dll</HintPath>
+      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.11.1\lib\net45\Microsoft.Spatial.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>

@@ -31,8 +31,8 @@ namespace Microsoft.AspNet.OData
         DisableCaseInsensitiveRequestPropertyBinding = 0x2,
 
         /// <summary>
-        /// Throw exeception and add ModelState error if ILogger is defined.
+        /// Throw exception after logging ModelState error.
         /// </summary>
-        ThrowModelStateExceptionIfILoggerDefined = 0x4
+        ThrowExceptionAfterLoggingModelStateError = 0x4
     }
 }

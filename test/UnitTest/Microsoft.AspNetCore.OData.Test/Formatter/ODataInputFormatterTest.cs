@@ -97,7 +97,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 config.MapODataServiceRoute("odata", null, model);
-                config.SetCompatibilityOptions(CompatibilityOptions.ThrowModelStateExceptionIfILoggerDefined);
+                config.SetCompatibilityOptions(CompatibilityOptions.ThrowExceptionAfterLoggingModelStateError);
             });
 
             using (HttpClient client = TestServerFactory.CreateClient(server))

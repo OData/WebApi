@@ -10,6 +10,7 @@ using System;
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
@@ -158,16 +159,27 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             Type type = value.GetType();
-            if (primitiveType != null && primitiveType.IsDate() && TypeHelper.IsDateTime(type))
-            {
-                Date dt = (DateTime)value;
-                return dt;
-            }
 
-            if (primitiveType != null && primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
+            if (primitiveType != null)
             {
-                TimeOfDay tod = (TimeSpan)value;
-                return tod;
+                if (primitiveType.IsDate() && TypeHelper.IsDateTime(type))
+                {
+                    Date dt = (DateTime)value;
+                    
+                    return dt;
+                }
+
+                if (primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
+                {
+                    TimeOfDay tod = (TimeSpan)value;
+                    
+                    return tod;
+                }
+
+                if (primitiveType is EdmDecimalTypeReference decimalTypeReference && decimalTypeReference.Scale.HasValue && value is decimal decimalValue)
+                {
+                    value = decimal.Round(decimalValue, decimalTypeReference.Scale.Value, MidpointRounding.AwayFromZero);
+                }
             }
 
             return ConvertUnsupportedPrimitives(value);

@@ -140,6 +140,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                     .UseKestrel(options =>
                                     {
                                         options.Listen(IPAddress.Loopback, _port);
+
+                                        // After upgrading ODL version to 7.11.0,
+                                        // Some E2E tests failing with error "Synchronous operations are disallowed. Call WriteAsync or set AllowSynchronousIO to true instead."
+                                        options.AllowSynchronousIO = true;
                                     })
                                     .UseStartup<WebHostTestStartup>()
                                     .ConfigureServices(services =>

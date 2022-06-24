@@ -19,7 +19,9 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Microsoft.Extensions.Logging;
 #else
 using System;
 using System.Collections;
@@ -66,6 +68,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 config.MapODataServiceRoute("odata", null, model);
+            }, (configureService) =>
+            {
+                configureService.AddSingleton<ILogger, TestLogger>();
+
             });
 
             using (HttpClient client = TestServerFactory.CreateClient(server))
@@ -144,6 +150,23 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 customers.Add(customer);
                 return Ok();
 
+            }
+        }
+
+        private class TestLogger : ILogger
+        {
+            public IDisposable BeginScope<TState>(TState state)
+            {
+                return null;
+            }
+
+            public bool IsEnabled(LogLevel logLevel)
+            {
+                return true;
+            }
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            {
             }
         }
     }

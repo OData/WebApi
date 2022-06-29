@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 services.AddMvc();
 #else
                 services.AddMvc(options => options.EnableEndpointRouting = false)
-                    .AddNewtonsoftJson();              
+                    .AddNewtonsoftJson();  
 #endif
 
                 services.AddOData();
@@ -158,7 +158,5 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 return true;
             }
         }
-
-        
     }
 }

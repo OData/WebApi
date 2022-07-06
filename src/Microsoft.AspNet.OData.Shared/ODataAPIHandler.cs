@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
 {
@@ -65,20 +66,32 @@ namespace Microsoft.AspNet.OData
         {
             if (resource != null && model != null)
             {
-                CheckAndApplyODataId(resource);
+                this.ParentObject = resource;
+                CheckAndApplyODataId(resource, model);
             }
         }
 
-        private void CheckAndApplyODataId(object obj)
+        /// <summary>
+        /// The parent object
+        /// </summary>
+        public TStructuralType ParentObject { get; set; }
+
+        private ODataPath GetODataPath(string path, IEdmModel model)
+        {
+            ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
+            ODataPath odataPath = parser.ParsePath();
+
+            return odataPath;
+        }
+
+        private void CheckAndApplyODataId(object obj, IEdmModel model)
         {
             Type type = obj.GetType();
-
             PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(IODataIdContainer));
-
             if (property != null && property.GetValue(obj) is IODataIdContainer container && container != null)
             {
-                TStructuralType res = ApplyODataIdOnContainer(container);
-
+                ODataPath odataPath = GetODataPath(container.ODataId, model);
+                object res = ApplyODataIdOnContainer(obj, odataPath);
                 foreach (PropertyInfo prop in type.GetProperties())
                 {
                     object resVal = prop.GetValue(res);
@@ -108,37 +121,62 @@ namespace Microsoft.AspNet.OData
                                 break;
                             }
 
-                            CheckAndApplyODataId(item);
+                            CheckAndApplyODataId(item, model);
                         }
                     }
                     else
                     {
-                        CheckAndApplyODataId(propVal);
+                        CheckAndApplyODataId(propVal, model);
+                    }
+                }
+            }
+        }
+
+        private object ApplyODataIdOnContainer(object obj, ODataPath odataPath)
+        {
+            KeySegment keySegment = odataPath.LastOrDefault() as KeySegment;
+            Dictionary<string, object> keys = keySegment?.Keys.ToDictionary(x => x.Key, x => x.Value);
+            TStructuralType returnedObject;
+            string error;
+            if (this.ParentObject.Equals(obj))
+            {
+                if (this.TryGet(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                {
+                    return returnedObject;
+                }
+                else
+                {
+                    if (this.TryCreate(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                    {
+                        return returnedObject;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            else
+            {
+                IODataAPIHandler apiHandlerNested = this.GetNestedHandler(this.ParentObject, odataPath.LastSegment.Identifier);
+                object[] getParams = new object[] { keys, null, null };
+                if (apiHandlerNested.GetType().GetMethod(nameof(TryGet)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
+                {
+                    return getParams[1];
+                }
+                else
+                {
+                    if (apiHandlerNested.GetType().GetMethod(nameof(TryCreate)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
+                    {
+                        return getParams[1];
+                    }
+                    else
+                    {
                     }
                 }
             }
 
-        }
-
-        private TStructuralType ApplyODataIdOnContainer(IODataIdContainer container)
-        {
-            TStructuralType returnedObject;
-            string error;
-            if (TryGet(null, out returnedObject, out error) == ODataAPIResponseStatus.Success)
-            {
-                return returnedObject;
-            }
-            else 
-            {
-                if (TryCreate(null, out returnedObject, out error) == ODataAPIResponseStatus.Success)
-                {
-                    return returnedObject;
-                }
-                else 
-                {
-                    return null;
-                }
-            }
+            return null;
         }
     }
 }

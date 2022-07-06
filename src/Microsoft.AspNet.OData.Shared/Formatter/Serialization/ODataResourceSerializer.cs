@@ -1141,7 +1141,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(selectExpandNode != null);
             Contract.Assert(resourceContext != null);
 
-            if (selectExpandNode.SelectedNavigationProperties == null)
+            if (selectExpandNode.SelectedNavigationProperties == null || resourceContext.Request.Method == "POST")
             {
                 return;
             }
@@ -1621,7 +1621,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
-            if (propertyValue == null || propertyValue is NullEdmComplexObject)
+            if (propertyValue == null || propertyValue is NullEdmComplexObject|| propertyValue is ODataIdContainer)
             {
                 if (edmProperty.Type.IsCollection())
                 {
@@ -1679,7 +1679,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 };
 
                 writer.WriteStart(nestedResourceInfo);
-                WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                WriteComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer);
                 writer.WriteEnd();
             }
         }
@@ -1705,7 +1705,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 };
 
                 await writer.WriteStartAsync(nestedResourceInfo);
-                //await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
                 await WriteComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer);
                 await writer.WriteEndAsync();
             }

@@ -129,7 +129,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 throw Error.ArgumentNull("readContext");
             }
-                        
 
             if (!String.IsNullOrEmpty(resourceWrapper.ResourceBase.TypeName) && structuredType.FullName() != resourceWrapper.ResourceBase.TypeName)
             {

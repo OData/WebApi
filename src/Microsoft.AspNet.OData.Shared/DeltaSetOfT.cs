@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="originalCollection">Original collection of the Type which needs to be updated</param>
         /// /// <returns>DeltaSet response</returns>
-        internal DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> originalCollection)
+        public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> originalCollection)
         {
             ODataAPIHandler<TStructuralType> apiHandler = new DefaultODataAPIHandler<TStructuralType>(originalCollection);
 
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>     
         /// <returns>DeltaSet response</returns>
-        internal DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
+        public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
         {         
             Debug.Assert(apiHandlerOfT != null);
 

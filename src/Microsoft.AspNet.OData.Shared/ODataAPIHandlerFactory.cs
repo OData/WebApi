@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Factory class for ODataAPIHandlers
     /// </summary>
-    internal abstract class ODataAPIHandlerFactory
+    public abstract class ODataAPIHandlerFactory
     {
         /// <summary>
         /// Creates an instance of an ODataAPIHandlerFactory with the given moel

@@ -148,7 +148,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public async Task PatchEmployee_WithUpdates_Employees_InV4()
         {
             //Arrange
-
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees/$delta',     
@@ -162,12 +161,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
-            requestForPost.Headers.Add("OData-MaxVersion", "4.0");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.0");
+            requestForPatch.Headers.Add("OData-MaxVersion", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             // Act & Assert
             var expected = "$delta\",\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":" +
@@ -175,7 +174,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 "\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null,\"Friends@delta\":" +
                 "[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0,\"Orders@delta\":[{\"Id\":3,\"Price\":30},{\"Id\":4,\"Price\":40}]},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var json = response.Content.ReadAsStringAsync().Result;

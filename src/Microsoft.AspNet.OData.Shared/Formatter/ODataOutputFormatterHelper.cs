@@ -156,6 +156,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
             ODataMessageWriterSettings writerSettings = internalRequest.WriterSettings;
             writerSettings.BaseUri = baseAddress;
+
             if (serializer.ODataPayloadKind == ODataPayloadKind.Delta)
             {
                 writerSettings.Version = ODataVersion.V401;

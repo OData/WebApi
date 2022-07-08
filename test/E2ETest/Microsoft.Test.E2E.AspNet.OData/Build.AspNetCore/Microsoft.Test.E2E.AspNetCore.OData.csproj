@@ -1885,6 +1885,7 @@
     <Reference Include="Microsoft.Spatial, Version=7.11.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.11.1\lib\net45\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.OData.Client, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.9.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
     </Reference>

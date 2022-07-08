@@ -156,7 +156,16 @@ namespace Microsoft.AspNet.OData.Formatter
 
             ODataMessageWriterSettings writerSettings = internalRequest.WriterSettings;
             writerSettings.BaseUri = baseAddress;
-            writerSettings.Version = version;
+
+            if (serializer.ODataPayloadKind == ODataPayloadKind.Delta)
+            {
+                writerSettings.Version = ODataVersion.V401;
+            }
+            else
+            {
+                writerSettings.Version = version;
+            }
+
             writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
             string metadataLink = internaUrlHelper.CreateODataLink(MetadataSegment.Instance);

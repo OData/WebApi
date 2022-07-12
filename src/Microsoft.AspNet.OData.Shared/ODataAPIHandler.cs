@@ -58,6 +58,11 @@ namespace Microsoft.AspNet.OData
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
+        /// The parent object
+        /// </summary>
+        internal TStructuralType ParentObject { get; set; }
+
+        /// <summary>
         /// Apply OdataId for a resource with OdataID container
         /// </summary>
         /// <param name="resource">resource to apply odata id on</param>
@@ -70,11 +75,6 @@ namespace Microsoft.AspNet.OData
                 CheckAndApplyODataId(resource, model);
             }
         }
-
-        /// <summary>
-        /// The parent object
-        /// </summary>
-        public TStructuralType ParentObject { get; set; }
 
         private ODataPath GetODataPath(string path, IEdmModel model)
         {
@@ -136,42 +136,46 @@ namespace Microsoft.AspNet.OData
         {
             KeySegment keySegment = odataPath.LastOrDefault() as KeySegment;
             Dictionary<string, object> keys = keySegment?.Keys.ToDictionary(x => x.Key, x => x.Value);
-            TStructuralType returnedObject;
-            string error;
-            if (this.ParentObject.Equals(obj))
+            if (keys != null)
             {
-                if (this.TryGet(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                TStructuralType returnedObject;
+                string error;
+                if (this.ParentObject.Equals(obj))
                 {
-                    return returnedObject;
-                }
-                else
-                {
-                    if (this.TryCreate(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                    if (this.TryGet(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
                     {
                         return returnedObject;
                     }
                     else
                     {
-                        return null;
+                        if (this.TryCreate(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                        {
+                            return returnedObject;
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
-                }
-            }
-            else
-            {
-                IODataAPIHandler apiHandlerNested = this.GetNestedHandler(this.ParentObject, odataPath.LastSegment.Identifier);
-                object[] getParams = new object[] { keys, null, null };
-                if (apiHandlerNested.GetType().GetMethod(nameof(TryGet)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
-                {
-                    return getParams[1];
                 }
                 else
                 {
-                    if (apiHandlerNested.GetType().GetMethod(nameof(TryCreate)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
+                    IODataAPIHandler apiHandlerNested = this.GetNestedHandler(this.ParentObject, odataPath.LastSegment.Identifier);
+                    object[] getParams = new object[] { keys, null, null };
+                    if (apiHandlerNested.GetType().GetMethod(nameof(TryGet)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
                     {
                         return getParams[1];
                     }
                     else
                     {
+                        if (apiHandlerNested.GetType().GetMethod(nameof(TryCreate)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
+                        {
+                            return getParams[1];
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                 }
             }

@@ -555,11 +555,13 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedDynamicValues(original);
         }
 
+
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
+        /// <returns>The original value after Patching</returns>
         public void Patch(TStructuralType original)
         {
             CopyChangedValues(original);

@@ -158,8 +158,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <remarks>When the list is modified, any modified properties that were removed from the list are no longer
         /// considered to be changed.</remarks>
-        public IList<string> UpdatableProperties
-            => _updatableProperties;
+        public IList<string> UpdatableProperties => _updatableProperties;
 
         /// <summary>
         /// To determine if the StructuralType is a Complex type
@@ -192,9 +191,9 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw Error.ArgumentNull("name");
+                throw Error.ArgumentNull(nameof(name));
             }
 
             if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
@@ -243,7 +242,7 @@ namespace Microsoft.AspNet.OData
         {
             if (name == null)
             {
-                throw Error.ArgumentNull("name");
+                throw Error.ArgumentNull(nameof(name));
             }
 
             if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
@@ -290,6 +289,9 @@ namespace Microsoft.AspNet.OData
                 Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
 
                 // Get the Delta<{NestedResourceType}>._instance using Reflection.
+                // This semantic is not correct but is preserved for backwards
+                // compatability and should be replaced in the next major release by
+                // the code in TryGetNestedPropertyValue.
                 FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
                 Contract.Assert(field != null, "field != null");
                 value = field.GetValue(deltaNestedResource);
@@ -310,12 +312,49 @@ namespace Microsoft.AspNet.OData
             return false;
         }
 
+        /// <summary>
+        /// Attempts to get the value of the nested Property called <paramref name="name"/> from the underlying Entity.
+        /// <remarks>
+        /// Only properties that exist on Entity can be retrieved.
+        /// Only modified nested properties can be retrieved.
+        /// The nested Property type will be <see cref="IDelta"/> of its defined type.
+        /// </remarks>
+        /// </summary>
+        /// <param name="name">The name of the nested Property</param>
+        /// <param name="value">The value of the nested Property</param>
+        /// <returns><c>True</c> if the Property was found and is a nested Property</returns>
+        [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
+        public bool TryGetNestedPropertyValue(string name, out object value)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull(nameof(name));
+            }
+
+            if (!_deltaNestedResources.ContainsKey(name))
+            {
+                value = null;
+                return false;
+            }
+
+            // This is a nested resource, the value returned must be an IDelta<T>
+            // from the dictionary of nested resources to allow the traversal of
+            // hierarchies of Delta<T>.
+            object deltaNestedResource = _deltaNestedResources[name];
+
+            Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+            Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
+
+            value = deltaNestedResource;
+            return true;
+        }
+
         /// <inheritdoc/>
         public override bool TryGetPropertyType(string name, out Type type)
         {
             if (name == null)
             {
-                throw Error.ArgumentNull("name");
+                throw Error.ArgumentNull(nameof(name));
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -406,7 +445,7 @@ namespace Microsoft.AspNet.OData
             // to prevent unrecognizable information from being applied to original resource.
             if (!_structuredType.IsAssignableFrom(original.GetType()))
             {
-                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+                throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
             //To apply ODataId based handler to apply properties on original.
@@ -500,12 +539,12 @@ namespace Microsoft.AspNet.OData
         {
             if (original == null)
             {
-                throw Error.ArgumentNull("original");
+                throw Error.ArgumentNull(nameof(original));
             }
 
             if (!_structuredType.IsInstanceOfType(original))
             {
-                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+                throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
             IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
@@ -517,11 +556,13 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedDynamicValues(original);
         }
 
+
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
+        /// <returns>The original value after Patching</returns>
         public void Patch(TStructuralType original)
         {
             CopyChangedValues(original);
@@ -665,12 +706,12 @@ namespace Microsoft.AspNet.OData
         {
             if (propertyInfo == null)
             {
-                throw Error.ArgumentNull("propertyInfo");
+                throw Error.ArgumentNull(nameof(propertyInfo));
             }
 
             if (entity == null)
             {
-                throw Error.ArgumentNull("entity");
+                throw Error.ArgumentNull(nameof(entity));
             }
 
             object propertyValue = propertyInfo.GetValue(entity);
@@ -720,7 +761,7 @@ namespace Microsoft.AspNet.OData
         {
             if (structuralType == null)
             {
-                throw Error.ArgumentNull("structuralType");
+                throw Error.ArgumentNull(nameof(structuralType));
             }
 
             if (!typeof(TStructuralType).IsAssignableFrom(structuralType))
@@ -885,10 +926,7 @@ namespace Microsoft.AspNet.OData
 
         private bool TrySetPropertyValueInternal(string name, object value)
         {
-            if (name == null)
-            {
-                throw Error.ArgumentNull("name");
-            }
+            Debug.Assert(name != null, "Argument name is null");
 
             if (!(_allProperties.ContainsKey(name) && _updatableProperties.Contains(name)))
             {
@@ -915,10 +953,7 @@ namespace Microsoft.AspNet.OData
 
         private bool TrySetNestedResourceInternal(string name, object deltaNestedResource)
         {
-            if (name == null)
-            {
-                throw Error.ArgumentNull("name");
-            }
+            Debug.Assert(name != null, "Argument name is null");
 
             if (!(_allProperties.ContainsKey(name) && _updatableProperties.Contains(name)))
             {

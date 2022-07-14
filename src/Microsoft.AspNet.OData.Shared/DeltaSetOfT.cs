@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
@@ -115,9 +116,7 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    NavigationPath navigationPath = new NavigationPath(changedObj.ODataPath);
-
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(navigationPath.Last().KeyProperties, out original, out getErrorMessage);
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(changedObj.ODataPath.GetKeys(), out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 

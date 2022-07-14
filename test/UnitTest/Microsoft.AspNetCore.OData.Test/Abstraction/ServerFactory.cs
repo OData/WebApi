@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -47,8 +48,9 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 services.AddMvc();
 #else
                 services.AddMvc(options => options.EnableEndpointRouting = false)
-                    .AddNewtonsoftJson();
+                    .AddNewtonsoftJson();  
 #endif
+
                 services.AddOData();
                 configureService?.Invoke(services);
             });

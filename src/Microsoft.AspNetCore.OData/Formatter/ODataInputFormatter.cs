@@ -142,6 +142,10 @@ namespace Microsoft.AspNet.OData.Formatter
                     }
 
                     logger.LogError(ex, String.Empty);
+                    if (context.HttpContext.Request.GetCompatibilityOptions().HasFlag(CompatibilityOptions.ThrowExceptionAfterLoggingModelStateError))
+                    {
+                        throw ex;
+                    }
                 };
 
                 List<IDisposable> toDispose = new List<IDisposable>();

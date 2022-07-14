@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Org.OData.Core.V1;
@@ -116,9 +117,7 @@ namespace Microsoft.AspNet.OData
                     IEdmStructuredObject original = null;
                     EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
 
-                    NavigationPath navigationPath = new NavigationPath(deltaEntityObject.ODataPath);
-
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(navigationPath.Last().KeyProperties, out original, out getErrorMessage);
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(deltaEntityObject.ODataPath.GetKeys(), out original, out getErrorMessage);
 
                     EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
                     if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
@@ -235,8 +234,7 @@ namespace Microsoft.AspNet.OData
         /// </summary> 
         private void ApplyODataId(ODataPath oDataPath, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
-            NavigationPath navigationPath = new NavigationPath(oDataPath);
-            EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(navigationPath);
+            EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(oDataPath);
 
             if (edmApiHandler == null)
             {
@@ -246,7 +244,7 @@ namespace Microsoft.AspNet.OData
             IEdmStructuredObject referencedObj;
             string error;
 
-            if (edmApiHandler.TryGet(navigationPath.Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            if (edmApiHandler.TryGet(oDataPath.GetKeys(), out referencedObj, out error) == ODataAPIResponseStatus.Success)
             {
                 EdmStructuredObject structuredObj = referencedObj as EdmStructuredObject;
 

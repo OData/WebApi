@@ -40,25 +40,19 @@ namespace Microsoft.AspNet.OData.Test
             this.employee = employee;
         }
 
-        public override EdmODataAPIHandler GetHandler(NavigationPath navigationPath)
+        public override EdmODataAPIHandler GetHandler(ODataPath path)
         {
-            if (navigationPath != null)
+            if (path != null)
             {
-                var pathItems = navigationPath;
-                
-                if (pathItems == null)
+                switch (path.LastSegment.Identifier)
                 {
-                    switch (navigationPath.Last().Name)
-                    {                       
-                        case "UnTypedFriend":
-                        case "Friend":
-                            return new FriendTypelessPatchHandler(entityType);
+                    case "UnTypedFriend":
+                    case "Friend":
+                        return new FriendTypelessPatchHandler(entityType);
 
-                        default:
-                            return null;
-                    }
+                    default:
+                        return null;
                 }
-                               
             }
 
             return null;

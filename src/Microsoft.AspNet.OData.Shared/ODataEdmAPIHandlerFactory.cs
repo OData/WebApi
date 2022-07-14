@@ -5,7 +5,9 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
 {
@@ -20,25 +22,28 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Get the handler depending on navigationpath
-        /// </summary>
-        /// <param name="navigationPath">Navigation path corresponding to an odataid</param>
-        /// <returns></returns>
-        public abstract EdmODataAPIHandler GetHandler(NavigationPath navigationPath);
-
-        /// <summary>
-        /// Get the handler based on the odataPath
-        /// </summary>
-        /// <param name="odataPath"></param>
-        /// <returns>ODataAPIHandler for the specified odata path</returns>
-        public EdmODataAPIHandler GetHandler(string odataPath)
-        {
-            return this.GetHandler(new NavigationPath (odataPath, this.Model));
-        }
-
-        /// <summary>
-        /// The IEdmModel for the Factory
+        /// The IEdmModel for the Factory.
         /// </summary>
         public IEdmModel Model { get; private set; }
+
+        /// <summary>
+        /// Get the handler depending on OData path.
+        /// </summary>
+        /// <param name="odataPath">OData path corresponding to an odataid.</param>
+        /// <returns>ODataAPIHandler for the specified OData path.</returns>
+        public abstract EdmODataAPIHandler GetHandler(ODataPath odataPath);
+
+        /// <summary>
+        /// Get the handler based on the OData path uri string.
+        /// </summary>
+        /// <param name="path">OData path uri string.</param>
+        /// <returns>ODataAPIHandler for the specified odata path uri string.</returns>
+        public EdmODataAPIHandler GetHandler(string path)
+        {
+            ODataUriParser parser = new ODataUriParser(this.Model, new Uri(path, UriKind.Relative));
+            ODataPath odataPath = parser.ParsePath();
+
+            return this.GetHandler(odataPath);
+        }
     }
 }

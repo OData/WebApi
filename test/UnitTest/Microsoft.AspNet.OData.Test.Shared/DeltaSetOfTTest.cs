@@ -324,22 +324,17 @@ namespace Microsoft.AspNet.OData.Test
 
         }
 
-        public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
+        public override IODataAPIHandler GetHandler(ODataPath path)
         {
-            if (navigationPath != null)
+            if (path != null)
             {
-                var pathItems = navigationPath;
-
-                if (pathItems == null)
+                switch (path.LastSegment.Identifier)
                 {
-                    switch (pathItems.Last().Name)
-                    {
-                        case "Friend":
-                            return new FriendPatchHandler();
-                       
-                        default:
-                            return null;
-                    }
+                    case "Friend":
+                        return new FriendPatchHandler();
+
+                    default:
+                        return null;
                 }
             }
 

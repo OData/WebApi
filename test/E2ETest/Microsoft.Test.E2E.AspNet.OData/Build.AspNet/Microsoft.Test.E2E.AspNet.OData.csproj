@@ -1895,6 +1895,10 @@
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
+    <Compile Include="BulkOperation\BulkOperationController.cs" />
+    <Compile Include="BulkOperation\BulkOperationDataModel.cs" />
+    <Compile Include="BulkOperation\BulkOperationEdmModel.cs" />
+    <Compile Include="BulkOperation\BulkOperationTest.cs" />
     <Compile Include="InstanceAnnotations\AnnotationController.cs" />
     <Compile Include="InstanceAnnotations\AnnotationDataModel.cs" />
     <Compile Include="InstanceAnnotations\AnnotationEdmModel.cs" />

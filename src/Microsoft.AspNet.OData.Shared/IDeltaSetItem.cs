@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Basic interface for representing a delta item like delta, deleted entity, etc.
     /// </summary>
-    internal interface IDeltaSetItem
+    public interface IDeltaSetItem
     {
         /// <summary>
         /// Gets the kind of object within the delta payload.

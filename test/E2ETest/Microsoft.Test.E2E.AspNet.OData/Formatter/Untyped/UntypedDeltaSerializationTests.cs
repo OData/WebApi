@@ -27,7 +27,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
     public class UntypedDeltaSerializationTests : WebHostTestBase
     {
         public UntypedDeltaSerializationTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -62,17 +62,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             Assert.True(((dynamic)returnedObject).value.Count == 15);
 
             //Verification of content to validate Payload
-            for (int i = 0 ; i < 10 ; i++)
+            for (int i = 0; i < 10; i++)
             {
                 string name = string.Format("Name {0}", i);
                 Assert.True(name.Equals(((dynamic)returnedObject).value[i]["Name"].Value));
             }
 
-            for (int i=10 ; i < 15 ; i++)
+            for (int i = 10; i < 15; i++)
             {
-                string contextUrl = BaseAddress.ToLowerInvariant() + "/untyped/$metadata#UntypedDeltaCustomers/$deletedEntity";
-                Assert.True(contextUrl.Equals(((dynamic)returnedObject).value[i]["@odata.context"].Value));
-                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["id"].Value));
+                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["@id"].Value));
             }
         }
     }

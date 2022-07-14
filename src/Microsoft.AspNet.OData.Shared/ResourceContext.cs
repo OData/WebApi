@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
@@ -195,6 +196,15 @@ namespace Microsoft.AspNet.OData
             }
 
             object value;
+
+            if (SerializerContext.IsDeltaOfT)
+            {
+                if (ResourceInstance is IDelta delta && delta.TryGetPropertyValue(propertyName, out value))
+                {
+                    return value;
+                }
+            }
+
             if (EdmObject.TryGetPropertyValue(propertyName, out value))
             {
                 return value;

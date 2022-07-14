@@ -5,15 +5,13 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
-    /// Interface to used as a Container for holding Instance Annotations, An default implementation is provided
-    /// Custoer can implement the interface and can have their own implementation.
+    /// Identifies a container for holding instance annotations. A default implementation is provided.
+    /// Customers can have their own implementation.
     /// </summary>
     public interface IODataInstanceAnnotationContainer
     {

@@ -6,7 +6,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics.Contracts;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -18,7 +17,6 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class EdmDeltaEntityObject : EdmEntityObject, IEdmChangedObject
     {
-        private EdmDeltaType _edmType;
         private IEdmNavigationSource _navigationSource;
 
         /// <summary>
@@ -47,16 +45,14 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaEntityObject(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.Entry);
         }
 
         /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
+        public override EdmDeltaEntityKind DeltaKind
         {
             get
             {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
+                return EdmDeltaEntityKind.Entry;
             }
         }
 

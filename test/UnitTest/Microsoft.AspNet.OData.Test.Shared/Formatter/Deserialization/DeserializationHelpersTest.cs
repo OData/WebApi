@@ -258,14 +258,14 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             // Arrange
             IEnumerable<int> value = new int[] { 1, 2, 3 };
             object resource = new SampleClassWithNonSettableCollectionProperties
-                {
-                    ICollection = { 42 },
-                    IList = { 42 },
-                    Collection = { 42 },
-                    List = { 42 },
-                    CustomCollectionWithNoEmptyCtor = { 42 },
-                    CustomCollection = { 42 }
-                };
+            {
+                ICollection = { 42 },
+                IList = { 42 },
+                Collection = { 42 },
+                List = { 42 },
+                CustomCollectionWithNoEmptyCtor = { 42 },
+                CustomCollection = { 42 }
+            };
 
             // Act
             DeserializationHelpers.SetCollectionProperty(resource, propertyName, null, value, clearCollection: true);
@@ -295,7 +295,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             // Act
             DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
-                new ODataDeserializerContext{ Model = new EdmModel() });
+                new ODataDeserializerContext { Model = new EdmModel() });
 
             // Assert
             resource.Verify();
@@ -319,7 +319,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
 
             // Act
-            DeserializationHelpers.ApplyInstanceAnnotations(resource.Object, entityTypeReference, null,provider,
+            DeserializationHelpers.ApplyInstanceAnnotations(resource.Object, entityTypeReference, null, provider,
     new ODataDeserializerContext { Model = new EdmModel() });
 
             DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
@@ -327,6 +327,66 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             // Assert
             resource.Verify();
+        }
+
+
+
+        [Fact]
+        public void ReadResource_DeletedResource_WithTransientTypeAndAnnotations()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+            ODataDeserializerProvider _deserializerProvider = ODataDeserializerProviderFactory.Create();
+            var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
+
+            var instanceAnnotations = new List<ODataInstanceAnnotation>();
+            instanceAnnotations.Add(new ODataInstanceAnnotation("NS.Test2", new ODataPrimitiveValue(345)));
+            instanceAnnotations.Add(new ODataInstanceAnnotation("Core.ContentID", new ODataPrimitiveValue(1)));
+
+            ODataResourceBase odataResource = new ODataDeletedResource
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "CustomerId", Value = 991 },
+                    new ODataProperty { Name = "Name", Value = "Name #991" },
+                },
+                TypeName = typeof(SimpleOpenCustomer).FullName,
+
+                InstanceAnnotations = instanceAnnotations
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
+            var deletedEntity = new DeltaDeletedEntityObject<SimpleOpenCustomer>();
+
+            // Act
+            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, customerTypeReference, odataResource, _deserializerProvider, readContext);
+
+            // Assert
+
+            //Verify Instance Annotations
+            object value;
+            deletedEntity.TryGetPropertyValue("InstanceAnnotations", out value);
+            var persistentAnnotations = (value as IODataInstanceAnnotationContainer).GetResourceAnnotations();
+            var transientAnnotations = deletedEntity.TransientInstanceAnnotationContainer.GetResourceAnnotations();
+
+            Assert.Single(persistentAnnotations);
+            Assert.Single(transientAnnotations);
+
+            Assert.Equal("NS.Test2", persistentAnnotations.First().Key);
+            Assert.Equal("Core.ContentID", transientAnnotations.First().Key);
+            Assert.Equal(345, persistentAnnotations.First().Value);
+            Assert.Equal(1, transientAnnotations.First().Value);
         }
 
         [Fact]
@@ -383,7 +443,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             // Assert
             Assert.Equal(HelpfulErrorMessage, exception.Message);
         }
-        
+
         [Fact]
         public void ApplyProperty_PassesWithCaseInsensitivePropertyName()
         {

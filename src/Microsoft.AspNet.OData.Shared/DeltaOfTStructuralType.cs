@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.UriParser;
 
@@ -451,15 +452,13 @@ namespace Microsoft.AspNet.OData
             //To apply ODataId based handler to apply properties on original.
             if (apiHandlerFactory != null)
             {
-                NavigationPath navigationPath = new NavigationPath(ODataPath);
+                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataPath);
 
-                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(navigationPath);
-
-                if (refapiHandler != null && navigationPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
+                if (refapiHandler != null && ODataPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
                 {
                     ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
 
-                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, navigationPath.Last().KeyProperties);
+                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, ODataPath.GetKeys());
                 }
             }
 

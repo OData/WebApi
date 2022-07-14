@@ -60,6 +60,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ETagMessageHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ODataPathExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContext.cs" />

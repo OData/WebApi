@@ -19,9 +19,6 @@
     <PackageReference Include="Microsoft.OData.Core" Version="7.11.1" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.11.1" />
     <PackageReference Include="Microsoft.Spatial" Version="7.11.1" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.9.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.9.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.9.1" />
     <PackageReference Include="Moq" Version="4.7.137" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
@@ -36,12 +33,6 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.11.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.11.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.11.1" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.9.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.9.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.9.1" />
     <PackageReference Include="Moq" Version="4.7.137" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
@@ -67,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
   </ItemGroup>
   	
 </Project>

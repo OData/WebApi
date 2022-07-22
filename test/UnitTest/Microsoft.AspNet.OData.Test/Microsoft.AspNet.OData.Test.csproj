@@ -35,18 +35,6 @@
     <Reference Include="Microsoft.Spatial, Version=7.12.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.12.2\lib\net45\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
-	<Reference Include="Microsoft.Spatial, Version=7.11.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-		<HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.11.1\lib\net45\Microsoft.Spatial.dll</HintPath>
-		<Private>True</Private>
-	</Reference>
-    <Reference Include="Microsoft.OData.Core, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\sln\packages\Microsoft.OData.Core.7.9.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\sln\packages\Microsoft.OData.Edm.7.9.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Spatial, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.9.1\lib\net45\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Moq, Version=4.7.137.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Moq.4.7.137\lib\net45\Moq.dll</HintPath>

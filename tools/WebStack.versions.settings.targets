@@ -15,7 +15,7 @@
     <AspNetCorePackageDependency>[2.0.0, 3.0.0)</AspNetCorePackageDependency>
     <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
     <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>
-    <ODataLibPackageDependency>[7.11.1, 8.0.0)</ODataLibPackageDependency>
+    <ODataLibPackageDependency>[7.12.1, 8.0.0)</ODataLibPackageDependency>
     <NewtonsoftJsonPackageDependency>10.0.3</NewtonsoftJsonPackageDependency>
   </PropertyGroup>
 

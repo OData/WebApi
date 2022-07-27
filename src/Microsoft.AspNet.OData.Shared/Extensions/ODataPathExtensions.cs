@@ -41,6 +41,59 @@ namespace Microsoft.AspNet.OData.Extensions
             return keys;
         }
 
+        public static ODataPathSegment GetLastNonKeySegment(this ODataPath path)
+        {
+            if (path == null)
+            {
+                throw Error.ArgumentNull(nameof(path));
+            }
+
+            if (path.Count == 1)
+            {
+                return path.LastSegment;
+            }
+
+            if (path.LastSegment is TypeSegment)
+            {
+                ODataPath modifiedPath = path.TrimEndingTypeSegment();
+
+                return modifiedPath.LastSegment;
+            }
+
+            return path.LastSegment;
+        }
+
+        public static ODataPathSegment GetLastNonTypeNonKeySegment(this ODataPath path)
+        {
+            if (path == null)
+            {
+                throw Error.ArgumentNull(nameof(path));
+            }
+
+            if (path.Count == 1)
+            {
+                return path.LastSegment;
+            }
+
+            ODataPath modifiedPath = path;
+
+            while (modifiedPath.LastSegment is TypeSegment || modifiedPath.LastSegment is KeySegment)
+            {
+                if (modifiedPath.LastSegment is TypeSegment)
+                {
+                    modifiedPath = modifiedPath.TrimEndingTypeSegment();
+                }
+                else if (modifiedPath.LastSegment is KeySegment)
+                {
+                    modifiedPath = modifiedPath.TrimEndingKeySegment();
+                }
+
+                modifiedPath.GetLastNonTypeNonKeySegment();
+            }
+
+            return modifiedPath.LastSegment;
+        }
+
         private static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)
         {
             Dictionary<string, object> keys = new Dictionary<string, object>();

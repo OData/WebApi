@@ -1402,6 +1402,9 @@
     <Compile Include="..\OpenType\TypedTest.cs">
       <Link>OpenType\TypedTest.cs</Link>
     </Compile>
+    <Compile Include="..\BulkOperation\BulkInsertTest.cs">
+      <Link>BulkOperation\BulkInsertTest.cs</Link>
+    </Compile>
     <Compile Include="..\BulkOperation\BulkInsertDataModel.cs">
       <Link>BulkOperation\BulkInsertDataModel.cs</Link>
     </Compile>

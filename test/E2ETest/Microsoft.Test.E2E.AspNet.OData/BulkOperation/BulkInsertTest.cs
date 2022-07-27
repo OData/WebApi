@@ -974,6 +974,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
         }
 
+        #endregion
+
+        #region Post
         [Fact]
         public async Task PostCompany_WithODataId()
         {
@@ -1029,7 +1032,33 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         }
 
+        [Fact]
+        public async Task PostEmployee_WithCreateFriends()
+        {
+            //Arrange
 
+            string requestUri = this.BaseAddress + "/convention/Employees";
+
+            var content = @"{
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+                     }";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                //Assert.Contains("Friends", json); // Activate after fixing serialization issue for DeepInsert nested resources
+            }
+
+        }
 
         #endregion
 

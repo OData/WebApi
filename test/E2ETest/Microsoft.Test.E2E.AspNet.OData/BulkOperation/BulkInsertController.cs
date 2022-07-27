@@ -6,10 +6,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -19,7 +17,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
-{    
+{
     public class EmployeesController : TestODataController
     {
         public EmployeesController()
@@ -42,7 +40,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private void InitEmployees()
         {
-            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age =33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age = 33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
 
             Employees = new List<Employee>
             {
@@ -150,7 +148,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedFriend") as IEdmEntityType;
 
-            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity) ,new TypelessAPIHandlerFactory(Request.GetModel(), entity));
+            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity), new TypelessAPIHandlerFactory(Request.GetModel(), entity));
 
             return changedObjColl;
         }
@@ -182,7 +180,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             if (EmployeesTypeless.First().TryGetPropertyValue("Name", out name) && name.ToString() == "Employeeabcd")
             {
                 Assert.Equal("abcd", obj1.ToString());
-                
+
                 object age;
                 friends.First().TryGetPropertyValue("Age", out age);
 
@@ -251,6 +249,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return Ok(returncoll);
         }
 
+        [ODataRoute("Employees")]
+        [HttpPost]
+        public ITestActionResult Post([FromBody] Employee employee)
+        {
+            InitEmployees();
+
+            var handler = new EmployeeAPIHandler();
+
+            handler.UpdateLinkedObjects(employee, Request.GetModel());
+
+            return Ok(employee);
+        }
 
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
@@ -416,7 +426,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private void InitCompanies()
         {
-            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10, Quantity =1 }, new NewOrder { Id = 2, Price = 20, Quantity = 2 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
+            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10, Quantity = 1 }, new NewOrder { Id = 2, Price = 20, Quantity = 2 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
             MyOverdueOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 1, Price = 10, Quantity = 1 }, new MyNewOrder { Id = 2, Price = 20, Quantity = 2 }, new MyNewOrder { Id = 3, Price = 30 }, new MyNewOrder { Id = 4, Price = 40 } };
 
             Companies = new List<Company>() { new Company { Id = 1, Name = "Company1", OverdueOrders = OverdueOrders.Where(x => x.Id == 2).ToList(), MyOverdueOrders = MyOverdueOrders.Where(x => x.Id == 2).ToList() } ,
@@ -432,14 +442,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             InitCompanies();
 
             Assert.NotNull(coll);
-            
+
             var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory(Request.GetModel()));
 
             var comp = coll.First() as Delta<Company>;
             object val;
-            if(comp.TryGetPropertyValue("Name", out val))
+            if (comp.TryGetPropertyValue("Name", out val))
             {
-                if(val.ToString() == "Company02")
+                if (val.ToString() == "Company02")
                 {
                     ValidateOverdueOrders2(1, 2, 9);
                 }
@@ -449,7 +459,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 }
             }
 
-          
+
             return Ok(returncoll);
         }
 
@@ -457,17 +467,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         [HttpPost]
         public ITestActionResult Post([FromBody] Company company)
         {
-           
+
             InitCompanies();
             InitEmployees();
 
-            if(company.Id == 4)
+            if (company.Id == 4)
             {
                 AddNewOrder(company);
             }
 
-            var idResolver = new BulkOpODataIdResolver(Request.GetModel());
-            idResolver.ApplyODataId(company );
+            var handler = new CompanyAPIHandler();
+
+            handler.UpdateLinkedObjects(company, Request.GetModel());
 
             Companies.Add(company);
 
@@ -479,7 +490,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             {
                 ValidateOverdueOrders1(3, 1);
             }
-            
+
 
             return Ok(company);
         }
@@ -491,167 +502,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             company.OverdueOrders[1] = newOrder;
         }
 
-        
-        private void MapOdataId(Company company)
-        {
-            //More generic. 
-            for(int i =0; i< company.OverdueOrders.Count;i++)
-            {
-                var order = company.OverdueOrders[i];
-                if(order.Container != null)
-                {
-                    var pathItems = new NavigationPath(order.Container.ODataId, Request.GetModel());
-
-                    int cnt = 0;
-                    if(pathItems[cnt].Name== "Employees")
-                    {
-                        var emp = GetEmployee(pathItems[cnt].KeyProperties);
-
-                        if(emp != null)
-                        {
-                            if(pathItems[++cnt].Name == "NewFriends")
-                            {
-                                var frnd = GetNewFriendFromEmployee(emp, pathItems[cnt].KeyProperties);
-
-                                if(frnd!= null)
-                                {
-                                    if (pathItems[++cnt].Name == "NewOrders")
-                                    {
-                                        //{ ID= 1, OdataIdContainer {....}} - add comments.
-                                        company.OverdueOrders[i] = GetNewOrderFromNewFriend(frnd, pathItems[cnt].KeyProperties);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-
-   
-
-        private void CheckAndApplyODataId(object obj)
-        {
-            Type type = obj.GetType();
-
-            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(IODataIdContainer));
-
-            if(property != null && property.GetValue(obj) is IODataIdContainer container && container != null)
-            {
-                var res =  ApplyODataId(container);
-
-                foreach(var prop in type.GetProperties())
-                {
-                    var resVal = prop.GetValue(res);
-
-
-                    if(resVal != null)
-                    {
-                        prop.SetValue(obj, resVal);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var prop in type.GetProperties().Where(p=> !p.PropertyType.IsPrimitive ))
-                {
-                    var propVal = prop.GetValue(obj);
-                    if(propVal == null)
-                    {
-                        continue;
-                    }
-
-                    if (propVal is IEnumerable lst)
-                    {
-
-                        foreach (var val in lst)
-                        {
-                            if (val.GetType().IsPrimitive)
-                            {
-                                break;
-                            }
-
-                            CheckAndApplyODataId(val);
-
-                        }
-                    }
-                    else
-                    {
-                        CheckAndApplyODataId(propVal);
-                    }
-
-                }
-            }
-                        
-        }
-
-        private object ApplyODataId(IODataIdContainer container)
-        {
-            var pathItems = new NavigationPath (container.ODataId, Request.GetModel());
-            if(pathItems != null)
-            {
-                int cnt = 0;
-                object value = null;
-
-                while(cnt< pathItems.Count)
-                {
-                    value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
-                    cnt++;
-                }
-
-                return value;
-            }
-
-            return null;
-        }
-
-        private object GetObject(string name, object parent, Dictionary<string, object> keyValues)
-        {
-            switch (name)
-            {
-                case "Employees":
-                    return EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
-                case "NewFriends":
-                    Employee emp = parent as Employee;
-
-                    return emp == null? null: emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-                case "NewOrders":
-                    NewFriend frnd = parent as NewFriend;
-
-                    return frnd == null ? null : frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-                default:
-                    return null;
-            }            
-        }
-
-        private Employee GetEmployee(Dictionary<string,object> keyValues)
-        {            
-            var emp = EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
-
-            return emp;
-        }
-
-        private NewFriend GetNewFriendFromEmployee(Employee emp, Dictionary<string, object> keyValues)
-        {
-            var frnd = emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-
-            return frnd;
-        }
-
-        private NewOrder GetNewOrderFromNewFriend(NewFriend frnd, Dictionary<string, object> keyValues)
-        {
-            var order = frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-
-            return order;
-        }
-
         private void InitEmployees()
         {
             var cntrl = new EmployeesController();
         }
 
-        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0, int price=101)
+        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0, int price = 101)
         {
             var comp = Companies.FirstOrDefault(x => x.Id == companyId);
             Assert.NotNull(comp);
@@ -674,34 +530,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             Assert.Equal(444, order.Price);
             Assert.Equal(quantity, order.Quantity);
         }
-    }
-
-    internal class BulkOpODataIdResolver: ODataIDResolver
-    {
-
-        public BulkOpODataIdResolver(IEdmModel model): base(model)
-        {
-
-        }
-
-        public override object GetObject(string name, object parent, Dictionary<string, object> keyValues)
-        {
-            switch (name)
-            {
-                case "Employees":
-                    return EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
-                case "NewFriends":
-                    Employee emp = parent as Employee;
-
-                    return emp == null ? null : emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-                case "NewOrders":
-                    NewFriend frnd = parent as NewFriend;
-
-                    return frnd == null ? null : frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
-                default:
-                    return null;
-            }
-        }
-
     }
 }

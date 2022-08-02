@@ -435,7 +435,6 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : System.Web.Http.Filte
 	int MaxSkip  { public get; public set; }
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
-	ODataQuerySettings QuerySettings  { protected get; }
 
 	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
 	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)
@@ -2504,6 +2503,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	FilterQueryOption Filter  { public get; }
 	ETag IfMatch  { public virtual get; }
 	ETag IfNoneMatch  { public virtual get; }
+	AllowedQueryOptions IgnoreQueryOptions  { public get; public set; }
 	OrderByQueryOption OrderBy  { public get; }
 	ODataRawQueryOptions RawValues  { public get; }
 	System.Net.Http.HttpRequestMessage Request  { public get; }

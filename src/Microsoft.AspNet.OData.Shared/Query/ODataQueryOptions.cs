@@ -40,8 +40,6 @@ namespace Microsoft.AspNet.OData.Query
 
         private ODataQueryOptionParser _queryOptionParser;
 
-        private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
-
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
@@ -149,6 +147,11 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets or sets the query validator.
         /// </summary>
         public ODataQueryValidator Validator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the query options that will be ignored.
+        /// </summary>
+        public AllowedQueryOptions IgnoreQueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the request headers.
@@ -290,7 +293,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query, AllowedQueryOptions ignoreQueryOptions)
         {
-            _ignoreQueryOptions = ignoreQueryOptions;
+            this.IgnoreQueryOptions = ignoreQueryOptions;
             return ApplyTo(query, new ODataQuerySettings());
         }
 
@@ -301,10 +304,12 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="querySettings">The settings to use in query composition.</param>
         /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
-        public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings,
+        public virtual IQueryable ApplyTo(
+            IQueryable query,
+            ODataQuerySettings querySettings,
             AllowedQueryOptions ignoreQueryOptions)
         {
-            _ignoreQueryOptions = ignoreQueryOptions;
+            this.IgnoreQueryOptions = ignoreQueryOptions;
             return ApplyTo(query, querySettings);
         }
 
@@ -530,8 +535,8 @@ namespace Microsoft.AspNet.OData.Query
         /// query options.</remarks>
         public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
         {
-            _ignoreQueryOptions = ignoreQueryOptions;
-            return ApplyTo(entity, new ODataQuerySettings());
+            this.IgnoreQueryOptions = ignoreQueryOptions;
+            return ApplyTo(entity, querySettings);
         }
 
         /// <summary>
@@ -987,7 +992,7 @@ namespace Microsoft.AspNet.OData.Query
 
         private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
         {
-            return ((queryOption != null) && ((_ignoreQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
+            return (queryOption != null) && ((this.IgnoreQueryOptions & queryOptionFlag) == AllowedQueryOptions.None);
         }
 
         private T ApplySelectExpand<T>(T entity, ODataQuerySettings querySettings)

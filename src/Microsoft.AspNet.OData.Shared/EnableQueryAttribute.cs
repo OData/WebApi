@@ -372,11 +372,6 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets the query settings.
-        /// </summary>
-        protected ODataQuerySettings QuerySettings => _querySettings;
-
-        /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
         /// returning response message. It then validates the query from uri based on the validation settings on
         /// <see cref="EnableQueryAttribute"/>. It finally applies the query appropriately, and reset it back on

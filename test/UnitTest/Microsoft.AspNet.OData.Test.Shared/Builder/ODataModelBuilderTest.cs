@@ -951,7 +951,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // Assert
             Assert.Null(decimalType.Precision);
-            Assert.Equal(0, decimalType.Scale);
+            Assert.Null(decimalType.Scale);
             Assert.Null(stringType.MaxLength);
         }
 

@@ -13,9 +13,10 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
     {
         public int OrderId { get; set; }
         public Customer Customer { get; set; }
-        public Decimal Cost { get; set; }
-        public Decimal Price { get; set; }
+        public decimal Cost { get; set; }
+        public decimal Price { get; set; }
         public DateTimeOffset OrderDate { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }

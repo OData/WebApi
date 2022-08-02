@@ -5,6 +5,7 @@ public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
 	DisableCaseInsensitiveRequestPropertyBinding = 2
 	None = 0
+	ThrowExceptionAfterLoggingModelStateError = 4
 }
 
 public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {

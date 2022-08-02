@@ -18,7 +18,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
     <!-- Define the Items for .NET CORE 3.x -->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
@@ -41,9 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.OData.Core" Version="7.10.0" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.10.0" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.10.0" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.12.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.12.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.12.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

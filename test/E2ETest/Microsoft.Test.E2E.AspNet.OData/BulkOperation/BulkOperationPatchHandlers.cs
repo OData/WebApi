@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -26,20 +27,130 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             if (odataPath != null)
             {
-                string pathName = odataPath.GetLastNonTypeNonKeySegment().Identifier;
+                int currentPosition = 0;
 
-                switch (pathName)
+                if (odataPath.Count == 1)
                 {
-                    case "Employees":
-                        return new EmployeeAPIHandler();
-                    case "Companies":
-                        return new CompanyAPIHandler();
+                    GetHandlerInternal(odataPath.FirstSegment.Identifier, currentPosition);
+                }
 
-                    default:
-                        return null;
+                List<ODataPathSegment> pathSegments = odataPath.GetSegments();
+
+                ODataPathSegment currentPathSegment = pathSegments[currentPosition];
+
+                if (currentPathSegment is EntitySetSegment || currentPathSegment is NavigationPropertySegment || currentPathSegment is SingletonSegment)
+                {
+                    int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
+                    KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
+
+                    currentPosition = keySegmentPosition;
+
+                    return GetHandlerInternal(
+                        currentPathSegment.Identifier,
+                        currentPosition,
+                        ODataPathHelper.GetKeysFromKeySegment(keySegment),
+                        pathSegments);
                 }
             }
 
+            return null;
+        }
+
+        private IODataAPIHandler GetHandlerInternal(
+            string pathName,
+            int currentPosition,
+            Dictionary<string, object> keys = null,
+            List<ODataPathSegment> pathSegments = null)
+        {
+            switch (pathName)
+            {
+                case "Employees":
+                    Employee employee;
+                    string msg;
+                    if ((new EmployeeAPIHandler().TryGet(keys, out employee, out msg)) == ODataAPIResponseStatus.Success)
+                    {
+                        return GetNestedHandlerForEmployee(pathSegments, currentPosition, employee);
+                    }
+                    return null;
+                case "Companies":
+                    return new CompanyAPIHandler();
+
+                default:
+                    return null;
+            }
+        }
+
+        private static IODataAPIHandler GetNestedHandlerForEmployee(List<ODataPathSegment> pathSegments, int currentPosition, Employee employee)
+        {
+            ++currentPosition;
+
+            if (pathSegments.Count <= currentPosition)
+            {
+                return null;
+            }
+
+            ODataPathSegment currentPathSegment = pathSegments[currentPosition];
+
+            if (currentPathSegment is NavigationPropertySegment)
+            {
+                int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
+                KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
+                Dictionary<string,object> keys = ODataPathHelper.GetKeysFromKeySegment(keySegment);
+
+                currentPosition = keySegmentPosition;
+
+                switch (currentPathSegment.Identifier)
+                {
+                    case "NewFriends":
+                        ODataPathSegment nextPathSegment = pathSegments[++currentPosition];
+
+                        if (nextPathSegment is TypeSegment)
+                        {
+                            currentPosition++;
+                            TypeSegment typeSegment = nextPathSegment as TypeSegment;
+
+                            if (typeSegment.Identifier == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
+                            {
+                                MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]) as MyNewFriend;
+
+                                if (friend != null)
+                                {
+                                    switch (pathSegments[++currentPosition].Identifier)
+                                    {
+                                        case "MyNewOrders":
+                                            return new MyNewOrderAPIHandler(friend);
+
+                                        default:
+                                            return null;
+
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            NewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]);
+
+                            if (friend != null)
+                            {
+                                switch (pathSegments[++currentPosition].Identifier)
+                                {
+                                    case "NewOrders":
+                                        return new NewOrderAPIHandler(friend);
+
+                                    default:
+                                        return null;
+
+                                }
+                            }
+                        }
+                        return null;
+
+                    default:
+                        return null;
+
+                }
+            }
             return null;
         }
     }

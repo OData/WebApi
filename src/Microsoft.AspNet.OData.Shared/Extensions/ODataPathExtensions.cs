@@ -6,14 +6,21 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
-    internal static class ODataPathExtensions
+    /// <summary>
+    /// Extensions method for <see cref="ODataPath"/>.
+    /// </summary>
+    public static class ODataPathExtensions
     {
+        /// <summary>
+        /// Get keys from the last <see cref="KeySegment"/>.
+        /// </summary>
+        /// <param name="path"><see cref="ODataPath"/>.</param>
+        /// <returns>Dictionary of keys.</returns>
         public static Dictionary<string, object> GetKeys(this ODataPath path)
         {
             if (path == null)
@@ -30,40 +37,23 @@ namespace Microsoft.AspNet.OData.Extensions
 
                 if (pathWithoutLastSegmentCastType.LastSegment is KeySegment)
                 {
-                    keys = GetKeysFromKeySegment(pathWithoutLastSegmentCastType.LastSegment as KeySegment);
+                    keys = ODataPathHelper.GetKeysFromKeySegment(pathWithoutLastSegmentCastType.LastSegment as KeySegment);
                 }
             }
             // Books(1)/Authors/Namespace.SpecialAuthor/(1000)
             else if (path.LastSegment is KeySegment)
             {
-                keys = GetKeysFromKeySegment(path.LastSegment as KeySegment);
+                keys = ODataPathHelper.GetKeysFromKeySegment(path.LastSegment as KeySegment);
             }
 
             return keys;
         }
 
-        public static ODataPathSegment GetLastNonKeySegment(this ODataPath path)
-        {
-            if (path == null)
-            {
-                throw Error.ArgumentNull(nameof(path));
-            }
-
-            if (path.Count == 1)
-            {
-                return path.LastSegment;
-            }
-
-            if (path.LastSegment is TypeSegment)
-            {
-                ODataPath modifiedPath = path.TrimEndingTypeSegment();
-
-                return modifiedPath.LastSegment;
-            }
-
-            return path.LastSegment;
-        }
-
+        /// <summary>
+        /// Return the last segment in the path, which is not a <see cref="TypeSegment"/> or <see cref="KeySegment"/>.
+        /// </summary>
+        /// <param name="path">The <see cref="ODataPath"/>.</param>
+        /// <returns>An <see cref="ODataPathSegment"/>.</returns>
         public static ODataPathSegment GetLastNonTypeNonKeySegment(this ODataPath path)
         {
             if (path == null)
@@ -76,40 +66,40 @@ namespace Microsoft.AspNet.OData.Extensions
                 return path.LastSegment;
             }
 
-            ODataPath modifiedPath = path;
+            // If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
+            // This method will return NewFriends NavigationPropertySegment.
 
-            while (modifiedPath.LastSegment is TypeSegment || modifiedPath.LastSegment is KeySegment)
+            while (path.LastSegment is TypeSegment || path.LastSegment is KeySegment)
             {
-                if (modifiedPath.LastSegment is TypeSegment)
+                if (path.LastSegment is TypeSegment)
                 {
-                    modifiedPath = modifiedPath.TrimEndingTypeSegment();
+                    // We remove the last type segment from the path.
+                    // E.g If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend,
+                    // The updated path will be Employees(2)/NewFriends(2)
+                    path = path.TrimEndingTypeSegment();
                 }
-                else if (modifiedPath.LastSegment is KeySegment)
+                else if (path.LastSegment is KeySegment)
                 {
-                    modifiedPath = modifiedPath.TrimEndingKeySegment();
+                    // We remove the last key segment from the path.
+                    // E.g If the path is Employees(2)/NewFriends(2),
+                    // The updated path will be Employees(2)/NewFriends
+                    path = path.TrimEndingKeySegment();
                 }
 
-                modifiedPath.GetLastNonTypeNonKeySegment();
+                path.GetLastNonTypeNonKeySegment();
             }
 
-            return modifiedPath.LastSegment;
+            return path.LastSegment;
         }
 
+        /// <summary>
+        /// Returns a list of <see cref="ODataPathSegment"/> in an <see cref="ODataPath"/>.
+        /// </summary>
+        /// <param name="path">The <see cref="ODataPath"/>.</param>
+        /// <returns>List of <see cref="ODataPathSegment"/>.</returns>
         public static List<ODataPathSegment> GetSegments(this ODataPath path)
         {
             return path.AsList();
-        }
-
-        private static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)
-        {
-            Dictionary<string, object> keys = new Dictionary<string, object>();
-
-            foreach (KeyValuePair<string, object> kvp in keySegment.Keys)
-            {
-                keys.Add(kvp.Key, kvp.Value);
-            }
-
-            return keys;
         }
     }
 }

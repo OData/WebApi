@@ -37,7 +37,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private List<Friend> Friends = null;
 
-
         private void InitEmployees()
         {
             Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age = 33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
@@ -142,7 +141,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         }
         public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(int key, EdmChangedObjectCollection friendColl)
         {
-
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
@@ -177,6 +175,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             friends.First().TryGetPropertyValue("Name", out obj1);
 
             object name;
+
             if (EmployeesTypeless.First().TryGetPropertyValue("Name", out name) && name.ToString() == "Employeeabcd")
             {
                 Assert.Equal("abcd", obj1.ToString());
@@ -234,7 +233,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return Ok();
         }
 
-
         [ODataRoute("Employees")]
         [HttpPatch]
         [EnableQuery]
@@ -276,7 +274,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return Ok(changedObjColl);
         }
 
-
         [ODataRoute("Employees({key})/NewFriends")]
         [HttpPatch]
         public ITestActionResult PatchNewFriends(int key, [FromBody] DeltaSet<NewFriend> friendColl)
@@ -299,7 +296,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 return Ok(changedObjColl);
             }
-
         }
 
         [ODataRoute("Employees({key})/UnTypedFriends")]
@@ -326,7 +322,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                         (obj1 as EdmStructuredObject).TryGetPropertyValue("Street", out obj2);
 
                         Assert.Equal("Abc 123", obj2);
-
                     }
                 }
 
@@ -358,19 +353,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
         }
 
-
         [ODataRoute("UnTypedEmployees")]
         [HttpPatch]
         public ITestActionResult PatchUnTypedEmployees([FromBody] EdmChangedObjectCollection empColl)
         {
-
             var changedObjColl = EmployeePatchMethodTypeLess(empColl);
 
             return Ok(changedObjColl);
-
         }
-
-
 
         [ODataRoute("Employees({key})")]
         [EnableQuery]
@@ -406,8 +396,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             return Ok(employee);
         }
-
-
     }
 
     public class CompanyController : TestODataController
@@ -437,7 +425,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         [HttpPatch]
         public ITestActionResult PatchCompanies([FromBody] DeltaSet<Company> coll)
         {
-            var empCntrl = new EmployeesController();
             InitCompanies();
 
             Assert.NotNull(coll);
@@ -457,7 +444,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     ValidateOverdueOrders1(1, 1, 9);
                 }
             }
-
 
             return Ok(returncoll);
         }
@@ -489,7 +475,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             {
                 ValidateOverdueOrders1(3, 1);
             }
-
 
             return Ok(company);
         }

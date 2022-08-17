@@ -6,7 +6,6 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Common
@@ -17,10 +16,10 @@ namespace Microsoft.AspNet.OData.Common
     public static class ODataPathHelper
     {
         /// <summary>
-        /// 
+        /// Get the keys from a <see cref="KeySegment"/>.
         /// </summary>
-        /// <param name="keySegment"></param>
-        /// <returns></returns>
+        /// <param name="keySegment">The <see cref="KeySegment"/> to extract the keys.</param>
+        /// <returns>Dictionary of keys.</returns>
         public static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)
         {
             Dictionary<string, object> keys = new Dictionary<string, object>();
@@ -34,11 +33,11 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
-        /// 
+        /// Get the position of the next <see cref="KeySegment"/> in a list of <see cref="ODataPathSegment"/>.
         /// </summary>
-        /// <param name="pathSegments"></param>
-        /// <param name="currentPosition"></param>
-        /// <returns></returns>
+        /// <param name="pathSegments">List of <see cref="ODataPathSegment"/>.</param>
+        /// <param name="currentPosition">Current position in the list of <see cref="ODataPathSegment"/>.</param>
+        /// <returns>Position of the next <see cref="KeySegment"/>.</returns>
         public static int GetNextKeySegmentPosition(List<ODataPathSegment> pathSegments, int currentPosition)
         {
             for (int i = currentPosition; i < pathSegments.Count; i++)

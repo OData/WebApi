@@ -433,7 +433,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                         new Company { Id = 2, Name = "Company2", OverdueOrders = OverdueOrders.Where(x => x.Id == 3 || x.Id == 4).ToList() } };
         }
 
-
         [ODataRoute("Companies")]
         [HttpPatch]
         public ITestActionResult PatchCompanies([FromBody] DeltaSet<Company> coll)

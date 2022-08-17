@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
@@ -92,6 +93,11 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return modifiedPath.LastSegment;
+        }
+
+        public static List<ODataPathSegment> GetSegments(this ODataPath path)
+        {
+            return path.AsList();
         }
 
         private static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)

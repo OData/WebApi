@@ -16,7 +16,7 @@
     <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
     <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>
     <ODataLibPackageDependency>[7.12.2, 8.0.0)</ODataLibPackageDependency>
-    <NewtonsoftJsonPackageDependency>10.0.3</NewtonsoftJsonPackageDependency>
+    <NewtonsoftJsonPackageDependency>13.0.1</NewtonsoftJsonPackageDependency>
   </PropertyGroup>
 
   <!--

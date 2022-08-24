@@ -1423,12 +1423,6 @@
 	<Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
 		<Link>BulkOperation\BulkInsertEdmModel.cs</Link>
 	</Compile>
-	<Compile Include="..\BulkOperation\BulkInsertController.cs">
-		<Link>BulkOperation\BulkInsertController.cs</Link>
-	</Compile>
-	<Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
-		<Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
-	</Compile>
     <Compile Include="..\ParameterAlias\ParameterAliasDataSource.cs">
       <Link>ParameterAlias\ParameterAliasDataSource.cs</Link>
     </Compile>

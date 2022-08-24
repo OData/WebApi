@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------------
-// <copyright file="BulkInsertEdmModel.cs" company=".NET Foundation">
+// <copyright file="BulkOperationEdmModel.cs" company=".NET Foundation">
 //      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
 //      See License.txt in the project root for license information.
 // </copyright>
@@ -11,7 +11,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    internal class BulkInsertEdmModel
+    internal class BulkOperationEdmModel
     {
         public static IEdmModel GetExplicitModel(WebRouteConfiguration configuration)
         {

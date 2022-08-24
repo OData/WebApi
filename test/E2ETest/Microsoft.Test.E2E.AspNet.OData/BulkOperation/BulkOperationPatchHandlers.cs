@@ -108,7 +108,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                             currentPosition++;
                             TypeSegment typeSegment = nextPathSegment as TypeSegment;
 
-                            if (typeSegment.Identifier == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
+                            if (typeSegment.Identifier == "Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend")
                             {
                                 MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]) as MyNewFriend;
 

@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------------
-// <copyright file="BulkInsertTest.cs" company=".NET Foundation">
+// <copyright file="BulkOperationTest.cs" company=".NET Foundation">
 //      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
 //      See License.txt in the project root for license information.
 // </copyright>
@@ -22,9 +22,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    public class BulkInsertTest : WebHostTestBase
+    public class BulkOperationTest : WebHostTestBase
     {
-        public BulkInsertTest(WebHostTestFixture fixture)
+        public BulkOperationTest(WebHostTestFixture fixture)
             :base(fixture)
         {
         }
@@ -36,8 +36,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("convention", "convention", BulkInsertEdmModel.GetConventionModel(configuration));
-            configuration.MapODataServiceRoute("explicit", "explicit", BulkInsertEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("convention", "convention", BulkOperationEdmModel.GetConventionModel(configuration));
+            configuration.MapODataServiceRoute("explicit", "explicit", BulkOperationEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.EnsureInitialized();
         }
 
@@ -136,7 +136,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
             
-            var content = @"{'@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',
+            var content = @"{'@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend',
                             '@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta',     
                     'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
                      }";
@@ -222,7 +222,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -265,7 +265,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'@odata.removed' : {'reason':'changed'}, 'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -620,11 +620,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'"+ this.BaseAddress + @"/convention/$metadata#Employees/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
                                 },
-                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':2,'Name':'Employee2',
+                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':2,'Name':'Employee2',
                             'Friends@odata.delta':[{'Id':3,'Name':'Friend3',
                             'Orders@odata.delta' :[{'Id':3,'Price': 30}, {'Id':4,'Price': 40} ]},{'Id':4,'Name':'Friend4'}]
                                 }]
@@ -875,7 +875,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             string requestUri = this.BaseAddress + "/convention/Companies";
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Company', 'Id':1,'Name':'Company01',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company01',
                             'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)', 'Quantity': 9}]
                             
                                 }]
@@ -910,8 +910,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             string requestUri = this.BaseAddress + "/convention/Companies";
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Company', 'Id':1,'Name':'Company02',
-                            'MyOverdueOrders@odata.delta':[{'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company02',
+                            'MyOverdueOrders@odata.delta':[{'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
                             
                                 }]
                      }";

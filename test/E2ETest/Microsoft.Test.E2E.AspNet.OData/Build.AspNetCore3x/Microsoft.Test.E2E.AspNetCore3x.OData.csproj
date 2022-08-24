@@ -1665,17 +1665,17 @@
     <Compile Include="..\Validation\DeltaOfTValidationTests.cs">
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertTest.cs">
-      <Link>BulkOperation\BulkInsertTest.cs</Link>
+    <Compile Include="..\BulkOperation\BulkOperationTest.cs">
+      <Link>BulkOperation\BulkOperationTest.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertDataModel.cs">
-      <Link>BulkOperation\BulkInsertDataModel.cs</Link>
+    <Compile Include="..\BulkOperation\BulkOperationDataModel.cs">
+      <Link>BulkOperation\BulkOperationDataModel.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
-      <Link>BulkOperation\BulkInsertEdmModel.cs</Link>
+    <Compile Include="..\BulkOperation\BulkOperationEdmModel.cs">
+      <Link>BulkOperation\BulkOperationEdmModel.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertController.cs">
-      <Link>BulkOperation\BulkInsertController.cs</Link>
+    <Compile Include="..\BulkOperation\BulkOperationController.cs">
+      <Link>BulkOperation\BulkOperationController.cs</Link>
     </Compile>
     <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
       <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>

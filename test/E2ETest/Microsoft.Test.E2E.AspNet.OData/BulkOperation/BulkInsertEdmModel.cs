@@ -9,7 +9,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
+namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     internal class BulkInsertEdmModel
     {

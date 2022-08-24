@@ -12,11 +12,10 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
+namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     public class EmployeesController : TestODataController
     {

@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
+namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     [AutoExpand]
     public class Employee

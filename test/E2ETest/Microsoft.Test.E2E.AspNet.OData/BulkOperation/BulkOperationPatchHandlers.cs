@@ -13,7 +13,6 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {

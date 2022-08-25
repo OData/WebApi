@@ -56,11 +56,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{'Id':1,'Name':'Test2'},{'Id':2,'Name':'Test3'}]
                      }";
 
-            //content = @"{
-            //        'Name':'Sql' , 'FavoriteSports' :{'Sport': 'Cricket'}
-                     
-            //         }";
-
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
@@ -85,7 +80,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(2, result.Count);
                 Assert.Contains("Test2", result.ToString());
             }
-
         }
 
         [Fact]
@@ -125,9 +119,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("400", result.ToString());
                 Assert.Contains("900", result.ToString());
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithUpdates_Friends()
@@ -212,7 +204,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Single(result);                
                 Assert.Contains("Friend2", result.ToString());
             }
-
         }
 
         [Fact]
@@ -225,7 +216,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -255,7 +245,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Single(result);
                 Assert.Contains("Friend2", result.ToString());
             }
-
         }
 
         [Fact]
@@ -268,7 +257,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'@odata.removed' : {'reason':'changed'}, 'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -286,7 +274,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected.ToLower(), json.ToString().ToLower());
             }
-
           
             requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
@@ -298,7 +285,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 Assert.Contains("Friend2", result.ToString());
             }
-
         }
 
         [Fact]
@@ -307,19 +293,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
             requestForPost.Content = new StringContent(content);
 
             requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
-           // StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            //requestForPost.Content = stringContent;
             
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
@@ -339,11 +321,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
             
             string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
-
            
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -367,11 +347,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -390,20 +368,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("$delta", json);
                 Assert.Contains(expected, json.ToString());
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithFailedOperation_WithAnnotations()
         {
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/NewFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -415,7 +389,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var expected = "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test2\":\"testing\",\"@Core.ContentID\":3," +
                 "\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
-
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
@@ -426,9 +399,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Core.DataModificationException", str);
                 Assert.Contains(expected, str);
             }
-
         }
-
 
         [Fact]
         public async Task PatchUntypedEmployee_WithAdds_Friends_Untyped()
@@ -436,7 +407,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
 
             string requestUri = this.BaseAddress + "/convention/UnTypedEmployees";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':35,}]
                      }";
@@ -450,7 +420,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
 
@@ -462,7 +431,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 "[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"UnTypedFriends@delta\":" +
                 "[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
 
-
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
@@ -471,18 +439,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-
         [Fact]
         public async Task PatchEmployee_WithAdds_Friends_WithNested_Untyped()
         {
             //Arrange
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/UnTypedFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':2, 'Name': 'Friend007', 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -497,9 +462,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 json.ToString().Contains("$delta");
                 json.ToString().Contains("@NS.Test");
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithAdds_Friends_WithAnnotations_Untyped()
@@ -507,11 +470,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
 
             string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':2, 'Age':35, '@NS.Test':1}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -534,11 +495,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
 
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -564,7 +523,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@NS.Test':1}]
                      }";
 
-
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
@@ -578,20 +536,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("@Core.DataModificationException", json.ToString());
                 Assert.Contains("@NS.Test", json.ToString());
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithFailedOperation_WithAnnotations_Untyped()
         {
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
-            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -609,7 +563,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Core.DataModificationException", str);
                 Assert.Contains("Core.ContentID", str);                
             }
-
         }
 
         [Fact]
@@ -671,7 +624,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Friend4", json.ToString());
             }
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithDelete()
@@ -745,7 +697,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-
         [Fact]
         public async Task PatchEmployee_WithAddUpdateAndDelete()
         {
@@ -784,7 +735,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Test4", result.ToString());
             }
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithMultipleUpdatesinOrder1()
@@ -866,7 +816,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-
         [Fact]
         public async Task PatchCompanies_WithUpdates_ODataId()
         {
@@ -877,10 +826,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company01',
                             'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)', 'Quantity': 9}]
-                            
                                 }]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -898,8 +845,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected, json.ToString());
             }
-
-           
         }
 
         [Fact]
@@ -912,10 +857,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company02',
                             'MyOverdueOrders@odata.delta':[{'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
-                            
                                 }]
                      }";
-
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
@@ -933,10 +876,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected, json.ToString());
             }
-
-
         }
-
 
         [Fact]
         public async Task PatchUntypedEmployee_WithOdataId()
@@ -982,8 +922,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             var content = @"{'Id':3,'Name':'Company03',
                             'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
-                            
-                               
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
@@ -997,9 +935,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
-
         }
-
 
         [Fact]
         public async Task PostCompany_WithODataId_AndWithout()
@@ -1010,8 +946,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             var content = @"{'Id':4,'Name':'Company04',
                             'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{Price:30}]
-                            
-                               
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
@@ -1025,7 +959,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
-
         }
 
         [Fact]
@@ -1053,10 +986,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("SqlUD", json);
                 //Assert.Contains("Friends", json); // Activate after fixing serialization issue for DeepInsert nested resources
             }
-
         }
 
         #endregion
-
     }
 }

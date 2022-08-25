@@ -74,7 +74,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 if (path.LastSegment is TypeSegment)
                 {
                     // We remove the last type segment from the path.
-                    // E.g If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend,
+                    // E.g If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
                     // The updated path will be Employees(2)/NewFriends(2)
                     path = path.TrimEndingTypeSegment();
                 }

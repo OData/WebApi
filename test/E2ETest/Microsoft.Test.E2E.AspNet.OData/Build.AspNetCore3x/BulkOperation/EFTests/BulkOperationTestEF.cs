@@ -67,7 +67,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("Sql", json.ToString());
             }
-
         }
 
         [Fact]
@@ -94,7 +93,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("SqlFU", json.ToString());
             }
-
         }
 
         [Fact]
@@ -136,7 +134,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Employee1", json);
                 Assert.Contains("Employee2", json);
             }
-
         }
 
         [Fact]
@@ -177,9 +174,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Employee1", json);
                 Assert.Contains("Employee2", json);
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithDelete()
@@ -205,10 +200,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("Sql", json);
             }
-
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithAddUpdateAndDelete()
@@ -234,9 +226,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlUD", json);
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithMultipleUpdatesinOrder1()
@@ -262,7 +252,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlMU", json);
             }
-
         }
 
         [Fact]
@@ -289,11 +278,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlMU1", json);
             }
-
         }
 
-
         #endregion
-
     }
 }

@@ -73,13 +73,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.Equal("XXX/odata/$metadata#ComplextTypeCollectionTests_Persons(1)/PersonInfos".Replace("XXX", BaseAddress.ToLowerInvariant()),
                 result["@odata.context"]);
 
-#if NETCORE
             Assert.Equal("XXX/odata/ComplextTypeCollectionTests_Persons(1)/PersonInfos?$skip=2".Replace("XXX", BaseAddress.ToLowerInvariant()),
                 result["@odata.nextLink"]);
-#else
-            Assert.Equal("XXX/odata/ComplextTypeCollectionTests_Persons%281%29/PersonInfos?$skip=2".Replace("XXX", BaseAddress.ToLowerInvariant()),
-                result["@odata.nextLink"]);
-#endif
 
             JArray personInfos = result["value"] as JArray;
             Assert.NotNull(personInfos);

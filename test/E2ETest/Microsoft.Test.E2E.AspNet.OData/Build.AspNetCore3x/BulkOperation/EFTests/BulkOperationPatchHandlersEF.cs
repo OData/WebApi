@@ -47,8 +47,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             modelBuilder.Entity<NewOrder>().Ignore(c => c.Container);
             modelBuilder.Entity<MyNewOrder>().Ignore(c => c.Container);
         }
-
-
     }
 
     internal class APIHandlerFactoryEF : ODataAPIHandlerFactory
@@ -131,7 +129,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     var id = keyValues["ID"].ToString();
                     originalObject = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
 
-
                     if (originalObject == null)
                     {
                         status = ODataAPIResponseStatus.NotFound;
@@ -158,9 +155,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     default:
                         return null;
                 }
-
             }
-
         }
 
         internal class FriendEFPatchHandler : ODataAPIHandler<Friend>
@@ -230,7 +225,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
                     }
 
-
                     if (originalObject == null)
                     {
                         status = ODataAPIResponseStatus.NotFound;
@@ -250,9 +244,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 return new OrderEFPatchHandler(parent);
             }
-
         }
-
 
         internal class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
         {
@@ -314,7 +306,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     var id = keyValues["Id"].ToString();
                     originalObject = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
 
-
                     if (originalObject == null)
                     {
                         status = ODataAPIResponseStatus.NotFound;
@@ -334,10 +325,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 return null;
             }
-
         }
-
-
 
         internal class OrderEFPatchHandler : ODataAPIHandler<Order>
         {
@@ -399,12 +387,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     var id = keyValues["Id"].ToString();
                     originalObject = friend.Orders.First(x => x.Id == Int32.Parse(id));
 
-
                     if (originalObject == null)
                     {
                         status = ODataAPIResponseStatus.NotFound;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -420,6 +406,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 throw new NotImplementedException();
             }
         }
-
     }
 }

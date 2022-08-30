@@ -5,64 +5,21 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
+
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Common.Models;
+using Microsoft.OData.UriParser;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
 {
     public class ODataPathExtensionsTest
     {
-        EdmNavigationProperty friendsProperty;
-        EdmEntityType customerType;
-        EdmEntityType personType;
-        EdmEntityType uniquePersonType;
-        EdmEntityType vipCustomerType;
-        IEdmEntitySet customerSet;
-
+        SampleEdmModel model = new SampleEdmModel();
         KeyValuePair<string, object>[] customerKey = new[] { new KeyValuePair<string, object>("Id", "1") };
         KeyValuePair<string, object>[] friendsKey = new[] { new KeyValuePair<string, object>("Id", "1001") };
-
-        public ODataPathExtensionsTest()
-        {
-            EdmModel model = new EdmModel();
-            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-
-            personType = new EdmEntityType("NS", "Person");
-            personType.AddKeys(personType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32, isNullable: false));
-            personType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String, isNullable: false);
-
-            customerType = new EdmEntityType("NS", "Customer");
-            customerType.AddKeys(customerType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32, isNullable: false));
-            customerType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String, isNullable: false);
-            friendsProperty = customerType.AddUnidirectionalNavigation(
-                new EdmNavigationPropertyInfo
-                {
-                    ContainsTarget = true,
-                    Name = "Friends",
-                    Target = personType,
-                    TargetMultiplicity = EdmMultiplicity.Many
-                });
-
-            vipCustomerType = new EdmEntityType("NS", "VipCustomer", customerType);
-            vipCustomerType.AddKeys(vipCustomerType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32, isNullable: false));
-            vipCustomerType.AddStructuralProperty("VipName", EdmPrimitiveTypeKind.String, isNullable: false);
-
-            uniquePersonType = new EdmEntityType("NS", "UniquePerson", personType);
-            uniquePersonType.AddKeys(uniquePersonType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32, isNullable: false));
-            uniquePersonType.AddStructuralProperty("UniqueName", EdmPrimitiveTypeKind.String, isNullable: false);
-
-            model.AddElement(customerType);
-            model.AddElement(personType);
-            model.AddElement(uniquePersonType);
-            model.AddElement(vipCustomerType);
-            model.AddElement(container);
-
-            customerSet = container.AddEntitySet("Customers", customerType);
-        }
 
         [Fact]
         public void GetKeys_PathWithTypeSegmentReturnsKeysFromLastKeySegment()
@@ -73,9 +30,9 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
             {
-                new EntitySetSegment(customerSet),
-                new KeySegment(customerKey, customerType, customerSet),
-                new TypeSegment(vipCustomerType, customerType, null)
+                new EntitySetSegment(model.customerSet),
+                new KeySegment(customerKey, model.customerType, model.customerSet),
+                new TypeSegment(model.vipCustomerType, model.customerType, null)
             });
 
             // Act
@@ -96,10 +53,10 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
             {
-                new EntitySetSegment(customerSet),
-                new KeySegment(customerKey, customerType, customerSet),
-                new NavigationPropertySegment(friendsProperty, customerSet),
-                new KeySegment(friendsKey, personType, null)
+                new EntitySetSegment(model.customerSet),
+                new KeySegment(customerKey, model.customerType, model.customerSet),
+                new NavigationPropertySegment(model.friendsProperty, model.customerSet),
+                new KeySegment(friendsKey, model.personType, null)
             });
 
             // Act
@@ -121,11 +78,11 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
             {
-                new EntitySetSegment(customerSet),
-                new KeySegment(customerKey, customerType, customerSet),
-                new NavigationPropertySegment(friendsProperty, customerSet),
-                new KeySegment(friendsKey, personType, null),
-                new TypeSegment(uniquePersonType, personType, null)
+                new EntitySetSegment(model.customerSet),
+                new KeySegment(customerKey, model.customerType, model.customerSet),
+                new NavigationPropertySegment(model.friendsProperty, model.customerSet),
+                new KeySegment(friendsKey, model.personType, null),
+                new TypeSegment(model.uniquePersonType, model.personType, null)
             });
 
             // Act
@@ -145,7 +102,7 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
             {
-                new EntitySetSegment(customerSet)
+                new EntitySetSegment(model.customerSet)
             });
 
             // Act

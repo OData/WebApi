@@ -50,6 +50,11 @@ namespace Microsoft.AspNet.OData.Common
                 throw Error.ArgumentNull(nameof(pathSegments));
             }
 
+            if (pathSegments[currentPosition] is KeySegment)
+            {
+                currentPosition++;
+            }
+
             for (int i = currentPosition; i < pathSegments.Count; i++)
             {
                 ODataPathSegment currentSegment = pathSegments[i];

@@ -239,7 +239,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var id = keyValues["Id"].ToString();
                 originalObject = CompanyController.Companies.First(x => x.Id == Int32.Parse(id));
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;

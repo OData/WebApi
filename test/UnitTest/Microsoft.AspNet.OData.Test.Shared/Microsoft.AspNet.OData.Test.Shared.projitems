@@ -228,6 +228,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataFormatterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataMediaTypeFormatterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\PrimitiveTypesTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PublicApi\PublicApiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PublicApi\PublicApiTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Controllers\CustomerControllers.cs" />

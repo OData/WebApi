@@ -28,25 +28,16 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull(nameof(path));
             }
 
-            Dictionary<string, object> keys = new Dictionary<string, object>();
+            List<ODataPathSegment> pathSegments = path.AsList();
+            int position = path.Count - 1;
+            ODataPathSegment pathSegment = pathSegments[position];
 
-            // Books(1)/Authors(1000)/Namespace.SpecialAuthor
-            if (path.LastSegment is TypeSegment)
+            while (!(pathSegment is KeySegment) && position >= 0)
             {
-                ODataPath pathWithoutLastSegmentCastType = path.TrimEndingTypeSegment();
-
-                if (pathWithoutLastSegmentCastType.LastSegment is KeySegment)
-                {
-                    keys = ODataPathHelper.GetKeysFromKeySegment(pathWithoutLastSegmentCastType.LastSegment as KeySegment);
-                }
-            }
-            // Books(1)/Authors/Namespace.SpecialAuthor/(1000)
-            else if (path.LastSegment is KeySegment)
-            {
-                keys = ODataPathHelper.GetKeysFromKeySegment(path.LastSegment as KeySegment);
+                pathSegment = pathSegments[--position];
             }
 
-            return keys;
+            return ODataPathHelper.GetKeysFromKeySegment(pathSegment as KeySegment);
         }
 
         /// <summary>
@@ -69,27 +60,16 @@ namespace Microsoft.AspNet.OData.Extensions
             // If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
             // This method will return NewFriends NavigationPropertySegment.
 
-            while (path.LastSegment is TypeSegment || path.LastSegment is KeySegment)
-            {
-                if (path.LastSegment is TypeSegment)
-                {
-                    // We remove the last type segment from the path.
-                    // E.g If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
-                    // The updated path will be Employees(2)/NewFriends(2)
-                    path = path.TrimEndingTypeSegment();
-                }
-                else if (path.LastSegment is KeySegment)
-                {
-                    // We remove the last key segment from the path.
-                    // E.g If the path is Employees(2)/NewFriends(2),
-                    // The updated path will be Employees(2)/NewFriends
-                    path = path.TrimEndingKeySegment();
-                }
+            List<ODataPathSegment> pathSegments = path.AsList();
+            int position = path.Count - 1;
+            ODataPathSegment pathSegment = pathSegments[position];
 
-                path.GetLastNonTypeNonKeySegment();
+            while ((pathSegment is TypeSegment || pathSegment is KeySegment) && position>=0)
+            {
+                pathSegment = pathSegments[--position];
             }
 
-            return path.LastSegment;
+            return pathSegment;
         }
 
         /// <summary>

@@ -22,6 +22,11 @@ namespace Microsoft.AspNet.OData.Common
         /// <returns>Dictionary of keys.</returns>
         public static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)
         {
+            if (keySegment == null)
+            {
+                throw Error.ArgumentNull(nameof(keySegment));
+            }
+
             Dictionary<string, object> keys = new Dictionary<string, object>();
 
             foreach (KeyValuePair<string, object> kvp in keySegment.Keys)
@@ -38,8 +43,13 @@ namespace Microsoft.AspNet.OData.Common
         /// <param name="pathSegments">List of <see cref="ODataPathSegment"/>.</param>
         /// <param name="currentPosition">Current position in the list of <see cref="ODataPathSegment"/>.</param>
         /// <returns>Position of the next <see cref="KeySegment"/>.</returns>
-        public static int GetNextKeySegmentPosition(List<ODataPathSegment> pathSegments, int currentPosition)
+        public static int GetNextKeySegmentPosition(IReadOnlyList<ODataPathSegment> pathSegments, int currentPosition)
         {
+            if (pathSegments == null)
+            {
+                throw Error.ArgumentNull(nameof(pathSegments));
+            }
+
             for (int i = currentPosition; i < pathSegments.Count; i++)
             {
                 ODataPathSegment currentSegment = pathSegments[i];

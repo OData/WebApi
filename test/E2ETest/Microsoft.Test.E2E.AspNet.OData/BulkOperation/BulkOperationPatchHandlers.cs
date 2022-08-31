@@ -47,7 +47,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return GetHandlerInternal(
                         currentPathSegment.Identifier,
                         currentPosition,
-                        ODataPathHelper.GetKeysFromKeySegment(keySegment),
+                        ODataPathHelper.KeySegmentAsDictionary(keySegment),
                         pathSegments);
                 }
             }
@@ -94,7 +94,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
                 KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
-                Dictionary<string,object> keys = ODataPathHelper.GetKeysFromKeySegment(keySegment);
+                Dictionary<string,object> keys = ODataPathHelper.KeySegmentAsDictionary(keySegment);
 
                 currentPosition = keySegmentPosition;
 

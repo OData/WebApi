@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 pathSegment = pathSegments[--position];
             }
 
-            return ODataPathHelper.GetKeysFromKeySegment(pathSegment as KeySegment);
+            return ODataPathHelper.KeySegmentAsDictionary(pathSegment as KeySegment);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.AspNet.OData.Extensions
             int position = path.Count - 1;
             ODataPathSegment pathSegment = pathSegments[position];
 
-            while ((pathSegment is TypeSegment || pathSegment is KeySegment) && position>=0)
+            while ((pathSegment is TypeSegment || pathSegment is KeySegment) && position >= 0)
             {
                 pathSegment = pathSegments[--position];
             }

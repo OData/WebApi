@@ -92,5 +92,27 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.Equal(-1, position);
         }
+
+        [Fact]
+        public void GetNextKeySegmentPosition_ReturnsNegativeOneIfInvalidPositionIsPassed()
+        {
+            // If the path is Customers(1)/Friends(1001)/Ns.UniqueFriend where Ns.UniqueFriend is a type segment
+            // and 1001 is a KeySegment, and the starting position is index 1, the next keysegment position is index 3.
+
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+                new EntitySetSegment(model.customerSet),
+                new KeySegment(customerKey, model.customerType, model.customerSet),
+                new NavigationPropertySegment(model.friendsProperty, model.customerSet),
+                new TypeSegment(model.uniquePersonType, model.personType, null)
+            });
+
+            // Act
+            int position = ODataPathHelper.GetNextKeySegmentPosition(path.AsList(), 10);
+
+            // Assert
+            Assert.Equal(-1, position);
+        }
     }
 }

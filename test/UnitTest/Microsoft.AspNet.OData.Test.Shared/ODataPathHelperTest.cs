@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.OData.Test
             KeySegment keySegment = new KeySegment(customerKey, model.customerType, model.customerSet);
 
             // Act
-            Dictionary<string, object> keys = ODataPathHelper.GetKeysFromKeySegment(keySegment);
+            Dictionary<string, object> keys = ODataPathHelper.KeySegmentAsDictionary(keySegment);
 
             // Assert
             Assert.Equal(2, keys.Count);

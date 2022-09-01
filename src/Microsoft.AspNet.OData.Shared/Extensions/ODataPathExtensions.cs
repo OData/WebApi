@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="path"><see cref="ODataPath"/>.</param>
         /// <returns>Dictionary of keys.</returns>
-        public static Dictionary<string, object> GetKeys(this ODataPath path)
+        internal static Dictionary<string, object> GetKeys(this ODataPath path)
         {
             if (path == null)
             {
@@ -29,15 +29,27 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             List<ODataPathSegment> pathSegments = path.AsList();
-            int position = path.Count - 1;
-            ODataPathSegment pathSegment = pathSegments[position];
 
-            while (!(pathSegment is KeySegment) && position >= 0)
+            if (pathSegments.Count == 0)
             {
-                pathSegment = pathSegments[--position];
+                return null;
             }
 
-            return ODataPathHelper.KeySegmentAsDictionary(pathSegment as KeySegment);
+            int position = path.Count - 1;
+
+            while (position >= 0 && !(pathSegments[position] is KeySegment))
+            {
+                position--;
+            }
+
+            if (position >= 0 && pathSegments[position] is KeySegment keySegment)
+            {
+                return ODataPathHelper.KeySegmentAsDictionary(keySegment);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -62,14 +74,18 @@ namespace Microsoft.AspNet.OData.Extensions
 
             List<ODataPathSegment> pathSegments = path.AsList();
             int position = path.Count - 1;
-            ODataPathSegment pathSegment = pathSegments[position];
 
-            while ((pathSegment is TypeSegment || pathSegment is KeySegment) && position >= 0)
+            while (position >= 0 && (pathSegments[position] is TypeSegment || pathSegments[position] is KeySegment))
             {
-                pathSegment = pathSegments[--position];
+                --position;
             }
 
-            return pathSegment;
+            if (position < 0)
+            {
+                return null;
+            }
+
+            return pathSegments[position];
         }
 
         /// <summary>

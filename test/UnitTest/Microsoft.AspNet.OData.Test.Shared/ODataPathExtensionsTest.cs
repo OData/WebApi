@@ -45,6 +45,38 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void GetKeys_PathWithNoSegmentReturnsNull()
+        {
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+            });
+
+            // Act
+            Dictionary<string, object> keys = path.GetKeys();
+
+            // Assert
+            Assert.Null(keys);
+        }
+
+        [Fact]
+        public void GetKeys_PathWithNoKeySegmentReturnsNull()
+        {
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+                new EntitySetSegment(model.customerSet),
+                new TypeSegment(model.vipCustomerType, model.customerType, null)
+            });
+
+            // Act
+            Dictionary<string, object> keys = path.GetKeys();
+
+            // Assert
+            Assert.Null(keys);
+        }
+
+        [Fact]
         public void GetKeys_PathWithNavPropReturnsKeysFromLastKeySegment()
         {
             // From this path Customers(1)/Friends(1001)
@@ -69,7 +101,7 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
-        public void GetLastNonTypeNonKeySegment_ReturnsCorrectSegment()
+        public void GetLastNonTypeNonKeySegment_TypeSegmentAsLastSegmentReturnsCorrectSegment()
         {
             // If the path is Customers(1)/Friends(1001)/Ns.UniqueFriend where Ns.UniqueFriend is a type segment
             // and 1001 is a KeySegment,
@@ -83,6 +115,29 @@ namespace Microsoft.AspNet.OData.Test
                 new NavigationPropertySegment(model.friendsProperty, model.customerSet),
                 new KeySegment(friendsKey, model.personType, null),
                 new TypeSegment(model.uniquePersonType, model.personType, null)
+            });
+
+            // Act
+            ODataPathSegment segment = path.GetLastNonTypeNonKeySegment();
+
+            // Assert
+            Assert.Equal("Friends", segment.Identifier);
+            Assert.True(segment is NavigationPropertySegment);
+        }
+
+        [Fact]
+        public void GetLastNonTypeNonKeySegment_KeySegmentAsLastSegmentReturnsCorrectSegment()
+        {
+            // If the path is Customers(1)/Friends(1001) where1001 is a KeySegment,
+            // GetLastNonTypeNonKeySegment() should return Friends NavigationPropertySegment.
+
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+                new EntitySetSegment(model.customerSet),
+                new KeySegment(customerKey, model.customerType, model.customerSet),
+                new NavigationPropertySegment(model.friendsProperty, model.customerSet),
+                new KeySegment(friendsKey, model.personType, null)
             });
 
             // Act

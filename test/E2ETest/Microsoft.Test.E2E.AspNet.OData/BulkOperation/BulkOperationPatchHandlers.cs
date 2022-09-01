@@ -453,7 +453,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
-            errorMessage = string.Empty;
+            errorMessage = null;
 
             try
             {
@@ -472,7 +472,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
-            errorMessage = string.Empty;
+            errorMessage = null;
 
             try
             {
@@ -494,7 +494,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
         {
             ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
-            errorMessage = string.Empty;
+            errorMessage = null;
             originalObject = null;
 
             try

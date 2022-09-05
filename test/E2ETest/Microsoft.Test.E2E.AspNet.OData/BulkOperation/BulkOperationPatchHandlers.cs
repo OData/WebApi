@@ -9,75 +9,133 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
-        public APIHandlerFactory(IEdmModel model) : base (model)
+        public APIHandlerFactory(IEdmModel model) : base(model)
         {
         }
 
-        public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
+        public override IODataAPIHandler GetHandler(ODataPath odataPath)
         {
-            if(navigationPath != null)
+            if (odataPath != null)
             {
-                var pathItems = navigationPath;
+                int currentPosition = 0;
 
-                int cnt = 0;
-                                    
-                    switch (pathItems[cnt].Name)
-                    {
-                        case "Employees":
-                        {
-                            Employee employee;
-                            string msg;
-                            if ((new EmployeeAPIHandler().TryGet(pathItems[cnt].KeyProperties, out employee, out msg)) == ODataAPIResponseStatus.Success)
-                            {
-                                return GetNestedHandlerForEmployee(pathItems, cnt, employee);
-                            }
-                        }
-                        return null;
-                    case "Companies":
-                        return new CompanyAPIHandler();
+                if (odataPath.Count == 1)
+                {
+                    GetHandlerInternal(odataPath.FirstSegment.Identifier, currentPosition);
+                }
 
-                        default:
-                            return null;
+                List<ODataPathSegment> pathSegments = odataPath.GetSegments();
 
-                    }
-                
+                ODataPathSegment currentPathSegment = pathSegments[currentPosition];
+
+                if (currentPathSegment is EntitySetSegment || currentPathSegment is NavigationPropertySegment || currentPathSegment is SingletonSegment)
+                {
+                    int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
+                    KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
+
+                    currentPosition = keySegmentPosition;
+
+                    return GetHandlerInternal(
+                        currentPathSegment.Identifier,
+                        currentPosition,
+                        ODataPathHelper.KeySegmentAsDictionary(keySegment),
+                        pathSegments);
+                }
             }
 
             return null;
         }
 
-        private static IODataAPIHandler GetNestedHandlerForEmployee(List<PathItem> pathItems, int cnt, Employee employee)
+        private IODataAPIHandler GetHandlerInternal(
+            string pathName,
+            int currentPosition,
+            Dictionary<string, object> keys = null,
+            List<ODataPathSegment> pathSegments = null)
         {
-            cnt++;
-            if(pathItems.Count <= cnt)
+            switch (pathName)
+            {
+                case "Employees":
+                    Employee employee;
+                    string msg;
+                    if ((new EmployeeAPIHandler().TryGet(keys, out employee, out msg)) == ODataAPIResponseStatus.Success)
+                    {
+                        return GetNestedHandlerForEmployee(pathSegments, currentPosition, employee);
+                    }
+                    return null;
+                case "Companies":
+                    return new CompanyAPIHandler();
+
+                default:
+                    return null;
+            }
+        }
+
+        private static IODataAPIHandler GetNestedHandlerForEmployee(List<ODataPathSegment> pathSegments, int currentPosition, Employee employee)
+        {
+            ++currentPosition;
+
+            if (pathSegments.Count <= currentPosition)
             {
                 return null;
             }
 
-            switch (pathItems[cnt].Name)
-            {
-                case "NewFriends":
-                    CastTypePathItem castItem = pathItems[cnt] as CastTypePathItem;
+            ODataPathSegment currentPathSegment = pathSegments[currentPosition];
 
-                    if (castItem != null)
-                    {
-                        if (castItem.CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
+            if (currentPathSegment is NavigationPropertySegment)
+            {
+                int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
+                KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
+                Dictionary<string,object> keys = ODataPathHelper.KeySegmentAsDictionary(keySegment);
+
+                currentPosition = keySegmentPosition;
+
+                switch (currentPathSegment.Identifier)
+                {
+                    case "NewFriends":
+                        ODataPathSegment nextPathSegment = pathSegments[++currentPosition];
+
+                        if (nextPathSegment is TypeSegment)
                         {
-                            MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]) as MyNewFriend;
+                            currentPosition++;
+                            TypeSegment typeSegment = nextPathSegment as TypeSegment;
+
+                            if (typeSegment.Identifier == "Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend")
+                            {
+                                MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]) as MyNewFriend;
+
+                                if (friend != null)
+                                {
+                                    switch (pathSegments[++currentPosition].Identifier)
+                                    {
+                                        case "MyNewOrders":
+                                            return new MyNewOrderAPIHandler(friend);
+
+                                        default:
+                                            return null;
+
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            NewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]);
 
                             if (friend != null)
                             {
-                                switch (pathItems[++cnt].Name)
+                                switch (pathSegments[++currentPosition].Identifier)
                                 {
-                                    case "MyNewOrders":
-                                        return new MyNewOrderAPIHandler(friend);
+                                    case "NewOrders":
+                                        return new NewOrderAPIHandler(friend);
 
                                     default:
                                         return null;
@@ -85,31 +143,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        NewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]);
+                        return null;
 
-                        if (friend != null)
-                        {
-                            switch (pathItems[++cnt].Name)
-                            {
-                                case "NewOrders":
-                                    return new NewOrderAPIHandler(friend);
+                    default:
+                        return null;
 
-                                default:
-                                    return null;
-
-                            }
-                        }
-                    }
-            
-                    return null;
-
-                default:
-                    return null;
-
+                }
             }
+            return null;
         }
     }
 
@@ -122,94 +163,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.entityType = entityType;
         }
 
-        public override EdmODataAPIHandler GetHandler(NavigationPath navigationPath)
+        public override EdmODataAPIHandler GetHandler(ODataPath odataPath)
         {
-            if (navigationPath != null)
+            if (odataPath != null)
             {
-                var pathItems = navigationPath;
-                int cnt = 0;
+                string pathName = odataPath.GetLastNonTypeNonKeySegment().Identifier;
 
-                switch (pathItems[cnt].Name)
+                switch (pathName)
                 {
                     case "UnTypedEmployees":
-                        {
-                            IEdmStructuredObject employee;
-                            string msg;
-                            if ((new EmployeeEdmAPIHandler(entityType).TryGet(pathItems[cnt].KeyProperties, out employee, out msg)) == ODataAPIResponseStatus.Success)
-                            {
-                                cnt++;
+                        return new EmployeeEdmAPIHandler(entityType);
 
-                                if (cnt <pathItems.Count && pathItems[cnt].Name == "UnTypedFriends")
-                                {
-
-                                    return new FriendTypelessAPIHandler(employee, employee.GetEdmType().Definition as IEdmEntityType);
-                                }                                
-                            }
-
-                            return new EmployeeEdmAPIHandler(entityType);
-                        }
-                       
                     default:
                         return null;
 
                 }
-
             }
 
             return null;
-        }
-
-        private static IODataAPIHandler GetNestedHandlerForEmployee(PathItem[] pathItems, int cnt, Employee employee)
-        {
-            switch (pathItems[++cnt].Name)
-            {
-                case "NewFriends":
-                    CastTypePathItem castItem = pathItems[cnt] as CastTypePathItem;
-
-                    if (castItem != null)
-                    {
-                        if (castItem.CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
-                        {
-                            MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]) as MyNewFriend;
-
-                            if (friend != null)
-                            {
-                                switch (pathItems[++cnt].Name)
-                                {
-                                    case "MyNewOrders":
-                                        return new MyNewOrderAPIHandler(friend);
-
-                                    default:
-                                        return null;
-
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        NewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]);
-
-                        if (friend != null)
-                        {
-                            switch (pathItems[++cnt].Name)
-                            {
-                                case "NewOrders":
-                                    return new NewOrderAPIHandler(friend);
-
-                                default:
-                                    return null;
-
-                            }
-                        }
-                    }
-
-                    return null;
-
-                default:
-                    return null;
-
-            }
         }
     }
 
@@ -267,7 +238,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 var id = keyValues["Id"].ToString();
                 originalObject = CompanyController.Companies.First(x => x.Id == Int32.Parse(id));
-
 
                 if (originalObject == null)
                 {
@@ -480,11 +450,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     internal class EmployeeAPIHandler : ODataAPIHandler<Employee>
     {
-
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
-            errorMessage = string.Empty;
+            errorMessage = null;
 
             try
             {
@@ -503,7 +472,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
-            errorMessage = string.Empty;
+            errorMessage = null;
 
             try
             {
@@ -525,7 +494,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
         {
             ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
-            errorMessage = string.Empty;
+            errorMessage = null;
             originalObject = null;
 
             try
@@ -560,7 +529,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
-            
+
         }
     }
 
@@ -853,8 +822,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new Order();
-                
-                if(friend.Orders == null)
+
+                if (friend.Orders == null)
                 {
                     friend.Orders = new List<Order>();
                 }
@@ -947,7 +916,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 createdObject = new NewFriend();
 
-                if(employee.NewFriends == null)
+                if (employee.NewFriends == null)
                 {
                     employee.NewFriends = new List<NewFriend>();
                 }
@@ -995,7 +964,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 var id = keyValues["Id"].ToString();
 
-                if(employee.NewFriends == null)
+                if (employee.NewFriends == null)
                 {
                     return ODataAPIResponseStatus.NotFound;
                 }
@@ -1072,7 +1041,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         break;
                     }
                 }
-                              
+
 
                 return ODataAPIResponseStatus.Success;
             }
@@ -1093,17 +1062,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["ID"].ToString();
-               foreach (var emp in EmployeesController.EmployeesTypeless)
-               {
+                foreach (var emp in EmployeesController.EmployeesTypeless)
+                {
                     object id1;
                     emp.TryGetPropertyValue("ID", out id1);
 
-                    if(id == id1.ToString())
+                    if (id == id1.ToString())
                     {
                         originalObject = emp;
                         break;
                     }
-               }
+                }
 
 
                 if (originalObject == null)
@@ -1127,11 +1096,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 case "UnTypedFriends":
                     return new FriendTypelessAPIHandler(parent, entityType.DeclaredNavigationProperties().First().Type.Definition.AsElementType() as IEdmEntityType);
-                    
+
                 default:
                     return null;
             }
-              
+
         }
 
     }
@@ -1141,7 +1110,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         IEdmEntityType entityType;
         EdmStructuredObject employee;
 
-        public FriendTypelessAPIHandler(IEdmStructuredObject employee,  IEdmEntityType entityType)
+        public FriendTypelessAPIHandler(IEdmStructuredObject employee, IEdmEntityType entityType)
         {
             this.employee = employee as EdmStructuredObject;
             this.entityType = entityType;
@@ -1155,7 +1124,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 object empid;
-                if(employee.TryGetPropertyValue("ID" , out empid) && empid as int? == 3)
+                if (employee.TryGetPropertyValue("ID", out empid) && empid as int? == 3)
                 {
                     throw new Exception("Testing Error");
                 }
@@ -1166,7 +1135,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 var friends = obj as ICollection<IEdmStructuredObject>;
 
-                if(friends == null)
+                if (friends == null)
                 {
                     friends = new List<IEdmStructuredObject>();
                 }
@@ -1192,7 +1161,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
-                if(id == "5")
+                if (id == "5")
                 {
                     throw new Exception("Testing Error");
                 }
@@ -1211,7 +1180,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         friends.Remove(emp);
 
                         employee.TrySetPropertyValue("UnTypedFriends", friends);
-                                                
+
                         break;
                     }
                 }
@@ -1241,7 +1210,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 var friends = obj as IList<EdmStructuredObject>;
 
-                if(friends == null)
+                if (friends == null)
                 {
                     return ODataAPIResponseStatus.NotFound;
                 }
@@ -1276,7 +1245,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override EdmODataAPIHandler GetNestedHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
-            return null;            
+            return null;
         }
 
     }

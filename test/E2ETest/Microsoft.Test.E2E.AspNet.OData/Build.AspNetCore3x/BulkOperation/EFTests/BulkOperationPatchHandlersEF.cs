@@ -11,7 +11,7 @@ using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
@@ -47,11 +47,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             modelBuilder.Entity<NewOrder>().Ignore(c => c.Container);
             modelBuilder.Entity<MyNewOrder>().Ignore(c => c.Container);
         }
-
-       
     }
 
-    internal class APIHandlerFactoryEF: ODataAPIHandlerFactory
+    internal class APIHandlerFactoryEF : ODataAPIHandlerFactory
     {
         EmployeeDBContext dbContext;
 
@@ -60,284 +58,274 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.dbContext = dbContext;
         }
 
-        public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
+        public override IODataAPIHandler GetHandler(ODataPath odataPath)
         {
-            if (navigationPath != null)
+            if (odataPath != null)
             {
-                var pathItems = navigationPath;
+                var pathItems = odataPath;
             }
 
             return null;
-    }
-
-    internal class EmployeeEFPatchHandler : ODataAPIHandler<Employee>
-    {
-        EmployeeDBContext dbContext = null;
-
-        public EmployeeEFPatchHandler(EmployeeDBContext dbContext)
-        {
-            this.dbContext = dbContext;
         }
 
-        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
+        internal class EmployeeEFPatchHandler : ODataAPIHandler<Employee>
         {
-            createdObject = null;
-            errorMessage = string.Empty;
+            EmployeeDBContext dbContext = null;
 
-            try
+            public EmployeeEFPatchHandler(EmployeeDBContext dbContext)
             {
-                createdObject = new Employee();
-                dbContext.Employees.Add(createdObject);
-
-                return ODataAPIResponseStatus.Success;
+                this.dbContext = dbContext;
             }
-            catch (Exception ex)
+
+            public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
             {
-                errorMessage = ex.Message;
+                createdObject = null;
+                errorMessage = string.Empty;
 
-                return ODataAPIResponseStatus.Failure;
-            }
-        }
-
-        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            try
-            {
-                var id = keyValues.First().Value.ToString();
-                var customer = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
-
-                dbContext.Employees.Remove(customer);
-
-                return ODataAPIResponseStatus.Success;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return ODataAPIResponseStatus.Failure;
-            }
-        }
-
-        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
-        {
-            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
-            errorMessage = string.Empty;
-            originalObject = null;
-
-            try
-            {
-                var id = keyValues["ID"].ToString();
-                originalObject = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
-
-
-                if (originalObject == null)
+                try
                 {
-                    status = ODataAPIResponseStatus.NotFound;
+                    createdObject = new Employee();
+                    dbContext.Employees.Add(createdObject);
+
+                    return ODataAPIResponseStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+            {
+                errorMessage = string.Empty;
+
+                try
+                {
+                    var id = keyValues.First().Value.ToString();
+                    var customer = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+
+                    dbContext.Employees.Remove(customer);
+
+                    return ODataAPIResponseStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
+            {
+                ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+                errorMessage = string.Empty;
+                originalObject = null;
+
+                try
+                {
+                    var id = keyValues["ID"].ToString();
+                    originalObject = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+
+                    if (originalObject == null)
+                    {
+                        status = ODataAPIResponseStatus.NotFound;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    status = ODataAPIResponseStatus.Failure;
+                    errorMessage = ex.Message;
                 }
 
-            }
-            catch (Exception ex)
-            {
-                status = ODataAPIResponseStatus.Failure;
-                errorMessage = ex.Message;
+                return status;
             }
 
-            return status;
-        }
-
-        public override IODataAPIHandler GetNestedHandler(Employee parent, string navigationPropertyName)
-        {
-            switch (navigationPropertyName)
+            public override IODataAPIHandler GetNestedHandler(Employee parent, string navigationPropertyName)
             {
-                case "Friends":
-                    return new FriendEFPatchHandler(parent);
-                case "NewFriends":
-                    return new NewFriendEFPatchHandler(parent);
-                default:
-                    return null;
-            }
-            
-        }
-
-    }
-
-    internal class FriendEFPatchHandler : ODataAPIHandler<Friend>
-    {
-        Employee employee;
-        public FriendEFPatchHandler(Employee employee)
-        {
-            this.employee = employee;
-        }
-
-        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
-        {
-            createdObject = null;
-            errorMessage = string.Empty;
-
-            try
-            {
-                createdObject = new Friend();
-                employee.Friends.Add(createdObject);
-
-                return ODataAPIResponseStatus.Success;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return ODataAPIResponseStatus.Failure;
-            }
-        }
-
-        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            try
-            {
-                var id = keyValues.First().Value.ToString();
-                var friend = employee.Friends.First(x => x.Id == Int32.Parse(id));
-
-                employee.Friends.Remove(friend);
-
-                return ODataAPIResponseStatus.Success;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return ODataAPIResponseStatus.Failure;
-            }
-        }
-
-        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
-        {
-            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
-            errorMessage = string.Empty;
-            originalObject = null;
-
-            try
-            {
-                var id = keyValues["Id"].ToString();
-                if (employee.Friends == null)
+                switch (navigationPropertyName)
                 {
-                    status = ODataAPIResponseStatus.NotFound;
+                    case "Friends":
+                        return new FriendEFPatchHandler(parent);
+                    case "NewFriends":
+                        return new NewFriendEFPatchHandler(parent);
+                    default:
+                        return null;
                 }
-                else
+            }
+        }
+
+        internal class FriendEFPatchHandler : ODataAPIHandler<Friend>
+        {
+            Employee employee;
+            public FriendEFPatchHandler(Employee employee)
+            {
+                this.employee = employee;
+            }
+
+            public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
+            {
+                createdObject = null;
+                errorMessage = string.Empty;
+
+                try
                 {
-                    originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                    createdObject = new Friend();
+                    employee.Friends.Add(createdObject);
+
+                    return ODataAPIResponseStatus.Success;
                 }
-
-
-                if (originalObject == null)
+                catch (Exception ex)
                 {
-                    status = ODataAPIResponseStatus.NotFound;
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+            {
+                errorMessage = string.Empty;
+
+                try
+                {
+                    var id = keyValues.First().Value.ToString();
+                    var friend = employee.Friends.First(x => x.Id == Int32.Parse(id));
+
+                    employee.Friends.Remove(friend);
+
+                    return ODataAPIResponseStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+            {
+                ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+                errorMessage = string.Empty;
+                originalObject = null;
+
+                try
+                {
+                    var id = keyValues["Id"].ToString();
+                    if (employee.Friends == null)
+                    {
+                        status = ODataAPIResponseStatus.NotFound;
+                    }
+                    else
+                    {
+                        originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                    }
+
+                    if (originalObject == null)
+                    {
+                        status = ODataAPIResponseStatus.NotFound;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    status = ODataAPIResponseStatus.Failure;
+                    errorMessage = ex.Message;
                 }
 
-            }
-            catch (Exception ex)
-            {
-                status = ODataAPIResponseStatus.Failure;
-                errorMessage = ex.Message;
+                return status;
             }
 
-            return status;
-        }
-
-        public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)
-        {
-            return new OrderEFPatchHandler(parent);
-        }
-
-    }
-
-
-    internal class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
-    {
-        Employee employee;
-        public NewFriendEFPatchHandler(Employee employee)
-        {
-            this.employee = employee;
-        }
-
-        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
-        {
-            createdObject = null;
-            errorMessage = string.Empty;
-
-            try
+            public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)
             {
-                createdObject = new NewFriend();
-                employee.NewFriends.Add(createdObject);
-
-                return ODataAPIResponseStatus.Success;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return ODataAPIResponseStatus.Failure;
+                return new OrderEFPatchHandler(parent);
             }
         }
 
-        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        internal class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
         {
-            errorMessage = string.Empty;
-
-            try
+            Employee employee;
+            public NewFriendEFPatchHandler(Employee employee)
             {
-                var id = keyValues.First().Value.ToString();
-                var friend = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
-
-                employee.NewFriends.Remove(friend);
-
-                return ODataAPIResponseStatus.Success;
+                this.employee = employee;
             }
-            catch (Exception ex)
+
+            public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
             {
-                errorMessage = ex.Message;
+                createdObject = null;
+                errorMessage = string.Empty;
 
-                return ODataAPIResponseStatus.Failure;
-            }
-        }
-
-        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
-        {
-            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
-            errorMessage = string.Empty;
-            originalObject = null;
-
-            try
-            {
-                var id = keyValues["Id"].ToString();
-                originalObject = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
-
-
-                if (originalObject == null)
+                try
                 {
-                    status = ODataAPIResponseStatus.NotFound;
+                    createdObject = new NewFriend();
+                    employee.NewFriends.Add(createdObject);
+
+                    return ODataAPIResponseStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+            {
+                errorMessage = string.Empty;
+
+                try
+                {
+                    var id = keyValues.First().Value.ToString();
+                    var friend = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
+
+                    employee.NewFriends.Remove(friend);
+
+                    return ODataAPIResponseStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+            }
+
+            public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+            {
+                ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+                errorMessage = string.Empty;
+                originalObject = null;
+
+                try
+                {
+                    var id = keyValues["Id"].ToString();
+                    originalObject = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
+
+                    if (originalObject == null)
+                    {
+                        status = ODataAPIResponseStatus.NotFound;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    status = ODataAPIResponseStatus.Failure;
+                    errorMessage = ex.Message;
                 }
 
+                return status;
             }
-            catch (Exception ex)
+
+            public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
             {
-                status = ODataAPIResponseStatus.Failure;
-                errorMessage = ex.Message;
+                return null;
             }
-
-            return status;
         }
-
-        public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
-        {
-            return null;
-        }
-
-    }
-
-
 
         internal class OrderEFPatchHandler : ODataAPIHandler<Order>
         {
@@ -399,12 +387,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     var id = keyValues["Id"].ToString();
                     originalObject = friend.Orders.First(x => x.Id == Int32.Parse(id));
 
-
                     if (originalObject == null)
                     {
                         status = ODataAPIResponseStatus.NotFound;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -420,6 +406,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 throw new NotImplementedException();
             }
         }
-
     }
 }

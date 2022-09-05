@@ -13,25 +13,24 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 using static Microsoft.Test.E2E.AspNet.OData.BulkOperation.APIHandlerFactoryEF;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
+namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     public class EmployeesControllerEF : TestODataController
     {
         public EmployeesControllerEF()
         {
-            
+
         }
-                
+
         public static List<Employee> employees;
         public static List<Friend> friends;
 
         internal DbSet<Employee> GenerateData(EmployeeDBContext context)
-        {            
+        {
             if (context.Employees.Any())
             {
                 return context.Employees;
@@ -59,7 +58,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
 
             friends = new List<Friend>();
-            friends.Add(new Friend { Id = 1, Age = 10 ,  Orders = new List<Order>() { new Order { Id = 1, Price = 5 }, new Order { Id = 2, Price = 5 } } });
+            friends.Add(new Friend { Id = 1, Age = 10, Orders = new List<Order>() { new Order { Id = 1, Price = 5 }, new Order { Id = 2, Price = 5 } } });
             friends.Add(new Friend { Id = 2, Age = 20, Orders = new List<Order>() { new Order { Id = 10, Price = 5 }, new Order { Id = 20, Price = 5 } } });
             friends.Add(new Friend { Id = 3, Age = 30, Orders = new List<Order>() { new Order { Id = 3, Price = 5 }, new Order { Id = 4, Price = 5 } } });
             friends.Add(new Friend { Id = 4, Age = 40, Orders = new List<Order>() { new Order { Id = 30, Price = 5 }, new Order { Id = 40, Price = 5 } } });

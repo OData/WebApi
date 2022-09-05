@@ -6,51 +6,84 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
+    /// <summary>
+    /// Extensions method for <see cref="ODataPath"/>.
+    /// </summary>
     internal static class ODataPathExtensions
     {
-        public static Dictionary<string, object> GetKeys(this ODataPath path)
+        /// <summary>
+        /// Get keys from the last <see cref="KeySegment"/>.
+        /// </summary>
+        /// <param name="path"><see cref="ODataPath"/>.</param>
+        /// <returns>Dictionary of keys.</returns>
+        internal static Dictionary<string, object> GetKeys(this ODataPath path)
+        {
+            Dictionary<string, object> keys = new Dictionary<string, object>();
+
+            if (path == null)
+            {
+                throw Error.ArgumentNull(nameof(path));
+            }
+
+            if (path.Count == 0)
+            {
+                return keys;
+            }
+
+            List<ODataPathSegment> pathSegments = path.AsList();
+
+            KeySegment keySegment = pathSegments.OfType<KeySegment>().LastOrDefault();
+
+            if (keySegment == null)
+            {
+                return keys;
+            }
+
+            keys = ODataPathHelper.KeySegmentAsDictionary(keySegment);
+
+            return keys;
+        }
+
+        /// <summary>
+        /// Return the last segment in the path, which is not a <see cref="TypeSegment"/> or <see cref="KeySegment"/>.
+        /// </summary>
+        /// <param name="path">The <see cref="ODataPath"/>.</param>
+        /// <returns>An <see cref="ODataPathSegment"/>.</returns>
+        public static ODataPathSegment GetLastNonTypeNonKeySegment(this ODataPath path)
         {
             if (path == null)
             {
                 throw Error.ArgumentNull(nameof(path));
             }
 
-            Dictionary<string, object> keys = new Dictionary<string, object>();
+            // If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
+            // This method will return NewFriends NavigationPropertySegment.
 
-            // Books(1)/Authors(1000)/Namespace.SpecialAuthor
-            if (path.LastSegment is TypeSegment)
-            {
-                ODataPath pathWithoutLastSegmentCastType = path.TrimEndingTypeSegment();
+            List<ODataPathSegment> pathSegments = path.AsList();
+            int position = path.Count - 1;
 
-                if (pathWithoutLastSegmentCastType.LastSegment is KeySegment)
-                {
-                    keys = GetKeysFromKeySegment(pathWithoutLastSegmentCastType.LastSegment as KeySegment);
-                }
-            }
-            // Books(1)/Authors/Namespace.SpecialAuthor/(1000)
-            else if (path.LastSegment is KeySegment)
+            while (position >= 0 && (pathSegments[position] is TypeSegment || pathSegments[position] is KeySegment))
             {
-                keys = GetKeysFromKeySegment(path.LastSegment as KeySegment);
+                --position;
             }
 
-            return keys;
+            return position < 0 ? null : pathSegments[position];
         }
 
-        private static Dictionary<string, object> GetKeysFromKeySegment(KeySegment keySegment)
+        /// <summary>
+        /// Returns a list of <see cref="ODataPathSegment"/> in an <see cref="ODataPath"/>.
+        /// </summary>
+        /// <param name="path">The <see cref="ODataPath"/>.</param>
+        /// <returns>List of <see cref="ODataPathSegment"/>.</returns>
+        public static List<ODataPathSegment> GetSegments(this ODataPath path)
         {
-            Dictionary<string, object> keys = new Dictionary<string, object>();
-
-            foreach (KeyValuePair<string, object> kvp in keySegment.Keys)
-            {
-                keys.Add(kvp.Key, kvp.Value);
-            }
-
-            return keys;
+            return path.AsList();
         }
     }
 }

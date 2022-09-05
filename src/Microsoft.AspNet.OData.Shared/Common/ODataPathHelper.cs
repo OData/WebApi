@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Common
@@ -27,14 +28,7 @@ namespace Microsoft.AspNet.OData.Common
                 throw Error.ArgumentNull(nameof(keySegment));
             }
 
-            Dictionary<string, object> keys = new Dictionary<string, object>();
-
-            foreach (KeyValuePair<string, object> kvp in keySegment.Keys)
-            {
-                keys.Add(kvp.Key, kvp.Value);
-            }
-
-            return keys;
+            return keySegment.Keys.ToDictionary(d => d.Key, d => d.Value);
         }
 
         /// <summary>

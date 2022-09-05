@@ -62,11 +62,6 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull(nameof(path));
             }
 
-            if (path.Count == 1)
-            {
-                return path.LastSegment;
-            }
-
             // If the path is Employees(2)/NewFriends(2)/Namespace.MyNewFriend where Namespace.MyNewFriend is a type segment,
             // This method will return NewFriends NavigationPropertySegment.
 

@@ -35,6 +35,7 @@ using Microsoft.Owin.Hosting;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Owin;
 using Xunit;
+using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 #endif
 
 // Parallelism in the test framework is a feature that is new for (Xunit) version 2. However,
@@ -424,20 +425,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         private void DefaultKatanaConfigure(IAppBuilder app)
         {
             // Set default principal to avoid OWIN selfhost bug with VS debugger
-            app.Use(async (context, next) =>
+            app.Use(new Func<AppFunc, AppFunc>(next => async env =>
             {
                 Thread.CurrentPrincipal = null;
-                await next();
-            });
+                await next.Invoke(env);
+            }));
+
+            WebHostLogExceptionFilter exceptionFilter = new WebHostLogExceptionFilter();
 
             // Inject error logging for 500.
-            WebHostLogExceptionFilter exceptionFilter = new WebHostLogExceptionFilter();
-            app.Use(async (context, next) =>
+            app.Use(new Func<AppFunc, AppFunc>(next => async env =>
             {
-                await next();
+                await next.Invoke(env);
 
                 int[] printExceptionFor = new int[] { 400, 500 };
-                if (printExceptionFor.Contains(context.Response.StatusCode) &&
+                if (printExceptionFor.Contains((int)env["owin.ResponseStatusCode"]) &&
                     exceptionFilter.Exceptions.Count > 0)
                 {
                     Console.WriteLine("**************** Internal Server Error ****************");
@@ -456,7 +458,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     Console.WriteLine();
                     exceptionFilter.Exceptions.Clear();
                 }
-            });
+            }));
 
             var configuration = new WebRouteConfiguration();
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;

@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData.Extensions
     /// <summary>
     /// Extensions method for <see cref="ODataPath"/>.
     /// </summary>
-    public static class ODataPathExtensions
+    internal static class ODataPathExtensions
     {
         /// <summary>
         /// Get keys from the last <see cref="KeySegment"/>.

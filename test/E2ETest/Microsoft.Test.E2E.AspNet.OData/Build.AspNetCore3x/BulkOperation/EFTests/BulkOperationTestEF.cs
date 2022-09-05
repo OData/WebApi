@@ -1,49 +1,44 @@
 ﻿//-----------------------------------------------------------------------------
-// <copyright file="BulkInsertTestEF.cs" company=".NET Foundation">
+// <copyright file="BulkOperationTestEF.cs" company=".NET Foundation">
 //      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
 //      See License.txt in the project root for license information.
 // </copyright>
 //------------------------------------------------------------------------------
 
-using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
+namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    public class BulkInsertTestEF : WebHostTestBase
+    public class BulkOperationTestEF : WebHostTestBase
     {
-        public BulkInsertTestEF(WebHostTestFixture fixture)
-            :base(fixture)
-        {            
+        public BulkOperationTestEF(WebHostTestFixture fixture)
+            : base(fixture)
+        {
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesControllerEF), typeof(MetadataController) };
             configuration.AddControllers(controllers);
-            
+
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("convention", "convention", BulkInsertEdmModel.GetConventionModel(configuration));
-            configuration.MapODataServiceRoute("explicit", "explicit", BulkInsertEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());            
+            configuration.MapODataServiceRoute("convention", "convention", BulkOperationEdmModel.GetConventionModel(configuration));
+            configuration.MapODataServiceRoute("explicit", "explicit", BulkOperationEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.EnsureInitialized();
-            
+
         }
 
 
@@ -68,11 +63,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();                
+                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("Sql", json.ToString());
             }
-                       
         }
 
         [Fact]
@@ -99,22 +93,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("SqlFU", json.ToString());
             }
-
         }
 
         [Fact]
         public async Task PatchEmployee_WithUpdates_Employees()
         {
             //Arrange
-            
+
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
                                 },
-                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':2,'Name':'Employee2',
+                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':2,'Name':'Employee2',
                             'Friends@odata.delta':[{'Id':3,'Name':'Friend3',
                             'Orders@odata.delta' :[{'Id':3,'Price': 30}, {'Id':4,'Price': 40} ]},{'Id':4,'Name':'Friend4'}]
                                 }]
@@ -123,7 +116,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             requestForPost.Headers.Add("OData-Version", "4.01");
             requestForPost.Headers.Add("OData-MaxVersion", "4.01");
-            
+
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
@@ -141,7 +134,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Contains("Employee1", json);
                 Assert.Contains("Employee2", json);
             }
-
         }
 
         [Fact]
@@ -151,11 +143,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
                                 },
-                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':2,'Name':'Employee2',
+                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':2,'Name':'Employee2',
                             'Friends@odata.delta':[{'Id':3,'Name':'Friend3',
                             'Orders@odata.delta' :[{'Id':3,'Price': 30}, {'Id':4,'Price': 40} ]},{'Id':4,'Name':'Friend4'}]
                                 }]
@@ -182,15 +174,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Contains("Employee1", json);
                 Assert.Contains("Employee2", json);
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithDelete()
         {
             //Arrange
-            
+
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
@@ -210,10 +200,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("Sql", json);
             }
-           
-  
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithAddUpdateAndDelete()
@@ -239,15 +226,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlUD", json);
             }
-
         }
-
 
         [Fact]
         public async Task PatchEmployee_WithMultipleUpdatesinOrder1()
         {
             //Arrange
-            
+
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
@@ -264,17 +249,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var json = response.Content.ReadAsStringAsync().Result;                
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlMU", json);
             }
-
         }
 
         [Fact]
         public async Task PatchEmployee_WithMultipleUpdatesinOrder2()
         {
             //Arrange
-            
+
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
@@ -294,11 +278,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Contains("SqlMU1", json);
             }
-                        
         }
 
-
         #endregion
-
     }
 }

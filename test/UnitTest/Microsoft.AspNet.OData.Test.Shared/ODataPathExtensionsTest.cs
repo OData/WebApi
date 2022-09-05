@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
-        public void GetKeys_PathWithNoSegmentReturnsNull()
+        public void GetKeys_PathWithNoSegmentReturnsEmptyCollection()
         {
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
@@ -56,11 +56,11 @@ namespace Microsoft.AspNet.OData.Test
             Dictionary<string, object> keys = path.GetKeys();
 
             // Assert
-            Assert.Null(keys);
+            Assert.Empty(keys);
         }
 
         [Fact]
-        public void GetKeys_PathWithNoKeySegmentReturnsNull()
+        public void GetKeys_PathWithNoKeySegmentReturnsEmptyCollection()
         {
             // Arrange
             ODataPath path = new ODataPath(new ODataPathSegment[]
@@ -73,7 +73,7 @@ namespace Microsoft.AspNet.OData.Test
             Dictionary<string, object> keys = path.GetKeys();
 
             // Assert
-            Assert.Null(keys);
+            Assert.Empty(keys);
         }
 
         [Fact]

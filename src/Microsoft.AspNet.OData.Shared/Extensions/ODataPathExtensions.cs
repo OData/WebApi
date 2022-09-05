@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
@@ -23,33 +24,30 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>Dictionary of keys.</returns>
         internal static Dictionary<string, object> GetKeys(this ODataPath path)
         {
+            Dictionary<string, object> keys = new Dictionary<string, object>();
+
             if (path == null)
             {
                 throw Error.ArgumentNull(nameof(path));
             }
 
+            if (path.Count == 0)
+            {
+                return keys;
+            }
+
             List<ODataPathSegment> pathSegments = path.AsList();
 
-            if (pathSegments.Count == 0)
+            KeySegment keySegment = pathSegments.OfType<KeySegment>().LastOrDefault();
+
+            if (keySegment == null)
             {
-                return null;
+                return keys;
             }
 
-            int position = path.Count - 1;
+            keys = ODataPathHelper.KeySegmentAsDictionary(keySegment);
 
-            while (position >= 0 && !(pathSegments[position] is KeySegment))
-            {
-                position--;
-            }
-
-            if (position >= 0 && pathSegments[position] is KeySegment keySegment)
-            {
-                return ODataPathHelper.KeySegmentAsDictionary(keySegment);
-            }
-            else
-            {
-                return null;
-            }
+            return keys;
         }
 
         /// <summary>
@@ -80,12 +78,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 --position;
             }
 
-            if (position < 0)
-            {
-                return null;
-            }
-
-            return pathSegments[position];
+            return position < 0 ? null : pathSegments[position];
         }
 
         /// <summary>

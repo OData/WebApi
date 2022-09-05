@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Common
     /// <summary>
     /// Helper methods for <see cref="ODataPath"/>.
     /// </summary>
-    public static class ODataPathHelper
+    internal static class ODataPathHelper
     {
         /// <summary>
         /// Get the keys from a <see cref="KeySegment"/>.

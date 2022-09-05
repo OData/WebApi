@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.OData.Test
         [Fact]
         public void GetLastNonTypeNonKeySegment_TypeSegmentAsLastSegmentReturnsCorrectSegment()
         {
-            // If the path is Customers(1)/Friends(1001)/Ns.UniqueFriend where Ns.UniqueFriend is a type segment
+            // If the path is Customers(1)/Friends(1001)/Ns.UniquePerson where Ns.UniquePerson is a type segment
             // and 1001 is a KeySegment,
             // GetLastNonTypeNonKeySegment() should return Friends NavigationPropertySegment.
 
@@ -165,6 +165,44 @@ namespace Microsoft.AspNet.OData.Test
 
             // Assert
             Assert.True(segment is EntitySetSegment);
+        }
+
+        [Fact]
+        public void GetLastNonTypeNonKeySegment_SingleKeySegmentPathReturnsNull()
+        {
+            // If the path is /1,
+            // GetLastNonTypeNonKeySegment() should return null since this is a KeySegment.
+
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+                new KeySegment(customerKey, model.customerType, model.customerSet)
+            });
+
+            // Act
+            ODataPathSegment segment = path.GetLastNonTypeNonKeySegment();
+
+            // Assert
+            Assert.Null(segment);
+        }
+
+        [Fact]
+        public void GetLastNonTypeNonKeySegment_SingleTypeSegmentPathReturnsNull()
+        {
+            // If the path is /Ns.UniquePerson,
+            // GetLastNonTypeNonKeySegment() should return null since this is a TypeSegment.
+
+            // Arrange
+            ODataPath path = new ODataPath(new ODataPathSegment[]
+            {
+                new TypeSegment(model.uniquePersonType, model.personType, null)
+            });
+
+            // Act
+            ODataPathSegment segment = path.GetLastNonTypeNonKeySegment();
+
+            // Assert
+            Assert.Null(segment);
         }
     }
 }

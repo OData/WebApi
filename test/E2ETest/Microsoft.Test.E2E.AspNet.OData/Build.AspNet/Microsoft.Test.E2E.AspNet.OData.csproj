@@ -47,12 +47,6 @@
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.12.2\lib\net45\Microsoft.OData.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.OData.Core, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.9.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.9.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.OData.Core, Version=7.12.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.12.2\lib\net45\Microsoft.OData.Core.dll</HintPath>
       <Private>True</Private>
@@ -63,10 +57,7 @@
     </Reference>
     <Reference Include="Microsoft.Owin, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.4.2.2\lib\net45\Microsoft.Owin.dll</HintPath>
-	<Reference Include="Microsoft.OData.Edm, Version=7.11.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-		<HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.11.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
-		<Private>True</Private>
-	</Reference>
+    </Reference>
     <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>
@@ -175,24 +166,9 @@
     <Compile Include="..\Aggregation\AggregationTests.cs">
       <Link>Aggregation\AggregationTests.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertDataModel.cs">
-      <Link>BulkOperation\BulkInsertDataModel.cs</Link>
-    </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
-      <Link>BulkOperation\BulkInsertEdmModel.cs</Link>
-    </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertTest.cs">
-      <Link>BulkOperation\BulkInsertTest.cs</Link>
-    </Compile>
-    <Compile Include="..\BulkOperation\BulkInsertController.cs">
-      <Link>BulkOperation\BulkInsertController.cs</Link>
-    </Compile>
     <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
       <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
     </Compile>
-	<Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
-		<Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
-	</Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
     </Compile>

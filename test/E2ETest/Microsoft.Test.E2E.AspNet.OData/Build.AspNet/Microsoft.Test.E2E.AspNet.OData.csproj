@@ -169,6 +169,18 @@
     <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
       <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
     </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationDataModel.cs">
+      <Link>BulkOperation\BulkOperationDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationEdmModel.cs">
+      <Link>BulkOperation\BulkOperationEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationController.cs">
+      <Link>BulkOperation\BulkOperationController.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+    </Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
     </Compile>

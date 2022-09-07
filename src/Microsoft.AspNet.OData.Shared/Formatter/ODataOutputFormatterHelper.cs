@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.OData.Formatter
             ODataPayloadKind? payloadKind;
 
             Type elementType;
-            if (typeof(IEdmObject).IsAssignableFrom(type) ||
+            if (typeof(IDeltaSet).IsAssignableFrom(type) || typeof(IEdmObject).IsAssignableFrom(type) ||
                 (TypeHelper.IsCollection(type, out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
             {
                 payloadKind = GetEdmObjectPayloadKind(type, internalRequest);
@@ -156,7 +156,16 @@ namespace Microsoft.AspNet.OData.Formatter
 
             ODataMessageWriterSettings writerSettings = internalRequest.WriterSettings;
             writerSettings.BaseUri = baseAddress;
-            writerSettings.Version = version;
+
+            if (serializer.ODataPayloadKind == ODataPayloadKind.Delta)
+            {
+                writerSettings.Version = ODataVersion.V401;
+            }
+            else
+            {
+                writerSettings.Version = version;
+            }
+
             writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
             string metadataLink = internaUrlHelper.CreateODataLink(MetadataSegment.Instance);
@@ -207,6 +216,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
                 writeContext.QueryOptions = internalRequest.Context.QueryOptions;
+                writeContext.Type = type;
 
                 //Set the SelectExpandClause on the context if it was explicitly specified.
                 if (selectExpandDifferentFromQueryOptions != null)
@@ -251,7 +261,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 {
                     return ODataPayloadKind.ResourceSet;
                 }
-                else if (typeof(IEdmChangedObject).IsAssignableFrom(elementType))
+                else if (typeof(IDeltaSetItem).IsAssignableFrom(elementType) || typeof(IEdmChangedObject).IsAssignableFrom(elementType))
                 {
                     return ODataPayloadKind.Delta;
                 }

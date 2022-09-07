@@ -149,6 +149,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\VersionTestHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DecimalTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableNestedPathsTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DeltaSetOfTTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\CollectionDeserializationHelpersTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataActionPayloadDeserializerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializationTestsCommon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataEntityReferenceLinkTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataModelBinderConverterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataEnumTypeSerializerTests.cs" />
@@ -226,6 +228,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataFormatterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataMediaTypeFormatterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\PrimitiveTypesTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataPathHelperTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PublicApi\PublicApiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PublicApi\PublicApiTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Controllers\CustomerControllers.cs" />
@@ -332,6 +336,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataVersionConstraintTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CustomersModelWithInheritance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\Models\SampleEdmModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\TestControllerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\ODataModelBuilderMocks.cs" />

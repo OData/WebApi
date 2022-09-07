@@ -44,5 +44,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Gets the nested items that are part of this nested resource info.
         /// </summary>
         public IList<ODataItemBase> NestedItems { get; private set; }
+
     }
 }

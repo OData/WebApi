@@ -57,6 +57,9 @@
     </Reference>
     <Reference Include="Microsoft.Owin, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.4.2.2\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Host.HttpListener, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -162,6 +165,21 @@
     </Compile>
     <Compile Include="..\Aggregation\AggregationTests.cs">
       <Link>Aggregation\AggregationTests.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationDataModel.cs">
+      <Link>BulkOperation\BulkOperationDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationEdmModel.cs">
+      <Link>BulkOperation\BulkOperationEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationController.cs">
+      <Link>BulkOperation\BulkOperationController.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
     </Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>

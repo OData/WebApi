@@ -17,8 +17,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     [NonValidatingParameterBinding]
     public class EdmDeltaEntityObject : EdmEntityObject, IEdmChangedObject
-    {
-        private EdmDeltaType _edmType;
+    {        
         private IEdmNavigationSource _navigationSource;
 
         /// <summary>
@@ -47,16 +46,15 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaEntityObject(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.Entry);
+            
         }
 
         /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
+        public override EdmDeltaEntityKind DeltaKind
         {
             get
             {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
+                return EdmDeltaEntityKind.Entry;
             }
         }
 

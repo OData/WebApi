@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// The odata id container. It will be used by POCO objects as well as Delta{TStructuralType}.
     /// </summary>
-    internal class ODataIdContainer
+    public class ODataIdContainer
     {
         /// <summary>
         /// Gets or set the odata id path string.

@@ -175,15 +175,13 @@ namespace Microsoft.AspNet.OData
         public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
 
         /// <inheritdoc />
-        internal ODataIdContainer ODataIdContainer { get; set; }
+        public ODataIdContainer ODataIdContainer { get; set; }
 
         /// <inheritdoc />
         public ODataPath ODataPath { get; set; }
 
         /// <inheritdoc />
         internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
-
-        ODataIdContainer IDeltaSetItem.ODataIdContainer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         /// <inheritdoc/>
         public override void Clear()

@@ -268,6 +268,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	EdmDeltaEntityKind DeltaKind  { public virtual get; protected set; }
 	System.Type ExpectedClrType  { public virtual get; }
 	bool IsComplexType  { public get; }
+	ODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.ODataPath ODataPath  { public virtual get; public virtual set; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
@@ -520,6 +521,12 @@ public class Microsoft.AspNet.OData.ODataFormattingAttribute : System.Attribute,
 
 	public virtual System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatter]] CreateODataFormatters ()
 	public virtual void Initialize (System.Web.Http.Controllers.HttpControllerSettings controllerSettings, System.Web.Http.Controllers.HttpControllerDescriptor controllerDescriptor)
+}
+
+public class Microsoft.AspNet.OData.ODataIdContainer {
+	public ODataIdContainer ()
+
+	string ODataId  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Http.DelegatingHandler, IDisposable {
@@ -1254,16 +1261,16 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 OrderBy (QueryOptionSetting setting, string[] properties)
 	public StructuralTypeConfiguration`1 Page ()
 	public StructuralTypeConfiguration`1 Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)

@@ -283,6 +283,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	EdmDeltaEntityKind DeltaKind  { public virtual get; protected set; }
 	System.Type ExpectedClrType  { public virtual get; }
 	bool IsComplexType  { public get; }
+	ODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.ODataPath ODataPath  { public virtual get; public virtual set; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
@@ -573,6 +574,12 @@ AttributeUsageAttribute(),
 ]
 public class Microsoft.AspNet.OData.ODataFormattingAttribute : System.Attribute {
 	public ODataFormattingAttribute ()
+}
+
+public class Microsoft.AspNet.OData.ODataIdContainer {
+	public ODataIdContainer ()
+
+	string ODataId  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : IFilterMetadata, IResultFilter {

@@ -559,7 +559,7 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        throw Error.InvalidOperation(SRResources.CannotCreateInstanceForProperty);
+                        throw Error.InvalidOperation(SRResources.ElementClrTypeNull);
                     }
 
                     //Here we get all the properties of common base type and get value from original complex type(T) and 

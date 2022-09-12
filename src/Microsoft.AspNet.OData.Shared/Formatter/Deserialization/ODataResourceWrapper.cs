@@ -5,7 +5,9 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
@@ -19,15 +21,22 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Initializes a new instance of <see cref="ODataResourceWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataResourceWrapper(ODataResource item)
+        public ODataResourceWrapper(ODataResourceBase item)
             : base(item)
         {
             NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
+            ResourceBase = item;
         }
 
         /// <summary>
-        /// Gets the wrapped <see cref="ODataResource"/>.
+        /// Gets the wrapped <see cref="ODataResourceBase"/>.
         /// </summary>
+        public ODataResourceBase ResourceBase { get; }
+
+        /// <summary>
+        /// Gets the wrapped <see cref="ODataResource"/>. This will return null for deleted resources.
+        /// </summary>
+        [Obsolete("Please use ResourceBase instead")]
         public ODataResource Resource
         {
             get

@@ -90,7 +90,9 @@ namespace Microsoft.AspNet.OData.Test
             HttpResponseMessage response = await _client.GetAsync(url);
 
             var stream = await response.Content.ReadAsStreamAsync();
-            IEnumerable<EnableNestedPathsCustomer> readCustomers = ReadCollectionResponse<EnableNestedPathsCustomer>(stream, _model);
+            var entitySet = _model.EntityContainer.FindEntitySet("EnableNestedPathsCustomers");
+            var path = new ODataPath(new EntitySetSegment(entitySet));
+            IEnumerable<EnableNestedPathsCustomer> readCustomers = ReadCollectionResponse<EnableNestedPathsCustomer>(stream, _model, path);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -223,30 +225,11 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task EnableNestedPaths_AppliedBeforeEnableQuery()
-        {
-            // Arrange
-            string url = $"{_baseUrl}EnableNestedPathsCustomers(1)/Products?$orderby=Id desc";
-
-            // Act
-            HttpResponseMessage response = await _client.GetAsync(url);
-
-            var stream = await response.Content.ReadAsStreamAsync();
-            var readCustomer = ReadCollectionResponse<EnableNestedPathsProduct>(stream, _model);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(_db.Customers.First().Products.OrderByDescending(p => p.Id).ToList(),
-                readCustomer,
-                new EnableNestedPathsProductComparer());
-        }
-
-        private IEnumerable<T> ReadCollectionResponse<T>(Stream stream, IEdmModel model)
+        private IEnumerable<T> ReadCollectionResponse<T>(Stream stream, IEdmModel model, ODataPath path)
         {
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
-            ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
+            ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model, Path = path };
             IEnumerable readEntities = _resourceSetDeserializer.Read(messageReader, typeof(T[]), readContext) as IEnumerable;
             return readEntities.Cast<T>();
         }
@@ -255,7 +238,8 @@ namespace Microsoft.AspNet.OData.Test
         {
             ODataMessageWrapper message = new ODataMessageWrapper(stream);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
-            ODataDeserializerContext readContext = new ODataDeserializerContext() {
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
                 Path = path,
                 Model = model,
                 ResourceType = typeof(T)

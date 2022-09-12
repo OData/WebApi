@@ -566,5 +566,16 @@ namespace Microsoft.AspNet.OData
 
             return null; // In actual sense unreachable
         }
+
+        /// <summary>
+        /// Helper method to check whether a given type has a default constructor.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <returns>true if the  type has a default constructor; otherwise returns false.</returns>
+        internal static bool HasDefaultConstructor(Type type)
+        {
+            return (!type.IsClass) || (!type.IsAbstract) || type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                .Any(x => x.GetParameters().Length == 0);
+        }
     }
 }

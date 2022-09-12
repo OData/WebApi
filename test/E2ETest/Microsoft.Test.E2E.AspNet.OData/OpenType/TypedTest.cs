@@ -40,7 +40,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
         string expectedValueOfString, actualValueOfString;
 
         public TypedOpenTypeTest(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -483,10 +483,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsObject<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
+                Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties.
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
-              
+
                 Assert.Equal("US", content["CountryOrRegion"]);
                 Assert.Equal("2016-02-01", content["OtherProperty"]);
             }

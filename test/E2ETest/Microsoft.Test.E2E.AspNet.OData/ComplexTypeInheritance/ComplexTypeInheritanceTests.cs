@@ -25,7 +25,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
     public class ComplexTypeInheritanceTests : WebHostTestBase
     {
         public ComplexTypeInheritanceTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
         }
 
-        public static TheoryDataSet<string, string, string,bool> PostToCollectionNewComplexTypeMembers
+        public static TheoryDataSet<string, string, string, bool> PostToCollectionNewComplexTypeMembers
         {
             get
             {
@@ -82,12 +82,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 
                 TheoryDataSet<string, string, string, bool> data = new TheoryDataSet<string, string, string, bool>();
 
-                foreach(string mode in modes)
+                foreach (string mode in modes)
                 {
-                    foreach(string obj in objects)
+                    foreach (string obj in objects)
                     {
-                        foreach(string target in targets)
-                            foreach(bool representation in representations)
+                        foreach (string target in targets)
+                            foreach (bool representation in representations)
                             {
                                 data.Add(mode, obj, target, representation);
                             }
@@ -302,7 +302,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         'Center':{'X':1,'Y':2},
         'HasBorder':true
     },
-    'OptionalShapes': [ ]
+    'OptionalShapes': [
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
+        'Radius':1,
+        'Center':{'X':1,'Y':2},
+        'HasBorder':true
+    }]
 }";
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             request.Content = stringContent;
@@ -324,7 +330,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
 
             JArray windows = contentOfJObject["OptionalShapes"] as JArray;
-            Assert.True(0 == windows.Count,
+            Assert.True(1 == windows.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}", 1, windows.Count, requestUri, contentOfString));
         }
 
@@ -373,9 +379,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 
             // Attempt to PATCH nested resource with delta object of the different CLR type
             // will result an error.
-            
 
-           var content = @"
+            var content = @"
     {
         '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',
         'Radius':2,
@@ -390,7 +395,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             Assert.Equal(2, (int)contentOfJObject["Radius"]);
             Assert.True(HttpStatusCode.OK == response.StatusCode);
         }
-
 
         [Theory]
         [InlineData("convention")]
@@ -629,7 +633,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         {
             //Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
-            string requestUri = serviceRootUri + "/Windows(3)/"+ targetPropertyResource;
+            string requestUri = serviceRootUri + "/Windows(3)/" + targetPropertyResource;
 
             //send a get request to get the current count
             int count = 0;
@@ -644,7 +648,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 
             //Set up the post request
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            requestForPost.Content = new StringContent(content:jObject, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = new StringContent(content: jObject, encoding: Encoding.UTF8, mediaType: "application/json");
             if (returnRepresentation)
             {
                 requestForPost.Headers.Add("Prefer", "return=representation");
@@ -654,11 +658,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             HttpResponseMessage response = await Client.SendAsync(requestForPost);
             string contentOfString = await response.Content.ReadAsStringAsync();
 
-            if(returnRepresentation)
+            if (returnRepresentation)
             {
                 JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
                 var result = contentOfJObject.GetValue("value") as JArray;
-            
+
                 Assert.True(count + 1 == result.Count,
                     String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
                     HttpStatusCode.NoContent,

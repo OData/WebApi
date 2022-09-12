@@ -358,7 +358,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
-            
+
             Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V422", result.MyEngine["@odata.type"].ToString());
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }
@@ -635,7 +635,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             vehConfig.ComplexProperty(m => m.MyEngine);
             vehConfig.ComplexProperty(m => m.MyV4Engine);
             builder.ComplexType<Engine>().ComplexProperty(m => m.Transmission).IsOptional();
-                     
+
             builder.ComplexType<Engine>().Property(m => m.Hp);
             builder.ComplexType<Transmission>().Property(m => m.Gears);
             builder.ComplexType<Automatic>().DerivesFrom<Transmission>();
@@ -648,7 +648,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             builder.ComplexType<V42>().Property(m => m.Model);
             builder.ComplexType<V42>().DerivesFrom<V4>();
             builder.ComplexType<V422>().DerivesFrom<V42>();
-            
+
             builder
                 .EntityType<Car>()
                 .DerivesFrom<Vehicle>()
@@ -721,9 +721,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
     public class InheritanceController : ODataController
     {
-        private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true, MyEngine=new V2 { Hp = 2000 }, MyV4Engine = new V4() };
+        private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true, MyEngine = new V2 { Hp = 2000 }, MyV4Engine = new V4() };
         private Motorcycle motorcycle1 = new Motorcycle { Model = 2009, Name = "sample motorcycle1", CanDoAWheelie = true, MyEngine = new V2 { Hp = 2000 }, MyV4Engine = new V422() };
-        private Motorcycle motorcycle2 = new Motorcycle { Model = 2009, Name = "sample motorcycle2", CanDoAWheelie = true, MyEngine = new V42 { Hp = 2000, Transmission= new Automatic { Gears = 4 } }, MyV4Engine = new V422() };
+        private Motorcycle motorcycle2 = new Motorcycle { Model = 2009, Name = "sample motorcycle2", CanDoAWheelie = true, MyEngine = new V42 { Hp = 2000, Transmission = new Automatic { Gears = 4 } }, MyV4Engine = new V422() };
 
         private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };
         private SportBike sportBike = new SportBike { Model = 2009, Name = "sample sportsbike", CanDoAWheelie = true, SportBikeProperty_NotVisible = 100 };
@@ -748,7 +748,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return new Vehicle[] { motorcycle, car, sportBike };
         }
 
-        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle([FromBody]Motorcycle motorcycle)
+        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle([FromBody] Motorcycle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;
@@ -763,9 +763,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine(Delta<Motorcycle> patch)
         {
             patch.Patch(motorcycle);
-            
+
             var engine = motorcycle.MyEngine as V4;
-            
+
             Assert.NotNull(engine);
             Assert.Equal(4000, engine.Hp);
 
@@ -784,7 +784,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
         public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine2(Delta<Motorcycle> patch)
         {
-            
             patch.Patch(motorcycle1);
 
             var engine = motorcycle1.MyEngine as V4;
@@ -805,7 +804,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             patch.Patch(motorcycle2);
 
             Engine engine = motorcycle2.MyEngine;
-            
+
 
             Assert.NotNull(engine);
             Assert.Equal(6000, engine.Hp);
@@ -824,7 +823,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return motorcycle;
         }
 
-        public Vehicle PostMotorcycle_When_Expecting_Vehicle([FromBody]Vehicle motorcycle)
+        public Vehicle PostMotorcycle_When_Expecting_Vehicle([FromBody] Vehicle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;

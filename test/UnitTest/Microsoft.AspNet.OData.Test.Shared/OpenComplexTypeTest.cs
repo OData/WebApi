@@ -396,7 +396,7 @@ namespace Microsoft.AspNet.OData.Test
             return Ok(address);
         }
 
-        public ITestActionResult PostOpenCustomer([FromBody]OpenCustomer customer)
+        public ITestActionResult PostOpenCustomer([FromBody] OpenCustomer customer)
         {
             // Verify there is a string dynamic property
             object countryValue;
@@ -469,19 +469,19 @@ namespace Microsoft.AspNet.OData.Test
             OpenAddress origin = customer.Address;
             VerifyOriginAddress(key, origin);
 
-            address.Patch(origin); // Do patch
+            var updatedAddress = address.Patch(origin); // Do patch
 
             // Verify the patched address
-            Assert.Equal("UpdatedStreet", origin.Street);
-            Assert.Equal("City " + key, origin.City); // not changed
-            Assert.NotNull(origin.DynamicProperties);
+            Assert.Equal("UpdatedStreet", updatedAddress.Street);
+            Assert.Equal("City " + key, updatedAddress.City); // not changed
+            Assert.NotNull(updatedAddress.DynamicProperties);
 
-            Assert.True(origin.DynamicProperties.Count >= 3); // Including the origin dynamic properties
+            Assert.True(updatedAddress.DynamicProperties.Count >= 3); // Including the origin dynamic properties
 
-            KeyValuePair<string, object> dynamicPropertyBirthDay = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
+            KeyValuePair<string, object> dynamicPropertyBirthDay = updatedAddress.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
             Assert.Equal(new Date(2016, 1, 29), dynamicPropertyBirthDay.Value);
 
-            string dynamicPropertyToken = origin.DynamicProperties.FirstOrDefault(e => e.Key == "Token")
+            string dynamicPropertyToken = updatedAddress.DynamicProperties.FirstOrDefault(e => e.Key == "Token")
                 .Value.ToString().ToUpperInvariant();
 
             switch (dynamicPropertyToken)
@@ -511,26 +511,26 @@ namespace Microsoft.AspNet.OData.Test
                     Assert.True(address.GetChangedPropertyNames().Count() == 3);
 
                     // --- LineA ---
-                    Assert.NotNull(origin.LineA);
-                    Assert.Equal("DescriptionA", origin.LineA.Description);
+                    Assert.NotNull(updatedAddress.LineA);
+                    Assert.Equal("DescriptionA", updatedAddress.LineA.Description);
 
                     // LineA.Fee is left as uninitialized.
-                    Assert.Equal(LineDetails.UninitializedValue_Fee, origin.LineA.Fee);
+                    Assert.Equal(LineDetails.UninitializedValue_Fee, updatedAddress.LineA.Fee);
 
-                    Assert.NotNull(origin.LineA.PhoneInfo);
-                    Assert.Equal("ContactNameA", origin.LineA.PhoneInfo.ContactName);
-                    Assert.Equal(7654321, origin.LineA.PhoneInfo.PhoneNumber);
+                    Assert.NotNull(updatedAddress.LineA.PhoneInfo);
+                    Assert.Equal("ContactNameA", updatedAddress.LineA.PhoneInfo.ContactName);
+                    Assert.Equal(7654321, updatedAddress.LineA.PhoneInfo.PhoneNumber);
 
                     // --- LineB ---
-                    Assert.NotNull(origin.LineB);
-                    Assert.Null(origin.LineB.Description);
+                    Assert.NotNull(updatedAddress.LineB);
+                    Assert.Null(updatedAddress.LineB.Description);
 
                     // LineB.Fee is originally initialized for OpenAddress is created for each customer.
-                    Assert.Equal(LineDetails.DefaultValue_Fee, origin.LineB.Fee);
+                    Assert.Equal(LineDetails.DefaultValue_Fee, updatedAddress.LineB.Fee);
 
-                    Assert.NotNull(origin.LineB.PhoneInfo);
-                    Assert.Equal("ContactNameB", origin.LineB.PhoneInfo.ContactName);
-                    Assert.Equal(0, origin.LineB.PhoneInfo.PhoneNumber);
+                    Assert.NotNull(updatedAddress.LineB.PhoneInfo);
+                    Assert.Equal("ContactNameB", updatedAddress.LineB.PhoneInfo.ContactName);
+                    Assert.Equal(0, updatedAddress.LineB.PhoneInfo.PhoneNumber);
                     break;
 
                 case "2D071BD4-E4FB-4639-8024-BBC173850441":
@@ -538,26 +538,26 @@ namespace Microsoft.AspNet.OData.Test
                     Assert.True(address.GetChangedPropertyNames().Count() == 2);
 
                     // --- LineA ---
-                    Assert.NotNull(origin.LineA);
-                    Assert.Equal("LineDetailsWithNewDeepSubNode.", origin.LineA.Description);
-                    Assert.Equal(LineDetails.UninitializedValue_Fee, origin.LineA.Fee);
+                    Assert.NotNull(updatedAddress.LineA);
+                    Assert.Equal("LineDetailsWithNewDeepSubNode.", updatedAddress.LineA.Description);
+                    Assert.Equal(LineDetails.UninitializedValue_Fee, updatedAddress.LineA.Fee);
 
-                    Assert.NotNull(origin.LineA.PhoneInfo);
-                    Assert.Equal("ContactNameA", origin.LineA.PhoneInfo.ContactName);
-                    Assert.Equal(0, origin.LineA.PhoneInfo.PhoneNumber);
+                    Assert.NotNull(updatedAddress.LineA.PhoneInfo);
+                    Assert.Equal("ContactNameA", updatedAddress.LineA.PhoneInfo.ContactName);
+                    Assert.Equal(0, updatedAddress.LineA.PhoneInfo.PhoneNumber);
 
-                    Assert.NotNull(origin.LineA.PhoneInfo.Spec);
-                    Assert.Null(origin.LineA.PhoneInfo.Spec.Make);
-                    Assert.Equal(6, origin.LineA.PhoneInfo.Spec.ScreenSize);
+                    Assert.NotNull(updatedAddress.LineA.PhoneInfo.Spec);
+                    Assert.Null(updatedAddress.LineA.PhoneInfo.Spec.Make);
+                    Assert.Equal(6, updatedAddress.LineA.PhoneInfo.Spec.ScreenSize);
 
                     // --- LineB ---
-                    Assert.NotNull(origin.LineB);
+                    Assert.NotNull(updatedAddress.LineB);
                     break;
 
                 case "250EFC6E-8FA4-4B68-951C-F1E26DE09D1D":
-                    Assert.True(origin.DynamicProperties.ContainsKey("Telephone"));
+                    Assert.True(updatedAddress.DynamicProperties.ContainsKey("Telephone"));
                     // Telephone dynamic property
-                    Phone telephone = origin.DynamicProperties["Telephone"] as Phone;
+                    Phone telephone = updatedAddress.DynamicProperties["Telephone"] as Phone;
                     Assert.NotNull(telephone);
                     Assert.Equal("ContactNameX", telephone.ContactName);
                     Assert.Equal(13, telephone.PhoneNumber);
@@ -568,9 +568,9 @@ namespace Microsoft.AspNet.OData.Test
                     break;
 
                 case "40CEEEDE-031C-45CB-9E44-E6017D635814":
-                    Assert.True(origin.DynamicProperties.ContainsKey("Building"));
+                    Assert.True(updatedAddress.DynamicProperties.ContainsKey("Building"));
                     // Building dynamic property
-                    Building building = origin.DynamicProperties["Building"] as Building;
+                    Building building = updatedAddress.DynamicProperties["Building"] as Building;
                     Assert.NotNull(building);
                     Assert.Equal("BuildingNameY", building.BuildingName);
 

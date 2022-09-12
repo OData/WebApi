@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // <copyright file="DeltaTests.cs" company=".NET Foundation">
-//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved.
 //      See License.txt in the project root for license information.
 // </copyright>
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -204,7 +205,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
     public abstract class DeltaTests : ODataFormatterTestBase
     {
         public DeltaTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -335,7 +336,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
     public class PutDeltaOfTTests : WebHostTestBase
     {
         public PutDeltaOfTTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -355,7 +356,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [Fact]
-        public async Task PutShouldntOverrideNavigationProperties()
+        //Changing the test from shouldnt to should as it override navigation properties with bulk operations
+        public async Task PutShouldOverrideNavigationProperties()
         {
             string putUri = BaseAddress + "/odata/DeltaCustomers(5)";
             ExpandoObject data = new ExpandoObject();
@@ -366,14 +368,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(3, query.Orders.Count);
+            Assert.Equal(0, query.Orders.Count);
         }
     }
 
     public class PatchtDeltaOfTTests : WebHostTestBase
     {
+        static IEdmModel model;
         public PatchtDeltaOfTTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -389,15 +392,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<DeltaCustomer>("DeltaCustomers");
             builder.EntitySet<DeltaOrder>("DeltaOrders");
-            return builder.GetEdmModel();
+            model = builder.GetEdmModel();
+            return model;
         }
+
 
         [Fact]
         public async Task PatchShouldSupportNonSettableCollectionProperties()
         {
+            var changedEntity = new EdmDeltaEntityObject(model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.Formatter.DeltaCustomer") as IEdmEntityType);
+            changedEntity.TrySetPropertyValue("Id", 1);
+            changedEntity.TrySetPropertyValue("FathersAge", 3);
+
             HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers(6)");
-            dynamic data = new ExpandoObject();
-            data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+            var data = new ExpandoObject() as IDictionary<string, object>;
+
+            foreach (var prop in changedEntity.GetChangedPropertyNames())
+            {
+                object val;
+                if (changedEntity.TryGetPropertyValue(prop, out val))
+                {
+                    data.Add(prop, val);
+                }
+
+            }
+
             string content = JsonConvert.SerializeObject(data);
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -405,35 +424,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
             Assert.True(response.IsSuccessStatusCode);
 
-            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(1)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(3, query.Addresses.Count);
+            Assert.Equal(2, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
 
         [Fact]
         public async Task PatchShouldSupportComplexDerivedTypeTransform()
         {
-            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers(7)");
             dynamic data = new ExpandoObject();
-            data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
-             
+            data.MyAddress = new PersonalAddress { Street = "abc" };
+
             string content = JsonConvert.SerializeObject(data);
-            content = @"{'MyAddress':{'@odata.type': 'Microsoft.Test.E2E.AspNet.OData.Formatter.PersonalAddress','Street': 'abc'}}";
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(patch);
 
             Assert.True(response.IsSuccessStatusCode);
 
-            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(7)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal("abc", query.MyAddress.Street.ToString());            
+            Assert.Equal("abc", query.MyAddress.Street.ToString());
         }
+
     }
 
     public class DeltaCustomersController : TestODataController
@@ -450,12 +469,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             customer.Id = 5;
             customers.Add(customer);
 
-            customer = new DeltaCustomer("Original name",
+            var customer1 = new DeltaCustomer("Original name",
                 Enumerable.Range(0, 2).Select(i => new DeltaAddress { ZipCode = i }),
                 Enumerable.Range(0, 3).Select(i => new DeltaOrder { Details = i.ToString() }));
-            customer.Id = 6;
-            customer.MyAddress = new OfficeAddress { Street = "Microsot" };
-            customers.Add(customer);
+            customer1.Id = 6;
+            customer1.MyAddress = new OfficeAddress { Street = "Microsot" };
+            customers.Add(customer1);
+
+            var customer2 = new DeltaCustomer("Original name",
+              Enumerable.Range(0, 2).Select(i => new DeltaAddress { ZipCode = i }),
+              Enumerable.Range(0, 3).Select(i => new DeltaOrder { Details = i.ToString() }));
+            customer2.Id = 7;
+            customer2.MyAddress = new OfficeAddress { Street = "Microsot" };
+            customers.Add(customer2);
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
@@ -479,6 +505,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             }
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
             entity.Put(customer);
+
             return Ok(customer);
         }
 
@@ -490,9 +517,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 return BadRequest(ModelState);
             }
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
-            var newCustomer = patch.Patch(customer);
-            Assert.True(newCustomer == customer);
-            return Ok(newCustomer);
+            if (customer == null)
+                return Ok();
+
+            patch.Patch(customer);
+            return Ok(customer);
         }
     }
 
@@ -510,6 +539,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             _addresses = addresses.ToList();
             Orders = orders.ToList();
         }
+
         public int Id { get; set; }
 
         private string _name = null;
@@ -540,7 +570,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         public string Street { get; set; }
     }
 
-    public class OfficeAddress: Address
+    public class OfficeAddress : Address
     {
 
     }

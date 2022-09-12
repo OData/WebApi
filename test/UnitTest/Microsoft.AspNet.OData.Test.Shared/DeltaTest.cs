@@ -308,7 +308,7 @@ namespace Microsoft.AspNet.OData.Test
             // modify
             address.City = "Sammamish";
             address.StreetAddress = "23213 NE 15th Ct";
-            
+
             // modify the nested property
             ideltaCustomer.TrySetPropertyValue("Address", address);
             Assert.Single(ideltaCustomer.GetChangedPropertyNames());
@@ -323,7 +323,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("Sammamish", addressEntity.City);
 
             // read the not nested property back using nested API
-            Assert.False(deltaCustomer.TryGetNestedPropertyValue("Address", out dynamic deltaNestedAddress));       
+            Assert.False(deltaCustomer.TryGetNestedPropertyValue("Address", out dynamic deltaNestedAddress));
         }
 
         [Fact]

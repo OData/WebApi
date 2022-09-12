@@ -119,9 +119,34 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             clearMethod.Invoke(collection, _emptyObjectArray);
         }
 
-        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance)
+        /// <summary>
+        /// Creates an instance of a collection object. 
+        /// </summary>
+        /// <param name="collectionType">The type of the collection.</param>
+        /// <param name="edmCollectionType">The <see cref="EdmCollectionTypeReference"/> of the collection.</param>
+        /// <param name="elementType">The <see cref="Type"/> of the collection elements.</param>
+        /// <param name="instance">An instance of the collection.</param>
+        /// <param name="isDelta">true if it is a collection delta; otherwise false.</param>
+        /// <returns>true if the collection instance was successfully created; otherwise false.</returns>
+        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance, bool isDelta = false)
         {
             Contract.Assert(collectionType != null);
+
+            //For Delta Collection requests
+            if (isDelta)
+            {
+                if (elementType == typeof(IEdmEntityObject))
+                {
+                    instance = new EdmChangedObjectCollection(edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType);
+                }
+                else
+                {
+                    Type type = typeof(DeltaSet<>).MakeGenericType(elementType);
+                    instance = Activator.CreateInstance(type, edmCollectionType.ElementType().AsEntity().Key().Select(x => x.Name).ToList()) as ICollection<IDeltaSetItem>;
+                }
+
+                return true;
+            }
 
             if (collectionType == typeof(EdmComplexObjectCollection))
             {

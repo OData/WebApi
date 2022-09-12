@@ -15,15 +15,16 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> for reading OData resource payloads.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public class ODataResourceDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>
@@ -87,7 +88,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("item");
             }
 
-            if (!edmType.IsStructured())
+            IEdmStructuredTypeReference structuredType = edmType.AsStructured();
+
+            if (structuredType == null)
             {
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, "Entity or Complex");
             }
@@ -98,10 +101,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataResource).Name);
             }
 
+            // Create the appropriate nested context
+            ODataDeserializerContext nestedContext = ODataResourceDeserializerHelpers.BuildNestedContextFromCurrentContext(readContext, structuredType.IsEntity() ? ODataResourceDeserializerHelpers.ApplyIdToPath(readContext, resourceWrapper) : readContext.Path);
+
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
-            return ReadResource(resourceWrapper, edmType.AsStructured(), readContext);
+            return ReadResource(resourceWrapper, edmType.AsStructured(), nestedContext);
         }
 
         /// <summary>
@@ -124,7 +130,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            if (!String.IsNullOrEmpty(resourceWrapper.Resource.TypeName) && structuredType.FullName() != resourceWrapper.Resource.TypeName)
+            if (!string.IsNullOrEmpty(resourceWrapper.ResourceBase.TypeName) && structuredType.FullName() != resourceWrapper.ResourceBase.TypeName)
             {
                 // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
                 IEdmModel model = readContext.Model;
@@ -134,20 +140,21 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
                 }
 
-                IEdmStructuredType actualType = model.FindType(resourceWrapper.Resource.TypeName) as IEdmStructuredType;
+                IEdmStructuredType actualType = model.FindType(resourceWrapper.ResourceBase.TypeName) as IEdmStructuredType;
                 if (actualType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.Resource.TypeName));
+                    throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.ResourceBase.TypeName));
                 }
 
                 if (actualType.IsAbstract)
                 {
-                    string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.Resource.TypeName);
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.ResourceBase.TypeName);
                     throw new ODataException(message);
                 }
 
                 IEdmTypeReference actualStructuredType;
                 IEdmEntityType actualEntityType = actualType as IEdmEntityType;
+
                 if (actualEntityType != null)
                 {
                     actualStructuredType = new EdmEntityTypeReference(actualEntityType, isNullable: false);
@@ -178,6 +185,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 object resource = CreateResourceInstance(structuredType, readContext);
                 ApplyResourceProperties(resource, resourceWrapper, structuredType, readContext);
+
+                if (resourceWrapper.ResourceBase is ODataDeletedResource deletedResource)
+                { 
+                    ODataResourceDeserializerHelpers.AppendDeletedProperties(resource, deletedResource, readContext.IsUntyped);
+                }
+
                 return resource;
             }
         }
@@ -210,6 +223,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (structuredType.IsEntity())
                 {
+                    if (readContext.IsDeltaDeletedEntity)
+                    {
+                        return new EdmDeltaDeletedEntityObject(structuredType.AsEntity());
+                    }
+
                     return new EdmEntityObject(structuredType.AsEntity());
                 }
 
@@ -226,20 +244,23 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if (readContext.IsDeltaOfT)
                 {
-                    IEnumerable<string> structuralProperties = structuredType.StructuralProperties()
+                    IEnumerable<string> properties = structuredType.StructuredDefinition().Properties()
                         .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
+
+                    PropertyInfo instanceAnnotationsPropertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(
+                           structuredType.StructuredDefinition(), model);
 
                     if (structuredType.IsOpen())
                     {
                         PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
                             structuredType.StructuredDefinition(), model);
 
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
-                            dynamicDictionaryPropertyInfo, structuredType.IsComplex());
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, properties,
+                            dynamicDictionaryPropertyInfo, structuredType.IsComplex(), instanceAnnotationsPropertyInfo);
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, null, structuredType.IsComplex());
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, properties, null, structuredType.IsComplex(), instanceAnnotationsPropertyInfo);
                     }
                 }
                 else
@@ -301,7 +322,43 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            foreach (ODataItemBase childItem in resourceInfoWrapper.NestedItems)
+            IList<ODataItemBase> nestedItems;
+            ODataEntityReferenceLinkBase[] referenceLinks = resourceInfoWrapper.NestedItems.OfType<ODataEntityReferenceLinkBase>().ToArray();
+
+            if (referenceLinks.Length > 0)
+            {
+                // Be noted:
+                // 1) OData v4.0, it's "Orders@odata.bind", and we get "ODataEntityReferenceLinkWrapper"(s) for that.
+                // 2) OData v4.01, it's {"odata.id" ...}, and we get "ODataResource"(s) for that.
+                // So, in OData v4, if it's a single, NestedItems contains one ODataEntityReferenceLinkWrapper,
+                // if it's a collection, NestedItems contains multiple ODataEntityReferenceLinkWrapper(s)
+                // We can use the following code to adjust the `ODataEntityReferenceLinkWrapper` to `ODataResourceWrapper`.
+                // In OData v4.01, we will not be here.
+                // Only supports declared property
+                Contract.Assert(edmProperty != null);
+
+                nestedItems = new List<ODataItemBase>();
+
+                if (edmProperty.Type.IsCollection())
+                {
+                    IEdmCollectionTypeReference edmCollectionTypeReference = edmProperty.Type.AsCollection();
+                    ODataResourceSetWrapper resourceSetWrapper = CreateResourceSetWrapper(edmCollectionTypeReference, referenceLinks, readContext);
+                    nestedItems.Add(resourceSetWrapper);
+                }
+                else
+                {
+                    ODataResourceWrapper resourceWrapper = CreateResourceWrapper(edmProperty.Type, referenceLinks[0], readContext);
+                    nestedItems.Add(resourceWrapper);
+                }
+            }
+            else
+            {
+                nestedItems = resourceInfoWrapper.NestedItems;
+            }
+
+            ODataDeserializerContext nestedReadContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(resourceInfoWrapper, readContext, edmProperty);
+
+            foreach (ODataItemBase childItem in nestedItems)
             {
                 // it maybe null.
                 if (childItem == null)
@@ -310,32 +367,25 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     {
                         // for the dynamic, OData.net has a bug. see https://github.com/OData/odata.net/issues/977
                         ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
-                            structuredType, null, readContext);
+                            structuredType, null, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceInNestedProperty(edmProperty, resource, null, readContext);
+                        ApplyResourceInNestedProperty(edmProperty, resource, null, nestedReadContext);
                     }
                 }
 
-                ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
-                if (entityReferenceLink != null)
-                {
-                    // ignore entity reference links.
-                    continue;
-                }
-
-                ODataResourceSetWrapper resourceSetWrapper = childItem as ODataResourceSetWrapper;
+                ODataResourceSetWrapperBase resourceSetWrapper = childItem as ODataResourceSetWrapperBase;
                 if (resourceSetWrapper != null)
                 {
                     if (edmProperty == null)
                     {
                         ApplyDynamicResourceSetInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name,
-                            resource, structuredType, resourceSetWrapper, readContext);
+                            resource, structuredType, resourceSetWrapper, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, readContext);
+                        ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, nestedReadContext);
                     }
 
                     continue;
@@ -348,14 +398,53 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     if (edmProperty == null)
                     {
                         ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
-                            structuredType, resourceWrapper, readContext);
+                            structuredType, resourceWrapper, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, readContext);
+                        ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, nestedReadContext);
                     }
                 }
             }
+        }
+
+        private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType,
+            IList<ODataEntityReferenceLinkBase> refLinks, ODataDeserializerContext readContext)
+        {
+            ODataResourceSet resourceSet = new ODataResourceSet
+            {
+                TypeName = edmPropertyType.FullName(),
+            };
+
+            IEdmTypeReference elementType = edmPropertyType.ElementType();
+            ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(resourceSet);
+
+            foreach (ODataEntityReferenceLinkBase refLinkWrapper in refLinks)
+            {
+                ODataResourceWrapper resourceWrapper = CreateResourceWrapper(elementType, refLinkWrapper, readContext);
+                resourceSetWrapper.Resources.Add(resourceWrapper);
+            }
+
+            return resourceSetWrapper;
+        }
+
+        private ODataResourceWrapper CreateResourceWrapper(IEdmTypeReference edmPropertyType, ODataEntityReferenceLinkBase refLink, ODataDeserializerContext readContext)
+        {
+            Contract.Assert(readContext != null);
+
+            ODataResource resource = new ODataResource
+            {
+                TypeName = edmPropertyType.FullName(),
+            };
+
+            resource.Properties = ODataResourceDeserializerHelpers.CreateKeyProperties(refLink.EntityReferenceLink.Url, readContext);
+
+            foreach (ODataInstanceAnnotation instanceAnnotation in refLink.EntityReferenceLink.InstanceAnnotations)
+            {
+                resource.InstanceAnnotations.Add(instanceAnnotation);
+            };
+
+            return new ODataResourceWrapper(resource);
         }
 
         /// <summary>
@@ -373,7 +462,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("resourceWrapper");
             }
 
-            foreach (ODataProperty property in resourceWrapper.Resource.Properties)
+            foreach (ODataProperty property in resourceWrapper.ResourceBase.Properties)
             {
                 ApplyStructuralProperty(resource, property, structuredType, readContext);
             }
@@ -394,7 +483,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("resourceWrapper");
             }
 
-            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.Resource,DeserializerProvider, readContext);
+            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.ResourceBase, DeserializerProvider, readContext);
         }
 
         /// <summary>
@@ -406,7 +495,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The deserializer context.</param>
         public virtual void ApplyStructuralProperty(object resource, ODataProperty structuralProperty,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
-        { 
+        {
             if (resource == null)
             {
                 throw Error.ArgumentNull("resource");
@@ -422,10 +511,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
         private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+
         {
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyInstanceAnnotations(resource, resourceWrapper, structuredType, readContext);
+            ODataResourceDeserializerHelpers.ApplyODataIdContainer(resource, resourceWrapper, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,
@@ -434,17 +525,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             Contract.Assert(nestedProperty != null);
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
-
-            if (readContext.IsDeltaOfT)
-            {
-                IEdmNavigationProperty navigationProperty = nestedProperty as IEdmNavigationProperty;
-                if (navigationProperty != null)
-                {
-                    string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name,
-                        navigationProperty.DeclaringEntityType().FullName());
-                    throw new ODataException(message);
-                }
-            }
 
             object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext);
 
@@ -464,7 +544,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             object value = null;
             if (resourceWrapper != null)
             {
-                IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.Resource.TypeName);
+                IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.ResourceBase.TypeName);
                 IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
                 value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
@@ -492,18 +572,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             IEdmStructuredTypeReference structuredType = edmType.AsStructured();
 
-            var nestedReadContext = new ODataDeserializerContext
-            {
-                Path = readContext.Path,
-                Model = readContext.Model,
-                Request = readContext.Request,
-            };
-
-            Type clrType = null;
+            Type clrType;
             if (readContext.IsUntyped)
             {
                 clrType = structuredType.IsEntity()
-                    ? typeof(EdmEntityObject)
+                    ? (readContext.IsDeltaEntity ? (readContext.IsDeltaDeletedEntity ? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject)) : typeof(EdmEntityObject))
                     : typeof(EdmComplexObject);
             }
             else
@@ -517,50 +590,40 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            nestedReadContext.ResourceType = readContext.IsDeltaOfT
+            ODataDeserializerContext nestedContext = ODataResourceDeserializerHelpers.BuildNestedContextFromCurrentContext(readContext, null, readContext.IsDeltaOfT
                 ? typeof(Delta<>).MakeGenericType(clrType)
-                : clrType;
-            return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
+                : clrType);
+
+            return deserializer.ReadInline(resourceWrapper, edmType, nestedContext);
         }
 
         private void ApplyResourceSetInNestedProperty(IEdmProperty nestedProperty, object resource,
-            ODataResourceSetWrapper resourceSetWrapper, ODataDeserializerContext readContext)
+            ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
             Contract.Assert(nestedProperty != null);
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            if (readContext.IsDeltaOfT)
-            {
-                IEdmNavigationProperty navigationProperty = nestedProperty as IEdmNavigationProperty;
-                if (navigationProperty != null)
-                {
-                    string message = Error.Format(SRResources.CannotPatchNavigationProperties, navigationProperty.Name,
-                        navigationProperty.DeclaringEntityType().FullName());
-                    throw new ODataException(message);
-                }
-            }
-
             object value = ReadNestedResourceSetInline(resourceSetWrapper, nestedProperty.Type, readContext);
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
-            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName);
+            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName, resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet);
         }
 
         private void ApplyDynamicResourceSetInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference structuredType,
-            ODataResourceSetWrapper resourceSetWrapper, ODataDeserializerContext readContext)
+            ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            if (String.IsNullOrEmpty(resourceSetWrapper.ResourceSet.TypeName))
+            if (String.IsNullOrEmpty(resourceSetWrapper.ResourceSetBase.TypeName))
             {
                 string message = Error.Format(SRResources.DynamicResourceSetTypeNameIsRequired, propertyName);
                 throw new ODataException(message);
             }
 
             string elementTypeName =
-                DeserializationHelpers.GetCollectionElementTypeName(resourceSetWrapper.ResourceSet.TypeName,
+                DeserializationHelpers.GetCollectionElementTypeName(resourceSetWrapper.ResourceSetBase.TypeName,
                     isNested: false);
             IEdmSchemaType elementType = readContext.Model.FindDeclaredType(elementTypeName);
 
@@ -587,12 +650,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 result, collectionType, readContext.Model);
         }
 
-        private object ReadNestedResourceSetInline(ODataResourceSetWrapper resourceSetWrapper, IEdmTypeReference edmType,
-            ODataDeserializerContext readContext)
+        private object ReadNestedResourceSetInline(ODataResourceSetWrapperBase resourceSetWrapper, IEdmTypeReference edmType,
+            ODataDeserializerContext nestedReadContext)
         {
             Contract.Assert(resourceSetWrapper != null);
             Contract.Assert(edmType != null);
-            Contract.Assert(readContext != null);
+            Contract.Assert(nestedReadContext != null);
 
             ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(edmType);
             if (deserializer == null)
@@ -601,18 +664,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             IEdmStructuredTypeReference structuredType = edmType.AsCollection().ElementType().AsStructured();
-            var nestedReadContext = new ODataDeserializerContext
-            {
-                Path = readContext.Path,
-                Model = readContext.Model,
-                Request = readContext.Request,
-            };
 
-            if (readContext.IsUntyped)
+            if (nestedReadContext.IsUntyped)
             {
                 if (structuredType.IsEntity())
                 {
-                    nestedReadContext.ResourceType = typeof(EdmEntityObjectCollection);
+                    nestedReadContext.ResourceType = (nestedReadContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet) ?
+                        typeof(EdmChangedObjectCollection) : typeof(EdmEntityObjectCollection);
                 }
                 else
                 {
@@ -621,7 +679,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
+                Type clrType = EdmLibHelpers.GetClrType(structuredType, nestedReadContext.Model);
 
                 if (clrType == null)
                 {
@@ -629,7 +687,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
 
-                nestedReadContext.ResourceType = typeof(List<>).MakeGenericType(clrType);
+                nestedReadContext.ResourceType = (nestedReadContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)
+                ? typeof(DeltaSet<>).MakeGenericType(clrType) : typeof(List<>).MakeGenericType(clrType);
             }
 
             return deserializer.ReadInline(resourceSetWrapper, edmType, nestedReadContext);

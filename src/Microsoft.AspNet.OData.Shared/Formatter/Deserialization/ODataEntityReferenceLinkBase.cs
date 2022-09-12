@@ -21,17 +21,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataEntityReferenceLinkBase(ODataEntityReferenceLink item)
             : base(item)
         {
+            EntityReferenceLink = item;
         }
 
         /// <summary>
         /// Gets the wrapped <see cref="ODataEntityReferenceLink"/>.
         /// </summary>
-        public ODataEntityReferenceLink EntityReferenceLink
-        {
-            get
-            {
-                return Item as ODataEntityReferenceLink;
-            }
-        }
+        public ODataEntityReferenceLink EntityReferenceLink { get; }
     }
 }

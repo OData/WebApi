@@ -90,7 +90,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
         public Task<ITestActionResult> GetSingleNavigationPropertyOnCar(int key)
         {
-            return Task< ITestActionResult>.Factory.StartNew(() =>
+            return Task<ITestActionResult>.Factory.StartNew(() =>
             {
                 return Ok((LocalTable[key] as Car).SingleNavigationProperty);
             });
@@ -142,7 +142,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return Task<ITestActionResult>.Factory.StartNew(() =>
             {
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
-                    this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
+                this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
 
                 IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
 
@@ -220,7 +220,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
     public abstract class InheritanceTests : ODataFormatterTestBase
     {
         public InheritanceTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -236,21 +236,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             cars.EntityType.Action("Wash");
 
             builder.OnModelCreating = mb =>
-                {
-                    cars.HasNavigationPropertiesLink(
-                        cars.EntityType.NavigationProperties,
-                        (entityContext, navigationProperty) =>
-                        {
-                            object id;
-                            entityContext.EdmObject.TryGetPropertyValue("Id", out id);
-                            return new Uri(ResourceContextHelper.CreateODataLink(entityContext,
-                                new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.StructuredType as IEdmEntityType, null),
-                                new NavigationPropertySegment(navigationProperty, null)));
-                        },
-                        false);
+            {
+                cars.HasNavigationPropertiesLink(
+                    cars.EntityType.NavigationProperties,
+                    (entityContext, navigationProperty) =>
+                    {
+                        object id;
+                        entityContext.EdmObject.TryGetPropertyValue("Id", out id);
+                        return new Uri(ResourceContextHelper.CreateODataLink(entityContext,
+                            new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                            new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.StructuredType as IEdmEntityType, null),
+                            new NavigationPropertySegment(navigationProperty, null)));
+                    },
+                    false);
 
-                };
+            };
 
             builder.EntityType<SportBike>().Action("Wash");
             builder.EntitySet<Customer>("InheritanceTests_Customers");

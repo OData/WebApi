@@ -1378,7 +1378,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (complexProperties != null)
             {
                 IEnumerable<string> changedProperties = null;
-                if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
+
+                if (resourceContext.EdmObject != null && resourceContext.EdmObject.IsDeltaResource())
                 {
                     IDelta deltaObject = resourceContext.EdmObject as IDelta;
                     changedProperties = deltaObject.GetChangedPropertyNames();
@@ -1405,7 +1406,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             IEnumerable<string> changedProperties = null;
 
-            if (null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
+            if (resourceContext.EdmObject != null && resourceContext.EdmObject is IDelta changedObject)
             {
                 changedProperties = changedObject.GetChangedPropertyNames();
 
@@ -1417,7 +1418,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
                 }
             }
-            else if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
+            else if (resourceContext.ResourceInstance != null && resourceContext.ResourceInstance is IDelta deltaObject)
             {
                 changedProperties = deltaObject.GetChangedPropertyNames();
                 dynamic delta = deltaObject;
@@ -1825,7 +1826,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 IEnumerable<IEdmStructuralProperty> structuralProperties = selectExpandNode.SelectedStructuralProperties;
 
-                if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
+                if (resourceContext.EdmObject != null && resourceContext.EdmObject.IsDeltaResource())
                 {
                     IDelta deltaObject = resourceContext.EdmObject as IDelta;
                     IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();

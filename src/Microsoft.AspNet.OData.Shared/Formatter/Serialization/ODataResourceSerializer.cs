@@ -1404,11 +1404,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 yield break;
             }
 
-            IEnumerable<string> changedProperties = null;
-
-            if (resourceContext.EdmObject != null && resourceContext.EdmObject is IDelta changedObject)
+            if (resourceContext.EdmObject is IDelta changedObject)
             {
-                changedProperties = changedObject.GetChangedPropertyNames();
+                IEnumerable<string> changedProperties = changedObject.GetChangedPropertyNames();
 
                 foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
                 {
@@ -1418,14 +1416,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
                 }
             }
-            else if (resourceContext.ResourceInstance != null && resourceContext.ResourceInstance is IDelta deltaObject)
+            else if (resourceContext.ResourceInstance is IDelta deltaObject)
             {
-                changedProperties = deltaObject.GetChangedPropertyNames();
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
                 dynamic delta = deltaObject;
 
                 foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
                 {
-                    Object obj = null;
+                    object obj = null;
 
                     if (changedProperties == null || changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
                     {

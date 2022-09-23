@@ -613,7 +613,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Contains("Friend2", json.ToString());
             }
 
-            requestUri = this.BaseAddress + "/convention/Employees(2)";
+            requestUri = this.BaseAddress + "/convention/Employees(2)?$expand=Friends";
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 response.EnsureSuccessStatusCode();
@@ -642,9 +642,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
-            var expected = "/convention/$metadata#Employees(Friends(),NewFriends(),UnTypedFriends())/$entity\",\"ID\":1,\"Name\":\"Sql\"," +
-                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":2,\"Name\":\"Test1\",\"Age\":0}]," +
-                "\"NewFriends\":[{\"Id\":1,\"Name\":\"NewFriendTest1\",\"Age\":33}],\"UnTypedFriends\":[]}";
+            var expected = "/convention/$metadata#Employees/$entity\",\"ID\":1,\"Name\":\"Sql\"," +
+                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"}}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -672,7 +671,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees(1)";
+            string requestUri = this.BaseAddress + "/convention/Employees(1)?$expand=Friends";
 
             var content = @"{
                     'Name':'Bind1'  ,
@@ -684,10 +683,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
-            //Act & Assert
-            var expected = "/convention/$metadata#Employees(Friends(),NewFriends(),UnTypedFriends())/$entity\",\"ID\":1,\"Name\":\"Bind1\"," +
-                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":3,\"Name\":null,\"Age\":0}]," +
-                "\"NewFriends\":[{\"Id\":1,\"Name\":\"NewFriendTest1\",\"Age\":33}],\"UnTypedFriends\":[]}";
+            var expected = "/convention/$metadata#Employees(Friends())/$entity\",\"ID\":1,\"Name\":\"Bind1\"," +
+                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":3,\"Name\":null,\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -1007,27 +1004,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPatch.Content = stringContent;
 
-            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/Friends\"";
-            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/NewFriends\"";
-            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/UnTypedFriends\"";
+            string friendsNavigationLink = "Friends@odata.navigationLink";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
-            string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\",\"@odata.id\":" +
-                "\"http://localhost:11001/convention/Friends(1001)\",\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1001)\"," +
-                "\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31,"+
-                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1001)/Orders/$ref\"," +
-                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1001)/Orders\"}," +
-                "{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"," +
-                "\"@odata.id\":\"http://localhost:11001/convention/Friends(1002)\"," +
-                "\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1002)\"," +
-                "\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32," +
-                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1002)/Orders/$ref\"," +
-                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1002)/Orders\"}," +
-                "{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"," +
-                "\"@odata.id\":\"http://localhost:11001/convention/Friends(1003)\"," +
-                "\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1003)\"," +
-                "\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33," +
-                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1003)/Orders/$ref\"," +
-                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1003)/Orders\"}]";
+            string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
 
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
@@ -1058,9 +1039,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPatch.Content = stringContent;
 
-            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/Friends\"";
-            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/NewFriends\"";
-            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/UnTypedFriends\"";
+            string friendsNavigationLink = "Friends@odata.navigationLink";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
@@ -1079,23 +1060,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             //Arrange
 
-            //string requestUri = this.BaseAddress + "/convention/Employees(1)?$format=application/json;odata.metadata=full";
-            string requestUri = this.BaseAddress + "/convention/Employees(1)";
+            string requestUri = this.BaseAddress + "/convention/Employees(1)?$format=application/json;odata.metadata=full";
 
             var requestForPatch = new HttpRequestMessage(new HttpMethod("GET"), requestUri);
 
-            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/Friends\"";
-            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/NewFriends\"";
-            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/UnTypedFriends\"";
+            string friendsNavigationLink = "Friends@odata.navigationLink";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
-            //string notexpected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
+            string notexpected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
 
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var json = response.Content.ReadAsStringAsync().Result;
-                //Assert.DoesNotContain(notexpected, json);
+                Assert.DoesNotContain(notexpected, json);
                 Assert.Contains(friendsNavigationLink, json);
                 Assert.Contains(newFriendsNavigationLink, json);
                 Assert.Contains(untypedFriendsNavigationLink, json);

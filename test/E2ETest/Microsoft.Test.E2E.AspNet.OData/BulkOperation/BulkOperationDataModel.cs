@@ -14,7 +14,6 @@ using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    [AutoExpand]
     public class Employee
     {
         [Key]

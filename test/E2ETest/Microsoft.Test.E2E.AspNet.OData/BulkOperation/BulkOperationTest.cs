@@ -990,6 +990,118 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
+        [Fact]
+        public async Task PostEmployee_WithCreateFriendsFullMetadata()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+
+            string content = @"{
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+                     }";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+
+            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/Friends\"";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/NewFriends\"";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/UnTypedFriends\"";
+
+            string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\",\"@odata.id\":" +
+                "\"http://localhost:11001/convention/Friends(1001)\",\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1001)\"," +
+                "\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31,"+
+                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1001)/Orders/$ref\"," +
+                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1001)/Orders\"}," +
+                "{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"," +
+                "\"@odata.id\":\"http://localhost:11001/convention/Friends(1002)\"," +
+                "\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1002)\"," +
+                "\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32," +
+                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1002)/Orders/$ref\"," +
+                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1002)/Orders\"}," +
+                "{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"," +
+                "\"@odata.id\":\"http://localhost:11001/convention/Friends(1003)\"," +
+                "\"@odata.editLink\":\"http://localhost:11001/convention/Friends(1003)\"," +
+                "\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33," +
+                "\"Orders@odata.associationLink\":\"http://localhost:11001/convention/Friends(1003)/Orders/$ref\"," +
+                "\"Orders@odata.navigationLink\":\"http://localhost:11001/convention/Friends(1003)/Orders\"}]";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expected, json);
+                Assert.Contains(friendsNavigationLink, json);
+                Assert.Contains(newFriendsNavigationLink, json);
+                Assert.Contains(untypedFriendsNavigationLink, json);
+            }
+        }
+
+        [Fact]
+        public async Task PostEmployee_WithFullMetadata()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+
+            var content = @"{
+                    'Name':'SqlUD'
+                     }";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+
+            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/Friends\"";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/NewFriends\"";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(0)/UnTypedFriends\"";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(friendsNavigationLink, json);
+                Assert.Contains(newFriendsNavigationLink, json);
+                Assert.Contains(untypedFriendsNavigationLink, json);
+            }
+        }
+
+        [Fact]
+        public async Task GetEmployee_WithFullMetadata()
+        {
+            //Arrange
+
+            //string requestUri = this.BaseAddress + "/convention/Employees(1)?$format=application/json;odata.metadata=full";
+            string requestUri = this.BaseAddress + "/convention/Employees(1)";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("GET"), requestUri);
+
+            string friendsNavigationLink = "Friends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/Friends\"";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/NewFriends\"";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink\":\"http://localhost:11001/convention/Employees(1)/UnTypedFriends\"";
+
+            //string notexpected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                //Assert.DoesNotContain(notexpected, json);
+                Assert.Contains(friendsNavigationLink, json);
+                Assert.Contains(newFriendsNavigationLink, json);
+                Assert.Contains(untypedFriendsNavigationLink, json);
+            }
+        }
+
         #endregion
     }
 }

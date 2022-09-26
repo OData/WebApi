@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -1651,8 +1652,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private void WriteNestedNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
         {
-            Contract.Assert(resourceContext != null);
-            Contract.Assert(writer != null);
+            Debug.Assert(resourceContext != null);
+            Debug.Assert(writer != null);
 
             if (!resourceContext.IsPostRequest)
             {
@@ -1677,8 +1678,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private async Task WriteNestedNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
         {
-            Contract.Assert(resourceContext != null);
-            Contract.Assert(writer != null);
+            Debug.Assert(resourceContext != null);
+            Debug.Assert(writer != null);
 
             if (!resourceContext.IsPostRequest)
             {

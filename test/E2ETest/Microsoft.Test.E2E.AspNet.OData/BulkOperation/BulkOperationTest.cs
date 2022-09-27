@@ -593,6 +593,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected, json.ToString());
+
+                // Navigation properties absent from the payload are not serialized in the response.
                 Assert.DoesNotContain("NewFriends@delta", json.ToString());
                 Assert.DoesNotContain("UntypedFriends@delta", json.ToString());
             }
@@ -632,6 +634,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected, json.ToString());
+                Assert.DoesNotContain("NewFriends@delta", json.ToString());
+                Assert.DoesNotContain("UntypedFriends@delta", json.ToString());
             }
 
             //Assert

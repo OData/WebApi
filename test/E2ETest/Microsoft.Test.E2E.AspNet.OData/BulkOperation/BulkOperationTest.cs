@@ -566,6 +566,39 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Fact]
+        public async Task PatchEmployee_WithUnchanged_Employee()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees";
+
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees/$delta',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Employee', 'ID':1,'Name':'Name1',
+                            'Friends@odata.delta':[{'Id':1,'Name':'Test0','Age':33},{'Id':2,'Name':'Test1'}]
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Name1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
+                "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Test0\",\"Age\":33}," +
+                "{\"Id\":2,\"Name\":\"Test1\",\"Age\":0}]}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+                Assert.DoesNotContain("NewFriends@delta", json.ToString());
+                Assert.DoesNotContain("UntypedFriends@delta", json.ToString());
+            }
+        }
+
+        [Fact]
         public async Task PatchEmployee_WithUpdates_Employees()
         {
             //Arrange

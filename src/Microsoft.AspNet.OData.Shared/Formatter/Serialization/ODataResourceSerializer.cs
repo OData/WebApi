@@ -1411,7 +1411,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
                 {
-                    if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
+                    if (changedProperties != null && changedProperties.Contains(navigationProperty.Name))
                     {
                         yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
                     }
@@ -1426,9 +1426,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     object obj = null;
 
-                    if (changedProperties == null || changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
+                    if (changedProperties != null && changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
                     {
-                        yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
+                        if (obj != null)
+                        {
+                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
+                        }
                     }
                 }
             }

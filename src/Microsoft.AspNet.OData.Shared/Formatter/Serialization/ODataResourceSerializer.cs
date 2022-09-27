@@ -1655,8 +1655,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private void WriteNestedNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
         {
-            Debug.Assert(resourceContext != null);
-            Debug.Assert(writer != null);
+            Debug.Assert(resourceContext != null, "resourceContext != null");
+            Debug.Assert(writer != null, "writer != null");
 
             if (!resourceContext.IsPostRequest)
             {
@@ -1681,8 +1681,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private async Task WriteNestedNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
         {
-            Debug.Assert(resourceContext != null);
-            Debug.Assert(writer != null);
+            Debug.Assert(resourceContext != null, "resourceContext != null");
+            Debug.Assert(writer != null, "writer != null");
 
             if (!resourceContext.IsPostRequest)
             {

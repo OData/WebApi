@@ -54,7 +54,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
 
-            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? messageReader.CreateODataDeltaResourceSetReader() : messageReader.CreateODataResourceSetReader();
+            IEdmEntityType entityType = edmType.AsCollection().ElementType().Definition as IEdmEntityType;
+            IEdmEntitySet entitySet = null;
+            if(entityType != null)
+            {
+                // CreateODataDeltaResourceSetReader requires an entity set if you pass a type for reading a request.
+                // We can relax that check in ODataJsonlightInputContext, line 670.
+                // In the meantime, creating a dummy entity set allows the reader to know what type its reading so the payload
+                // doesn't have to be marked up with odata.type annotations.
+                IEdmEntityContainer container = new EdmEntityContainer(entityType.Namespace, "");
+                entitySet = new EdmEntitySet(container,"",entityType);
+            }
+
+            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? messageReader.CreateODataDeltaResourceSetReader() : messageReader.CreateODataResourceSetReader(entitySet, entityType);
             object resourceSet = resourceSetReader.ReadResourceOrResourceSet();
             return ReadInline(resourceSet, edmType, readContext);
         }
@@ -135,16 +147,28 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            if (result != null && elementType.IsComplex())
+            if (result != null && (elementType.IsComplex() || elementType.IsEntity()))
             {
                 if (readContext.IsUntyped)
                 {
-                    EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(edmType.AsCollection());
-                    foreach (EdmComplexObject complexObject in result)
+                    if (elementType.IsComplex())
                     {
-                        complexCollection.Add(complexObject);
+                        EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(edmType.AsCollection());
+                        foreach (EdmComplexObject complexObject in result)
+                        {
+                            complexCollection.Add(complexObject);
+                        }
+                        return complexCollection;
                     }
-                    return complexCollection;
+                    else
+                    {
+                        EdmEntityObjectCollection entityCollection = new EdmEntityObjectCollection(edmType.AsCollection());
+                        foreach (EdmEntityObject entityObject in result)
+                        {
+                            entityCollection.Add(entityObject);
+                        }
+                        return entityCollection;
+                    }
                 }
                 else
                 {

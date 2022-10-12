@@ -1390,7 +1390,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     if (changedProperties == null || changedProperties.Contains(complexProperty.Key.Name))
                     {
-                        yield return complexProperty;
+                        Type clrType = EdmLibHelpers.GetClrType(complexProperty.Key.Type, resourceContext.EdmModel);
+
+                        if (clrType != typeof(IODataIdContainer))
+                        {
+                            yield return complexProperty;
+                        }
                     }
                 }
             }
@@ -1616,7 +1621,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
-            if (propertyValue == null || propertyValue is NullEdmComplexObject || propertyValue is ODataIdContainer)
+            if (propertyValue == null || propertyValue is NullEdmComplexObject)
             {
                 if (edmProperty.Type.IsCollection())
                 {

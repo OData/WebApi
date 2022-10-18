@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     [NonValidatingParameterBinding]
-    internal class DeltaSet<TStructuralType> : Collection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
+    public class DeltaSet<TStructuralType> : Collection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
     {
         private Type _clrType;
         private IList<string> _keys;

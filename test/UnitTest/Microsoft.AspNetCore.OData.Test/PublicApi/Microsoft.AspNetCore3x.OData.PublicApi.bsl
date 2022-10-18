@@ -31,6 +31,13 @@ public interface Microsoft.AspNet.OData.IDeltaDeletedEntityObject {
 	System.Nullable`1[[Microsoft.OData.DeltaDeletedEntryReason]] Reason  { public abstract get; public abstract set; }
 }
 
+public interface Microsoft.AspNet.OData.IDeltaSetItem {
+	EdmDeltaEntityKind DeltaKind  { public abstract get; }
+	ODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
+	Microsoft.OData.UriParser.ODataPath ODataPath  { public abstract get; public abstract set; }
+	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
+}
+
 public interface Microsoft.AspNet.OData.IEdmChangedObject : IEdmObject, IEdmStructuredObject {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
 }
@@ -322,6 +329,15 @@ public class Microsoft.AspNet.OData.DeltaDeletedEntityObject`1 : Delta`1, IDynam
 	System.Uri Id  { public virtual get; public virtual set; }
 	string NavigationSource  { public virtual get; public virtual set; }
 	System.Nullable`1[[Microsoft.OData.DeltaDeletedEntryReason]] Reason  { public virtual get; public virtual set; }
+}
+
+[
+NonValidatingParameterBindingAttribute(),
+]
+public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.Collection`1[[Microsoft.AspNet.OData.IDeltaSetItem]], ICollection, IEnumerable, IList, IDeltaSet, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
+	public DeltaSet`1 (System.Collections.Generic.IList`1[[System.String]] keys)
+
+	protected virtual void InsertItem (int index, IDeltaSetItem item)
 }
 
 [
@@ -3987,9 +4003,10 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataRawValueSeriali
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSerializer : ODataEdmTypeSerializer {
 	public ODataResourceSerializer (ODataSerializerProvider serializerProvider)
 
-	public virtual void AppendDynamicProperties (Microsoft.OData.ODataResource resource, SelectExpandNode selectExpandNode, ResourceContext resourceContext)
-	public virtual void AppendInstanceAnnotations (Microsoft.OData.ODataResource resource, ResourceContext resourceContext)
+	public virtual void AppendDynamicProperties (Microsoft.OData.ODataResourceBase resource, SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+	public virtual void AppendInstanceAnnotations (Microsoft.OData.ODataResourceBase resource, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateComplexNestedResourceInfo (Microsoft.OData.Edm.IEdmStructuralProperty complexProperty, Microsoft.OData.UriParser.PathSelectItem pathSelectItem, ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataDeletedResource CreateDeletedResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateDynamicComplexNestedResourceInfo (string propertyName, object propertyValue, Microsoft.OData.Edm.IEdmTypeReference edmType, ResourceContext resourceContext)
 	public virtual string CreateETag (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ResourceContext resourceContext)

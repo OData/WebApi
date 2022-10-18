@@ -112,6 +112,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 return _rootContainer.GetRequiredService<ODataMetadataSerializer>();
             }
+            else if (TypeHelper.IsTypeAssignableFrom(typeof(IDeltaSet), type))
+            {
+                return _rootContainer.GetRequiredService<ODataDeltaFeedSerializer>();
+            }
 
             // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
             // until after the above checks have passed.

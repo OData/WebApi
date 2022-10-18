@@ -574,7 +574,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>true if the  type has a default constructor; otherwise returns false.</returns>
         internal static bool HasDefaultConstructor(Type type)
         {
-            return (!type.IsClass) || (!type.IsAbstract) || type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+            return (!type.IsClass) || type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static) 
                 .Any(x => x.GetParameters().Length == 0);
         }
     }

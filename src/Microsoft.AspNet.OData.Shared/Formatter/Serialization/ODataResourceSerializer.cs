@@ -188,139 +188,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Gets the resource context for the resource being written.
-        /// </summary>
-        /// <param name="graph">The object to be written.</param>
-        /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        /// <returns>The <see cref="ResourceContext"/>.</returns>
-        internal ResourceContext GetResourceContext(object graph, ODataSerializerContext writeContext)
-        {
-            Contract.Assert(writeContext != null);
-
-            IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
-            ResourceContext resourceContext = new ResourceContext(writeContext, structuredType, graph);
-            EdmDeltaEntityObject deltaResource = graph as EdmDeltaEntityObject;
-            if (deltaResource != null && deltaResource.NavigationSource != null)
-            {
-                resourceContext.NavigationSource = deltaResource.NavigationSource;
-            }
-
-            return resourceContext;
-        }
-
-        /// <summary>
-        /// Writes the delta complex properties.
-        /// </summary>
-        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
-        /// <param name="resourceContext">The resource context for the resource being written.</param>
-        /// <param name="writer">The ODataWriter.</param>
-        internal void WriteDeltaComplexProperties(SelectExpandNode selectExpandNode,
-            ResourceContext resourceContext, ODataWriter writer)
-        {
-            Contract.Assert(resourceContext != null);
-            Contract.Assert(writer != null);
-
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
-
-            foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
-            {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = complexProperty.Key.Type.IsCollection(),
-                    Name = complexProperty.Key.Name
-                };
-
-                writer.WriteStart(nestedResourceInfo);
-                WriteDeltaComplexAndExpandedNavigationProperty(complexProperty.Key, null, resourceContext, writer);
-                writer.WriteEnd();
-            }
-        }
-
-        /// <summary>
-        /// Writes the delta navigation properties.
-        /// </summary>
-        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
-        /// <param name="resourceContext">The resource context for the resource being written.</param>
-        /// <param name="writer">The ODataWriter.</param>
-        internal void WriteDeltaNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
-        {
-            Contract.Assert(resourceContext != null, "The resource context cannot be null");
-            Contract.Assert(writer != null, "The writer cannot be null");
-
-            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
-
-            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
-            {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = navigationProperty.Key.Type.IsCollection(),
-                    Name = navigationProperty.Key.Name
-                };
-
-                writer.WriteStart(nestedResourceInfo);
-                WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
-                writer.WriteEnd();
-            }
-        }
-
-        /// <summary>
-        /// Writes delta navigation properties asyncronously.
-        /// </summary>
-        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
-        /// <param name="resourceContext">The resource context for the resource being written.</param>
-        /// <param name="writer">The ODataWriter.</param>
-        /// <returns>A task that represents the asynchronous write operation</returns>
-        internal async Task WriteDeltaNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
-        {
-            Contract.Assert(resourceContext != null, "The ResourceContext cannot be null");
-            Contract.Assert(writer != null, "The ODataWriter cannot be null");
-
-            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
-
-            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
-            {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = navigationProperty.Key.Type.IsCollection(),
-                    Name = navigationProperty.Key.Name
-                };
-
-                await writer.WriteStartAsync(nestedResourceInfo);
-                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
-                await writer.WriteEndAsync();
-            }
-        }
-
-        /// <summary>
-        /// Writes delta complex properties asyncronously.
-        /// </summary>
-        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
-        /// <param name="resourceContext">The resource context for the resource being written.</param>
-        /// <param name="writer">The ODataWriter.</param>
-        /// <returns>A task that represents the asynchronous write operation</returns>
-        internal async Task WriteDeltaComplexPropertiesAsync(SelectExpandNode selectExpandNode,
-            ResourceContext resourceContext, ODataWriter writer)
-        {
-            Contract.Assert(resourceContext != null);
-            Contract.Assert(writer != null);
-
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
-
-            foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
-            {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = complexProperty.Key.Type.IsCollection(),
-                    Name = complexProperty.Key.Name
-                };
-
-                await writer.WriteStartAsync(nestedResourceInfo);
-                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(complexProperty.Key, null, resourceContext, writer);
-                await writer.WriteEndAsync();
-            }
-        }
-
-        /// <summary>
         /// Creates the <see cref="SelectExpandNode"/> that describes the set of properties and actions to select and expand while writing this entity.
         /// </summary>
         /// <param name="resourceContext">Contains the entity instance being written and the context.</param>
@@ -359,136 +226,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public virtual ODataResource CreateResource(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             ODataResource resource = CreateResource(selectExpandNode, resourceContext, false) as ODataResource;
-            return resource;
-        }
-
-        private ODataResourceBase CreateResource(SelectExpandNode selectExpandNode, ResourceContext resourceContext, bool isDeletedResource)
-        {
-            if (selectExpandNode == null)
-            {
-                throw Error.ArgumentNull("selectExpandNode");
-            }
-
-            if (resourceContext == null)
-            {
-                throw Error.ArgumentNull("resourceContext");
-            }
-
-            if (resourceContext.SerializerContext.ExpandReference)
-            {
-                if (isDeletedResource)
-                {
-                    return new ODataDeletedResource
-                    {
-                        Id = resourceContext.GenerateSelfLink(false)
-                    };
-                }
-
-                return new ODataResource
-                {
-                    Id = resourceContext.GenerateSelfLink(false)
-                };
-            }
-
-            string typeName = resourceContext.StructuredType.FullTypeName();
-            ODataResourceBase resource;
-
-            if (isDeletedResource)
-            {
-                resource = new ODataDeletedResource
-                {
-                    TypeName = typeName,
-                    Properties = CreateStructuralPropertyBag(selectExpandNode, resourceContext),
-                };
-            }
-            else
-            {
-                resource = new ODataResource
-                {
-                    TypeName = typeName,
-                    Properties = CreateStructuralPropertyBag(selectExpandNode, resourceContext),
-                };
-            }
-
-
-            if (resourceContext.EdmObject is EdmDeltaEntityObject && resourceContext.NavigationSource != null)
-            {
-                ODataResourceSerializationInfo serializationInfo = new ODataResourceSerializationInfo();
-                serializationInfo.NavigationSourceName = resourceContext.NavigationSource.Name;
-                serializationInfo.NavigationSourceKind = resourceContext.NavigationSource.NavigationSourceKind();
-                IEdmEntityType sourceType = resourceContext.NavigationSource.EntityType();
-                if (sourceType != null)
-                {
-                    serializationInfo.NavigationSourceEntityTypeName = sourceType.Name;
-                }
-                resource.SetSerializationInfo(serializationInfo);
-            }
-
-            // Try to add the dynamic properties if the structural type is open.
-            AppendDynamicProperties(resource, selectExpandNode, resourceContext);
-
-            // Try to add instance annotations
-            AppendInstanceAnnotations(resource, resourceContext);
-
-            if (selectExpandNode.SelectedActions != null)
-            {
-                IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, resourceContext);
-                foreach (ODataAction action in actions)
-                {
-                    resource.AddAction(action);
-                }
-            }
-
-            if (selectExpandNode.SelectedFunctions != null)
-            {
-                IEnumerable<ODataFunction> functions = CreateODataFunctions(selectExpandNode.SelectedFunctions, resourceContext);
-                foreach (ODataFunction function in functions)
-                {
-                    resource.AddFunction(function);
-                }
-            }
-
-            IEdmStructuredType pathType = GetODataPathType(resourceContext.SerializerContext);
-            if (resourceContext.StructuredType.TypeKind == EdmTypeKind.Complex)
-            {
-                AddTypeNameAnnotationAsNeededForComplex(resource, resourceContext.SerializerContext.MetadataLevel);
-            }
-            else
-            {
-                AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
-            }
-
-            if (!isDeletedResource && resourceContext.StructuredType.TypeKind == EdmTypeKind.Entity && resourceContext.NavigationSource != null)
-            {
-                if (!(resourceContext.NavigationSource is IEdmContainedEntitySet))
-                {
-                    IEdmModel model = resourceContext.SerializerContext.Model;
-                    NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(resourceContext.NavigationSource);
-                    EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(resourceContext, resourceContext.SerializerContext.MetadataLevel);
-
-                    if (selfLinks.IdLink != null)
-                    {
-                        resource.Id = selfLinks.IdLink;
-                    }
-
-                    if (selfLinks.ReadLink != null)
-                    {
-                        resource.ReadLink = selfLinks.ReadLink;
-                    }
-
-                    if (selfLinks.EditLink != null)
-                    {
-                        resource.EditLink = selfLinks.EditLink;
-                    }
-                }
-
-                string etag = CreateETag(resourceContext);
-                if (etag != null)
-                {
-                    resource.ETag = etag;
-                }
-            }
-
             return resource;
         }
 
@@ -814,54 +551,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates the <see cref="ODataStreamPropertyInfo"/> to be written for the given stream property.
-        /// </summary>
-        /// <param name="structuralProperty">The EDM structural property being written.</param>
-        /// <param name="resourceContext">The context for the entity instance being written.</param>
-        /// <returns>The <see cref="ODataStreamPropertyInfo"/> to write.</returns>
-        internal virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
-        {
-            if (structuralProperty == null)
-            {
-                throw Error.ArgumentNull("structuralProperty");
-            }
-
-            if (resourceContext == null)
-            {
-                throw Error.ArgumentNull("resourceContext");
-            }
-
-            if (structuralProperty.Type == null || !structuralProperty.Type.IsStream())
-            {
-                return null;
-            }
-
-            if (resourceContext.SerializerContext.MetadataLevel != ODataMetadataLevel.FullMetadata)
-            {
-                return null;
-            }
-
-            // TODO: we need to return ODataStreamReferenceValue if
-            // 1) If we have the EditLink link builder
-            // 2) If we have the ReadLink link builder
-            // 3) If we have the Core.AcceptableMediaTypes annotation associated with the Stream property
-
-            // We need a way for the user to specify a mediatype for an instance of a stream property.
-            // If specified, we should explicitly write the streamreferencevalue and not let ODL fill it in.
-
-            // Although the mediatype is represented as an instance annotation in JSON, it's really control information.
-            // So we shouldn't use instance annotations to tell us the media type, but have a separate way to specify the media type.
-            // Perhaps we define an interface (and stream wrapper class that derives from stream and implements the interface) that exposes a MediaType property.
-            // If the stream property implements this interface, and it specifies a media-type other than application/octet-stream, we explicitly create and write a StreamReferenceValue with that media type.
-            // We could also use this type to expose properties for things like ReadLink and WriteLink(and even ETag)
-            // that the user could specify to something other than the default convention
-            // if they wanted to provide custom routes for reading/writing the stream values or custom ETag values for the stream.
-
-            // So far, let's return null and let OData.lib to calculate the ODataStreamReferenceValue by conventions.
-            return null;
-        }
-
-        /// <summary>
         /// Creates the <see cref="ODataProperty"/> to be written for the given entity and the structural property.
         /// </summary>
         /// <param name="structuralProperty">The EDM structural property being written.</param>
@@ -965,6 +654,187 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             return CreateODataOperation(function, builder, resourceContext) as ODataFunction;
+        }
+
+        /// <summary>
+        /// Gets the resource context for the resource being written.
+        /// </summary>
+        /// <param name="graph">The object to be written.</param>
+        /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
+        /// <returns>The <see cref="ResourceContext"/>.</returns>
+        internal ResourceContext GetResourceContext(object graph, ODataSerializerContext writeContext)
+        {
+            Contract.Assert(writeContext != null);
+
+            IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
+            ResourceContext resourceContext = new ResourceContext(writeContext, structuredType, graph);
+            EdmDeltaEntityObject deltaResource = graph as EdmDeltaEntityObject;
+            if (deltaResource != null && deltaResource.NavigationSource != null)
+            {
+                resourceContext.NavigationSource = deltaResource.NavigationSource;
+            }
+
+            return resourceContext;
+        }
+
+        /// <summary>
+        /// Writes the delta complex properties.
+        /// </summary>
+        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
+        /// <param name="resourceContext">The resource context for the resource being written.</param>
+        /// <param name="writer">The ODataWriter.</param>
+        internal void WriteDeltaComplexProperties(SelectExpandNode selectExpandNode,
+            ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = complexProperty.Key.Type.IsCollection(),
+                    Name = complexProperty.Key.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteDeltaComplexAndExpandedNavigationProperty(complexProperty.Key, null, resourceContext, writer);
+                writer.WriteEnd();
+            }
+        }
+
+        /// <summary>
+        /// Writes the delta navigation properties.
+        /// </summary>
+        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
+        /// <param name="resourceContext">The resource context for the resource being written.</param>
+        /// <param name="writer">The ODataWriter.</param>
+        internal void WriteDeltaNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null, "The resource context cannot be null");
+            Contract.Assert(writer != null, "The writer cannot be null");
+
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                writer.WriteEnd();
+            }
+        }
+
+        /// <summary>
+        /// Writes delta navigation properties asynchronously.
+        /// </summary>
+        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
+        /// <param name="resourceContext">The resource context for the resource being written.</param>
+        /// <param name="writer">The ODataWriter.</param>
+        /// <returns>A task that represents the asynchronous write operation</returns>
+        internal async Task WriteDeltaNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null, "The ResourceContext cannot be null");
+            Contract.Assert(writer != null, "The ODataWriter cannot be null");
+
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                await writer.WriteStartAsync(nestedResourceInfo);
+                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                await writer.WriteEndAsync();
+            }
+        }
+
+        /// <summary>
+        /// Writes delta complex properties asynchronously.
+        /// </summary>
+        /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
+        /// <param name="resourceContext">The resource context for the resource being written.</param>
+        /// <param name="writer">The ODataWriter.</param>
+        /// <returns>A task that represents the asynchronous write operation</returns>
+        internal async Task WriteDeltaComplexPropertiesAsync(SelectExpandNode selectExpandNode,
+            ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = complexProperty.Key.Type.IsCollection(),
+                    Name = complexProperty.Key.Name
+                };
+
+                await writer.WriteStartAsync(nestedResourceInfo);
+                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(complexProperty.Key, null, resourceContext, writer);
+                await writer.WriteEndAsync();
+            }
+        }
+
+        /// <summary>
+        /// Creates the <see cref="ODataStreamPropertyInfo"/> to be written for the given stream property.
+        /// </summary>
+        /// <param name="structuralProperty">The EDM structural property being written.</param>
+        /// <param name="resourceContext">The context for the entity instance being written.</param>
+        /// <returns>The <see cref="ODataStreamPropertyInfo"/> to write.</returns>
+        internal virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+        {
+            if (structuralProperty == null)
+            {
+                throw Error.ArgumentNull("structuralProperty");
+            }
+
+            if (resourceContext == null)
+            {
+                throw Error.ArgumentNull("resourceContext");
+            }
+
+            if (structuralProperty.Type == null || !structuralProperty.Type.IsStream())
+            {
+                return null;
+            }
+
+            if (resourceContext.SerializerContext.MetadataLevel != ODataMetadataLevel.FullMetadata)
+            {
+                return null;
+            }
+
+            // TODO: we need to return ODataStreamReferenceValue if
+            // 1) If we have the EditLink link builder
+            // 2) If we have the ReadLink link builder
+            // 3) If we have the Core.AcceptableMediaTypes annotation associated with the Stream property
+
+            // We need a way for the user to specify a mediatype for an instance of a stream property.
+            // If specified, we should explicitly write the streamreferencevalue and not let ODL fill it in.
+
+            // Although the mediatype is represented as an instance annotation in JSON, it's really control information.
+            // So we shouldn't use instance annotations to tell us the media type, but have a separate way to specify the media type.
+            // Perhaps we define an interface (and stream wrapper class that derives from stream and implements the interface) that exposes a MediaType property.
+            // If the stream property implements this interface, and it specifies a media-type other than application/octet-stream, we explicitly create and write a StreamReferenceValue with that media type.
+            // We could also use this type to expose properties for things like ReadLink and WriteLink(and even ETag)
+            // that the user could specify to something other than the default convention
+            // if they wanted to provide custom routes for reading/writing the stream values or custom ETag values for the stream.
+
+            // So far, let's return null and let OData.lib to calculate the ODataStreamReferenceValue by conventions.
+            return null;
         }
 
         internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataOperation)
@@ -1110,6 +980,136 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     string resourceTypeName = resource.TypeName;
                     return String.Equals(resourceTypeName, pathTypeName, StringComparison.Ordinal);
             }
+        }
+
+        private ODataResourceBase CreateResource(SelectExpandNode selectExpandNode, ResourceContext resourceContext, bool isDeletedResource)
+        {
+            if (selectExpandNode == null)
+            {
+                throw Error.ArgumentNull("selectExpandNode");
+            }
+
+            if (resourceContext == null)
+            {
+                throw Error.ArgumentNull("resourceContext");
+            }
+
+            if (resourceContext.SerializerContext.ExpandReference)
+            {
+                if (isDeletedResource)
+                {
+                    return new ODataDeletedResource
+                    {
+                        Id = resourceContext.GenerateSelfLink(false)
+                    };
+                }
+
+                return new ODataResource
+                {
+                    Id = resourceContext.GenerateSelfLink(false)
+                };
+            }
+
+            string typeName = resourceContext.StructuredType.FullTypeName();
+            ODataResourceBase resource;
+
+            if (isDeletedResource)
+            {
+                resource = new ODataDeletedResource
+                {
+                    TypeName = typeName,
+                    Properties = CreateStructuralPropertyBag(selectExpandNode, resourceContext),
+                };
+            }
+            else
+            {
+                resource = new ODataResource
+                {
+                    TypeName = typeName,
+                    Properties = CreateStructuralPropertyBag(selectExpandNode, resourceContext),
+                };
+            }
+
+
+            if (resourceContext.EdmObject is EdmDeltaEntityObject && resourceContext.NavigationSource != null)
+            {
+                ODataResourceSerializationInfo serializationInfo = new ODataResourceSerializationInfo();
+                serializationInfo.NavigationSourceName = resourceContext.NavigationSource.Name;
+                serializationInfo.NavigationSourceKind = resourceContext.NavigationSource.NavigationSourceKind();
+                IEdmEntityType sourceType = resourceContext.NavigationSource.EntityType();
+                if (sourceType != null)
+                {
+                    serializationInfo.NavigationSourceEntityTypeName = sourceType.Name;
+                }
+                resource.SetSerializationInfo(serializationInfo);
+            }
+
+            // Try to add the dynamic properties if the structural type is open.
+            AppendDynamicProperties(resource, selectExpandNode, resourceContext);
+
+            // Try to add instance annotations
+            AppendInstanceAnnotations(resource, resourceContext);
+
+            if (selectExpandNode.SelectedActions != null)
+            {
+                IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, resourceContext);
+                foreach (ODataAction action in actions)
+                {
+                    resource.AddAction(action);
+                }
+            }
+
+            if (selectExpandNode.SelectedFunctions != null)
+            {
+                IEnumerable<ODataFunction> functions = CreateODataFunctions(selectExpandNode.SelectedFunctions, resourceContext);
+                foreach (ODataFunction function in functions)
+                {
+                    resource.AddFunction(function);
+                }
+            }
+
+            IEdmStructuredType pathType = GetODataPathType(resourceContext.SerializerContext);
+            if (resourceContext.StructuredType.TypeKind == EdmTypeKind.Complex)
+            {
+                AddTypeNameAnnotationAsNeededForComplex(resource, resourceContext.SerializerContext.MetadataLevel);
+            }
+            else
+            {
+                AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
+            }
+
+            if (!isDeletedResource && resourceContext.StructuredType.TypeKind == EdmTypeKind.Entity && resourceContext.NavigationSource != null)
+            {
+                if (!(resourceContext.NavigationSource is IEdmContainedEntitySet))
+                {
+                    IEdmModel model = resourceContext.SerializerContext.Model;
+                    NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(resourceContext.NavigationSource);
+                    EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(resourceContext, resourceContext.SerializerContext.MetadataLevel);
+
+                    if (selfLinks.IdLink != null)
+                    {
+                        resource.Id = selfLinks.IdLink;
+                    }
+
+                    if (selfLinks.ReadLink != null)
+                    {
+                        resource.ReadLink = selfLinks.ReadLink;
+                    }
+
+                    if (selfLinks.EditLink != null)
+                    {
+                        resource.EditLink = selfLinks.EditLink;
+                    }
+                }
+
+                string etag = CreateETag(resourceContext);
+                if (etag != null)
+                {
+                    resource.ETag = etag;
+                }
+            }
+
+            return resource;
         }
 
         private void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,

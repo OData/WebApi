@@ -269,7 +269,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
         /// <param name="resourceContext">The resource context for the resource being written.</param>
         /// <param name="writer">The ODataWriter.</param>
-        /// <returns></returns>
+        /// <returns>A task that represents the asynchronous write operation</returns>
         internal async Task WriteDeltaNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(resourceContext != null, "The ResourceContext cannot be null");
@@ -297,7 +297,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="selectExpandNode">Contains the set of properties and actions to use to select and expand while writing an entity.</param>
         /// <param name="resourceContext">The resource context for the resource being written.</param>
         /// <param name="writer">The ODataWriter.</param>
-        /// <returns></returns>
+        /// <returns>A task that represents the asynchronous write operation</returns>
         internal async Task WriteDeltaComplexPropertiesAsync(SelectExpandNode selectExpandNode,
             ResourceContext resourceContext, ODataWriter writer)
         {

@@ -28,7 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
     public class DeltaQueryTests : WebHostTestBase
     {
         public DeltaQueryTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -51,6 +51,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
         {
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/TestCustomers?$deltaToken=abc");
             get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
+            get.Headers.Add("OData-Version", "4.01");
             HttpResponseMessage response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic results = await response.Content.ReadAsObject<JObject>();
@@ -59,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
 
             var changeEntity = results.value[0];
             Assert.True(((JToken)changeEntity).Count() == 7, "The changed customer should have 6 properties plus type written.");
-            string changeEntityType = changeEntity["@odata.type"].Value as string;
+            string changeEntityType = changeEntity["@type"].Value as string;
             Assert.True(changeEntityType != null, "The changed customer should have type written");
             Assert.True(changeEntityType.Contains("#Microsoft.Test.E2E.AspNet.OData.TestCustomerWithAddress"), "The changed order should be a TestCustomerWithAddress");
             Assert.True(changeEntity.Id.Value == 1, "The ID Of changed customer should be 1.");
@@ -98,22 +99,22 @@ namespace Microsoft.Test.E2E.AspNet.OData
 
             var newOrder = results.value[2];
             Assert.True(((JToken)newOrder).Count() == 3, "The new order should have 2 properties plus context written");
-            string newOrderContext = newOrder["@odata.context"].Value as string;
+            string newOrderContext = newOrder["@context"].Value as string;
             Assert.True(newOrderContext != null, "The new order should have a context written");
             Assert.True(newOrderContext.Contains("$metadata#TestOrders"), "The new order should come from the TestOrders entity set");
             Assert.True(newOrder.Id.Value == 27, "The ID of the new order should be 27");
             Assert.True(newOrder.Amount.Value == 100, "The amount of the new order should be 100");
 
             var deletedEntity = results.value[3];
-            Assert.True(deletedEntity.id.Value == "7", "The ID of the deleted customer should be 7");
-            Assert.True(deletedEntity.reason.Value == "changed", "The reason for the deleted customer should be 'changed'");
+            Assert.True(deletedEntity["@id"].Value == "7", "The ID of the deleted customer should be 7");
+            Assert.True(deletedEntity["@removed"].reason.Value == "changed", "The reason for the deleted customer should be 'changed'");
 
             var deletedOrder = results.value[4];
-            string deletedOrderContext = deletedOrder["@odata.context"].Value as string;
+            string deletedOrderContext = deletedOrder["@context"].Value as string;
             Assert.True(deletedOrderContext != null, "The deleted order should have a context written");
             Assert.True(deletedOrderContext.Contains("$metadata#TestOrders"), "The deleted order should come from the TestOrders entity set");
-            Assert.True(deletedOrder.id.Value == "12", "The ID of the deleted order should be 12");
-            Assert.True(deletedOrder.reason.Value == "deleted", "The reason for the deleted order should be 'deleted'");
+            Assert.True(deletedOrder["@id"].Value == "12", "The ID of the deleted order should be 12");
+            Assert.True(deletedOrder["@removed"].reason.Value == "deleted", "The reason for the deleted order should be 'deleted'");
 
             var deletedLink = results.value[5];
             Assert.True(deletedLink.source.Value == "http://localhost/odata/DeltaCustomers(1)", "The source of the deleted link should be 'http://localhost/odata/DeltaCustomers(1)'");
@@ -152,7 +153,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
             changedEntity.TrySetPropertyValue("NullOpenProperty", null);
             changedObjects.Add(changedEntity);
 
-            EdmComplexObjectCollection places = new EdmComplexObjectCollection(new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(addressType,true))));
+            EdmComplexObjectCollection places = new EdmComplexObjectCollection(new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(addressType, true))));
             EdmDeltaComplexObject b = new EdmDeltaComplexObject(addressType);
             b.TrySetPropertyValue("City", "City2");
             b.TrySetPropertyValue("State", "State2");
@@ -167,7 +168,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
             newCustomer.TrySetPropertyValue("Name", "NewCustomer");
             newCustomer.TrySetPropertyValue("FavoritePlaces", places);
             changedObjects.Add(newCustomer);
-            
+
             var newOrder = new EdmDeltaEntityObject(orderType);
             newOrder.NavigationSource = ordersSet;
             newOrder.TrySetPropertyValue("Id", 27);
@@ -206,7 +207,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
         public int Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
-        public virtual IList<string> PhoneNumbers {get; set;}
+        public virtual IList<string> PhoneNumbers { get; set; }
         public virtual IList<TestOrder> Orders { get; set; }
         public virtual IList<TestAddress> FavoritePlaces { get; set; }
         public IDictionary<string, object> DynamicProperties { get; set; }

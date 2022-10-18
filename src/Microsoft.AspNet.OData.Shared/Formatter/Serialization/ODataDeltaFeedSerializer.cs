@@ -449,19 +449,18 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw new SerializationException(
                     Error.Format(SRResources.TypeCannotBeSerialized, _elementType.FullName()));
             }
-            else 
-            {
-                ResourceContext resourceContext = serializer.GetResourceContext(graph, writeContext);
-                SelectExpandNode selectExpandNode = serializer.CreateSelectExpandNode(resourceContext);
 
-                if (selectExpandNode != null)
-                {
-                    ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext, serializer, selectExpandNode, writeContext.IsUntyped);
-                    writer.WriteStart(deletedResource);
-                    serializer.WriteDeltaComplexProperties(selectExpandNode, resourceContext, writer);
-                    writer.WriteEnd();
-                }
+            ResourceContext resourceContext = serializer.GetResourceContext(graph, writeContext);
+            SelectExpandNode selectExpandNode = serializer.CreateSelectExpandNode(resourceContext);
+
+            if (selectExpandNode != null)
+            {
+                ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext, serializer, selectExpandNode, writeContext.IsUntyped);
+                writer.WriteStart(deletedResource);
+                serializer.WriteDeltaComplexProperties(selectExpandNode, resourceContext, writer);
+                writer.WriteEnd();
             }
+
         }
 
         /// <summary>

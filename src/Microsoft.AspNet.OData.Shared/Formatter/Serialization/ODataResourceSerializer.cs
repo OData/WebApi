@@ -225,8 +225,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <returns>The created <see cref="ODataResource"/>.</returns>
         public virtual ODataResource CreateResource(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
-            ODataResource resource = CreateResource(selectExpandNode, resourceContext, false) as ODataResource;
-            return resource;
+            return CreateResource(selectExpandNode, resourceContext, false) as ODataResource;
         }
 
         /// <summary>

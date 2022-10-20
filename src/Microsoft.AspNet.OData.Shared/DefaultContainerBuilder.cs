@@ -85,6 +85,25 @@ namespace Microsoft.AspNet.OData
         {
             try
             {
+                // On .NET Framework platform, if using Microsoft.Extensions.DependencyInjection > 6.x version,
+                // The runtime throws exception directly when calling BuildContainer if we can 'services.BuildServiceProvider()'
+                // So, wrap 'services.BuildServiceProvider()' into a private method call, we can catch the runtime exception directly				
+                return services.BuildContainerImpl();
+            }
+            catch
+            {
+                MethodInfo buildServiceProviderMethod =
+                    typeof(ServiceCollectionContainerBuilderExtensions)
+                    .GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) });
+
+                return (IServiceProvider)buildServiceProviderMethod.Invoke(null, new object[] { services });
+            }
+        }
+
+        private IServiceProvider BuildContainerImpl()
+        {
+            try
+            {
                 return services.BuildServiceProvider();
             }
             catch (MissingMethodException)

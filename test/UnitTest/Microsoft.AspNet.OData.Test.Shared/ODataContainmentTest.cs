@@ -377,9 +377,11 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             var response = await _client.SendAsync(request);
+            //int x = 5;
             var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
+            //Assert.Equal(5, x);
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("http://localhost/odata/$metadata#OrderLines", (string)result["@odata.context"]);
         }

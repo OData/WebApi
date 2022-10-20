@@ -120,6 +120,20 @@ namespace Microsoft.AspNet.OData.Test.Common
             tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
             model.AddElement(tag);
 
+            // order line detail
+            EdmEntityType orderLineDetail = new EdmEntityType("NS", "OrderLineDetail");
+            orderLineDetail.AddKeys(orderLine.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            model.AddElement(orderLineDetail);
+
+            EdmNavigationProperty orderLineDetailsNavProp = orderLine.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "OrderLineDetails",
+                    TargetMultiplicity = EdmMultiplicity.Many,
+                    Target = orderLineDetail,
+                    ContainsTarget = true,
+                });
+
             // entity sets
             EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
             model.AddElement(container);
@@ -131,12 +145,14 @@ namespace Microsoft.AspNet.OData.Test.Common
             EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
             EdmSingleton mary = container.AddSingleton("Mary", customer);
             EdmSingleton rootOrder = container.AddSingleton("RootOrder", order);
+            EdmSingleton vipOrder = container.AddSingleton("VipOrder", myOrder);
 
             // annotations
             model.SetOptimisticConcurrencyAnnotation(customers, new[] { city });
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
+            IEdmContainedEntitySet orderLineDetails = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLineDetailsNavProp);
 
             // no-containment
             IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
@@ -368,8 +384,10 @@ namespace Microsoft.AspNet.OData.Test.Common
             VipCustomer = vipCustomer;
             Mary = mary;
             RootOrder = rootOrder;
+            VipOrder = vipOrder;
             OrderLine = orderLine;
             OrderLines = orderLines;
+            OrderLineDetails = orderLineDetails;
             NonContainedOrderLines = nonContainedOrderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
@@ -391,6 +409,8 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public EdmEntityType OrderLine { get; private set; }
 
+        public EdmEntityType OrderLineDetail { get; private set; }
+
         public EdmComplexType Address { get; private set; }
 
         public EdmComplexType Account { get; private set; } // Open Complex Type
@@ -405,7 +425,11 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public EdmSingleton RootOrder { get; private set; }
 
+        public EdmSingleton VipOrder { get; private set; }
+
         public IEdmContainedEntitySet OrderLines { get; private set; }
+
+        public IEdmContainedEntitySet OrderLineDetails { get; private set; }
 
         public IEdmNavigationSource NonContainedOrderLines { get; private set; }
 

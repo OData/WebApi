@@ -106,6 +106,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderCancellation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderLineDetail.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\RecursiveModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\SpecialOrderLine.cs" />

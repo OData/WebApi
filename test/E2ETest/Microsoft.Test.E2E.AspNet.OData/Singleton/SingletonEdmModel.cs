@@ -15,6 +15,101 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
     internal class SingletonEdmModel
     {
+
+        // EXPERIMENTAL VERSION
+        // Next step: try to add link for nav property or some way to get the project details to show up
+        /*public static IEdmModel GetExplicitModel(string singletonName)
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Define EntityType of Partner
+            var partner = builder.EntityType<Partner>();
+            partner.HasKey(p => p.ID);
+            partner.Property(p => p.Name);
+            var partnerCompany = partner.HasRequired(p => p.Company);
+
+            // Define Enum Type
+            var category = builder.EnumType<CompanyCategory>();
+            category.Member(CompanyCategory.IT);
+            category.Member(CompanyCategory.Communication);
+            category.Member(CompanyCategory.Electronics);
+            category.Member(CompanyCategory.Others);
+
+            // Define EntityType of Company
+            var company = builder.EntityType<Company>();
+            company.HasKey(p => p.ID);
+            company.Property(p => p.Name);
+            company.Property(p => p.Revenue);
+            company.EnumProperty(p => p.Category);
+            var companyPartners = company.HasMany(p => p.Partners);
+            companyPartners.IsNotCountable();
+
+            var companyBranches = company.CollectionProperty(p => p.Branches);
+
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            project.CollectionProperty(p => p.ProjectDetails);
+            //var companyProjects = company.ContainsMany(p => p.Projects);
+
+            //// Define EntityType of ProjectDetails
+            //var projectDetail = builder.EntityType<ProjectDetail>();
+            //projectDetail.HasKey(p => p.Id);
+            //projectDetail.Property(p => p.Comment);
+            //var projectDetails = project.ContainsMany(p => p.ProjectDetails);
+
+            // Define Complex Type: Office
+            var office = builder.ComplexType<Office>();
+            office.Property(p => p.City);
+            office.Property(p => p.Address);
+
+            // Define Derived Type: SubCompany
+            var subCompany = builder.EntityType<SubCompany>();
+            subCompany.DerivesFrom<Company>();
+            subCompany.Property(p => p.Location);
+            subCompany.Property(p => p.Description);
+            subCompany.ComplexProperty(p => p.Office);
+
+            builder.Namespace = typeof(Partner).Namespace;
+
+            // Define PartnerSet and Company(singleton)
+            EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
+            partnersConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
+            Func<ResourceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
+            partnersConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            SingletonConfiguration<Company> companyConfiguration = builder.Singleton<Company>(singletonName);
+            companyConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            companyConfiguration.HasManyBinding(c => c.Partners, "Partners");
+            Func<ResourceContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
+            companyConfiguration.EntityType.Action("ResetDataSource");
+            companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
+
+            // Define ProjectSet and Company(singleton)
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            //Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProject = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            //companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            //// Define ProjectDetailsSet
+            //EntitySetConfiguration<ProjectDetail> projectDetailsConfiguration = builder.EntitySet<ProjectDetail>("ProjectDetails");
+            //projectDetailsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            ////Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProjectDetail = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            //companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+
+            // Define 
+            // companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            return builder.GetEdmModel();
+        }*/
+
         public static IEdmModel GetExplicitModel(string singletonName)
         {
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -42,6 +137,193 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             companyPartners.IsNotCountable();
 
             var companyBranches = company.CollectionProperty(p => p.Branches);
+
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            var companyProjects = company.ContainsMany(p => p.Projects);
+
+            // Define EntityType of ProjectDetails
+            var detail = builder.EntityType<ProjectDetail>();
+            detail.HasKey(p => p.Id);
+            detail.Property(p => p.Comment);
+            var projectDetails = project.ContainsMany(p => p.ProjectDetails);
+
+            // Define Complex Type: Office
+            var office = builder.ComplexType<Office>();
+            office.Property(p => p.City);
+            office.Property(p => p.Address);
+
+            // Define Derived Type: SubCompany
+            var subCompany = builder.EntityType<SubCompany>();
+            subCompany.DerivesFrom<Company>();
+            subCompany.Property(p => p.Location);
+            subCompany.Property(p => p.Description);
+            subCompany.ComplexProperty(p => p.Office);
+
+            builder.Namespace = typeof(Partner).Namespace;
+
+            // Define PartnerSet and Company(singleton)
+            EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
+            partnersConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
+            Func<ResourceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
+            partnersConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            SingletonConfiguration<Company> companyConfiguration = builder.Singleton<Company>(singletonName);
+            companyConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            companyConfiguration.HasManyBinding(c => c.Partners, "Partners");
+            Func<ResourceContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
+            companyConfiguration.EntityType.Action("ResetDataSource");
+            companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
+
+            // Define ProjectSet and add to Company
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            //Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProject = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //projectsConfiguration.HasNavigationPropertyLink()
+            projectsConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            // Define ProjectDetailsSet and add to Project
+            EntitySetConfiguration<ProjectDetail> detailsConfiguration = builder.EntitySet<ProjectDetail>("ProjectDetails");
+            detailsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            //Func<ResourceContext<ProjectDetail>, IEdmNavigationProperty, Uri> linkToProjectDetail = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //detailsConfiguration.HasNavigationPropertyLink()
+            detailsConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            projectsConfiguration.HasManyBinding(c => c.ProjectDetails, "ProjectDetails");
+            Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> projectLinkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            projectsConfiguration.HasNavigationPropertyLink(projectDetails, projectLinkFactory, true);
+
+            return builder.GetEdmModel();
+        }
+
+        // EMPTY PROJECT DETAILS
+        /*public static IEdmModel GetExplicitModel(string singletonName)
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Define EntityType of Partner
+            var partner = builder.EntityType<Partner>();
+            partner.HasKey(p => p.ID);
+            partner.Property(p => p.Name);
+            var partnerCompany = partner.HasRequired(p => p.Company);
+
+            // Define Enum Type
+            var category = builder.EnumType<CompanyCategory>();
+            category.Member(CompanyCategory.IT);
+            category.Member(CompanyCategory.Communication);
+            category.Member(CompanyCategory.Electronics);
+            category.Member(CompanyCategory.Others);
+
+            // Define EntityType of Company
+            var company = builder.EntityType<Company>();
+            company.HasKey(p => p.ID);
+            company.Property(p => p.Name);
+            company.Property(p => p.Revenue);
+            company.EnumProperty(p => p.Category);
+            var companyPartners = company.HasMany(p => p.Partners);
+            companyPartners.IsNotCountable();
+
+            var companyBranches = company.CollectionProperty(p => p.Branches);
+
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            project.CollectionProperty(p => p.ProjectDetails);
+            //project.ContainsMany(p => p.ProjectDetails);
+            var companyProjects = company.ContainsMany(p => p.Projects);
+
+            //// Define EntityType of ProjectDetails
+            //var projectDetail = builder.EntityType<ProjectDetail>();
+            //projectDetail.HasKey(p => p.Id);
+            //projectDetail.Property(p => p.Comment);
+
+            // Define Complex Type: Office
+            var office = builder.ComplexType<Office>();
+            office.Property(p => p.City);
+            office.Property(p => p.Address);
+
+            // Define Derived Type: SubCompany
+            var subCompany = builder.EntityType<SubCompany>();
+            subCompany.DerivesFrom<Company>();
+            subCompany.Property(p => p.Location);
+            subCompany.Property(p => p.Description);
+            subCompany.ComplexProperty(p => p.Office);
+
+            builder.Namespace = typeof(Partner).Namespace;
+
+            // Define PartnerSet and Company(singleton)
+            EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
+            partnersConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
+            Func<ResourceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
+            partnersConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            SingletonConfiguration<Company> companyConfiguration = builder.Singleton<Company>(singletonName);
+            companyConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            companyConfiguration.HasManyBinding(c => c.Partners, "Partners");
+            Func<ResourceContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
+            companyConfiguration.EntityType.Action("ResetDataSource");
+            companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
+
+            // Define ProjectSet and Company(singleton)
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProject = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            // Define 
+            // companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            return builder.GetEdmModel();
+        }*/
+
+        // EARLIER VERSION
+        /*public static IEdmModel GetExplicitModel(string singletonName)
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Define EntityType of Partner
+            var partner = builder.EntityType<Partner>();
+            partner.HasKey(p => p.ID);
+            partner.Property(p => p.Name);
+            var partnerCompany = partner.HasRequired(p => p.Company);
+
+            // Define Enum Type
+            var category = builder.EnumType<CompanyCategory>();
+            category.Member(CompanyCategory.IT);
+            category.Member(CompanyCategory.Communication);
+            category.Member(CompanyCategory.Electronics);
+            category.Member(CompanyCategory.Others);
+
+            // Define EntityType of Company
+            var company = builder.EntityType<Company>();
+            company.HasKey(p => p.ID);
+            company.Property(p => p.Name);
+            company.Property(p => p.Revenue);
+            company.EnumProperty(p => p.Category);
+            var companyPartners = company.HasMany(p => p.Partners);
+            companyPartners.IsNotCountable();
+
+            var companyBranches = company.CollectionProperty(p => p.Branches);
+            
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            project.CollectionProperty(p => p.ProjectDetails);
+            var companyProjects = company.ContainsMany(p => p.Projects); // Try: ContainsMany
 
             // Define Complex Type: Office
             var office = builder.ComplexType<Office>();
@@ -73,8 +355,108 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             companyConfiguration.EntityType.Action("ResetDataSource");
             companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
 
+            // Define ProjectSet and Company(singleton)
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            //projectsConfiguration.HasSingletonBinding(c => c.Company, singletonName);
+            Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProject = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //projectsConfiguration.HasNavigationPropertyLink(projectCompany, linkToProject, true);
+
+            companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            // Define 
+            // companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
             return builder.GetEdmModel();
-        }
+        }*/
+
+        // THIS NO LONGER HAS THE PROJECTDETAILS PROP ON A GIVEN PROJECT
+        // TODO: Figure out why and properly set up relationships to link the props of a project detail
+        /*public static IEdmModel GetExplicitModel(string singletonName)
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Define EntityType of Partner
+            var partner = builder.EntityType<Partner>();
+            partner.HasKey(p => p.ID);
+            partner.Property(p => p.Name);
+            var partnerCompany = partner.HasRequired(p => p.Company);
+
+            // Define Enum Type
+            var category = builder.EnumType<CompanyCategory>();
+            category.Member(CompanyCategory.IT);
+            category.Member(CompanyCategory.Communication);
+            category.Member(CompanyCategory.Electronics);
+            category.Member(CompanyCategory.Others);
+
+            // Define EntityType of Company
+            var company = builder.EntityType<Company>();
+            company.HasKey(p => p.ID);
+            company.Property(p => p.Name);
+            company.Property(p => p.Revenue);
+            company.EnumProperty(p => p.Category);
+            var companyPartners = company.HasMany(p => p.Partners);
+            var companyProjects = company.ContainsMany(p => p.Projects);
+            companyPartners.IsNotCountable();
+
+            var companyBranches = company.CollectionProperty(p => p.Branches);
+
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            var projectDetails = project.ContainsMany(p => p.ProjectDetails);
+
+            // Define EntityType of ProjectDetails
+            var projectDetail = builder.EntityType<ProjectDetail>();
+            projectDetail.HasKey(p => p.Id);
+            projectDetail.Property(p => p.Comment);
+
+            // Define Complex Type: Office
+            var office = builder.ComplexType<Office>();
+            office.Property(p => p.City);
+            office.Property(p => p.Address);
+
+            // Define Derived Type: SubCompany
+            var subCompany = builder.EntityType<SubCompany>();
+            subCompany.DerivesFrom<Company>();
+            subCompany.Property(p => p.Location);
+            subCompany.Property(p => p.Description);
+            subCompany.ComplexProperty(p => p.Office);
+
+            builder.Namespace = typeof(Partner).Namespace;
+
+            // Define PartnerSet and Company(singleton)
+            EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
+            partnersConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
+            Func<ResourceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
+            partnersConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            SingletonConfiguration<Company> companyConfiguration = builder.Singleton<Company>(singletonName);
+            companyConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            companyConfiguration.HasManyBinding(c => c.Partners, "Partners");
+            Func<ResourceContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
+            companyConfiguration.EntityType.Action("ResetDataSource");
+            companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
+
+            // Define ProjectSet and Company(singleton)
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> linkToProject = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            //projectsConfiguration.HasNavigationPropertyLink(projectCompany, linkToProject, true);
+
+            companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            // Define 
+            // companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            return builder.GetEdmModel();
+        }*/
 
         public static IEdmModel GetConventionModel(WebRouteConfiguration configuration, string singletonName)
         {

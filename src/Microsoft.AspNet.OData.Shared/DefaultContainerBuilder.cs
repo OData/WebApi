@@ -85,22 +85,24 @@ namespace Microsoft.AspNet.OData
         {
             try
             {
-                return services.BuildServiceProvider();
+                // On .NET Framework platform, if using Microsoft.Extensions.DependencyInjection > 6.x version,
+                // The runtime throws exception directly when calling BuildContainer if we call 'services.BuildServiceProvider()' within it.
+                // So, wrap 'services.BuildServiceProvider()' into a private method call, we can catch the runtime exception directly				
+                return BuildServiceProviderImpl();
             }
-            catch (MissingMethodException)
+            catch
             {
-                /* "services.BuildServiceProvider()" returns IServiceProvider in Microsoft.Extensions.DependencyInjection 1.0 and ServiceProvider in Microsoft.Extensions.DependencyInjection 2.0
-                 * * (This is a breaking change)[https://github.com/aspnet/DependencyInjection/issues/550].
-                * To support both versions with the same code base in OData/WebAPI we decided to call that extension method using reflection.
-                * More info at https://github.com/OData/WebApi/pull/1082
-                */
-
                 MethodInfo buildServiceProviderMethod =
                     typeof(ServiceCollectionContainerBuilderExtensions)
                     .GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) });
 
                 return (IServiceProvider)buildServiceProviderMethod.Invoke(null, new object[] { services });
             }
+        }
+
+        private IServiceProvider BuildServiceProviderImpl()
+        {
+            return services.BuildServiceProvider();
         }
 
         private static Microsoft.Extensions.DependencyInjection.ServiceLifetime TranslateServiceLifetime(

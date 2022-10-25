@@ -71,6 +71,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             EntitySetConfiguration<Company> companies = builder.EntitySet<Company>("Companies");
             EntitySetConfiguration<NewOrder> overdueorders = builder.EntitySet<NewOrder>("OverdueOrders");
+            EntitySetConfiguration<NewOrderLine> orderLines = builder.EntitySet<NewOrderLine>("OrderLines");
             EntitySetConfiguration<MyNewOrder> myoverdueorders = builder.EntitySet<MyNewOrder>("MyOverdueOrders");
             EntitySetConfiguration<NewOrder> myNewOrders = builder.EntitySet<NewOrder>("MyNewOrders");
 

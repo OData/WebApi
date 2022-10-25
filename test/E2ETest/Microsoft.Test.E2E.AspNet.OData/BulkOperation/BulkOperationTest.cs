@@ -871,7 +871,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             //Act & Assert
             var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -902,7 +902,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company02\",\"MyOverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -964,10 +964,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "#Companies/$entity\",\"Id\":3,\"Name\":\"Company03\",\"OverdueOrders\":[{\"Id\":1,\"Price\":101,\"Quantity\":0}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
         }
 
@@ -988,10 +991,68 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "#Companies/$entity\",\"Id\":4,\"Name\":\"Company04\",\"OverdueOrders\":[{\"Id\":1,\"Price\":101,\"Quantity\":0},{\"Id\":4,\"Price\":30,\"Quantity\":0}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+        }
+
+        [Fact]
+        public async Task PostCompany_WithMultipleNestedNavigationProperties()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'Id':5,'Name':'Company05',
+                            'OverdueOrders':[{'@odata.id':'OverdueOrders(4)'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            var expected = "#Companies/$entity\",\"Id\":5,\"Name\":\"Company05\",\"OverdueOrders\":[{\"Id\":4,\"Price\":40,\"Quantity\":0}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+        }
+
+        [Fact]
+        public async Task PostCompany_WithMultipleNestedNavigationPropertiesWithExpand()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies?$expand=OverdueOrders($expand=OrderLines)";
+            //string requestUri = this.BaseAddress + "/convention/Companies?$expand=OrderLines";
+
+            var content = @"{'Id':5,'Name':'Company05',
+                            'OverdueOrders':[{'@odata.id':'OverdueOrders(4)'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            var expected = "#Companies/$entity\",\"Id\":5,\"Name\":\"Company05\",\"OverdueOrders\":[{\"Id\":4,\"Price\":40,\"Quantity\":0}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
         }
 

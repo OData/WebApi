@@ -34,7 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public static IList<IEdmStructuredObject> EmployeesTypeless = null;
 
-        private List<Friend> Friends = null;
+        public static List<Friend> Friends = null;
 
         private void InitEmployees()
         {
@@ -51,7 +51,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     AccessLevel=AccessLevel.Execute,
                     FavoriteSports = new FavoriteSports{Sport ="Football"},
                     NewFriends = new List<NewFriend>(){new NewFriend {Id =1, Name ="NewFriendTest1", Age=33, NewOrders= new List<NewOrder>() { new NewOrder {Id=1, Price =101 } } } },
-                    Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
+                    //Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
+                    Friends = Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
                 },
                 new Employee()
                 {
@@ -60,7 +61,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
                     NewFriends = new List<NewFriend>(){ new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444 , Quantity=2 } } } },
-                    Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
+                    //Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
+                    Friends =  Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
                 },
                 new Employee(){
                     ID=3,Name="Name3",
@@ -402,6 +404,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public static IList<Company> Companies = null;
         public static IList<NewOrder> OverdueOrders = null;
         public static IList<MyNewOrder> MyOverdueOrders = null;
+        public static IList<NewOrderLine> OrderLines = null;
 
         public CompanyController()
         {
@@ -413,7 +416,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         private void InitCompanies()
         {
-            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10, Quantity = 1 }, new NewOrder { Id = 2, Price = 20, Quantity = 2 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
+            OrderLines = new List<NewOrderLine>() { new NewOrderLine { Id = 1, ProductName = "Product 1" }, new NewOrderLine { Id = 2, ProductName = "Product 2" }, new NewOrderLine { Id = 3, ProductName = "Product 3" } };
+            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10, Quantity = 1 }, new NewOrder { Id = 2, Price = 20, Quantity = 2 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40, OrderLines = OrderLines.Where(x => x.Id == 1 || x.Id == 2).ToList() } };
             MyOverdueOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 1, Price = 10, Quantity = 1 }, new MyNewOrder { Id = 2, Price = 20, Quantity = 2 }, new MyNewOrder { Id = 3, Price = 30 }, new MyNewOrder { Id = 4, Price = 40 } };
 
             Companies = new List<Company>() { new Company { Id = 1, Name = "Company1", OverdueOrders = OverdueOrders.Where(x => x.Id == 2).ToList(), MyOverdueOrders = MyOverdueOrders.Where(x => x.Id == 2).ToList() } ,
@@ -469,6 +473,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             if (company.Id == 4)
             {
                 ValidateOverdueOrders1(4, 4, 0, 30);
+            }
+            else if (company.Id == 5)
+            {
+                ValidateOverdueOrders1(5, 4, 0, 40);
             }
             else
             {

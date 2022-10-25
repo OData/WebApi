@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using Microsoft.OData.UriParser;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -110,6 +111,11 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
+            return null;
+        }
+
+        public override IODataAPIHandler GetNestedHandler(ODataPath oDataPath)
+        {
             return null;
         }
 

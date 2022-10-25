@@ -76,7 +76,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public int Age { get; set; }
 
         public List<Order> Orders { get; set; }
-
     }
 
 
@@ -132,7 +131,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public int Quantity { get; set; }
 
+        public List<NewOrderLine> OrderLines { get; set; }
+
         public IODataIdContainer Container {get;set;}
+    }
+
+    public class NewOrderLine
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string ProductName { get; set; }
+
+        public IODataIdContainer Container { get; set; }
     }
 
 

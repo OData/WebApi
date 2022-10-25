@@ -58,6 +58,13 @@ namespace Microsoft.AspNet.OData
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
+        /// Get the ODataAPIHandler for the nested type
+        /// </summary>
+        /// <param name="oDataPath"></param>
+        /// <returns>The type of Nested ODataAPIHandler</returns>
+        public abstract IODataAPIHandler GetNestedHandler(ODataPath oDataPath);
+
+        /// <summary>
         /// The parent object
         /// </summary>
         internal TStructuralType ParentObject { get; set; }
@@ -160,8 +167,9 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    IODataAPIHandler apiHandlerNested = this.GetNestedHandler(this.ParentObject, odataPath.LastSegment.Identifier);
+                    IODataAPIHandler apiHandlerNested = this.GetNestedHandler(odataPath);
                     object[] getParams = new object[] { keys, null, null };
+
                     if (apiHandlerNested.GetType().GetMethod(nameof(TryGet)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
                     {
                         return getParams[1];

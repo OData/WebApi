@@ -346,6 +346,11 @@ namespace Microsoft.AspNet.OData.Test
             return new NewFriendPatchHandler(parent);
         }
 
+        public override IODataAPIHandler GetNestedHandler(ODataPath oDataPath)
+        {
+            throw new NotImplementedException();
+        }
+
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
         {
             createdObject = new Friend();
@@ -383,6 +388,11 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandler(ODataPath oDataPath)
         {
             throw new NotImplementedException();
         }

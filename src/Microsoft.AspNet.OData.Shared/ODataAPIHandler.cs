@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="resource">resource to apply odata id on</param>
         /// <param name="model">The model.</param>
-        public virtual void UpdateLinkedObjects(TStructuralType resource, IEdmModel model)
+        internal virtual void UpdateLinkedObjects(TStructuralType resource, IEdmModel model)
         {
             if (resource != null && model != null)
             {

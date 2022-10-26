@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
@@ -209,11 +210,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         [Theory]
         [InlineData("/convention/Employees/$count", true)]
         [InlineData("/convention/Employees/$count", false)]
-        public async Task QueryEntitySetCountEncoding(string requestUri, bool sendAcceptCharset)
+        public async Task QueryEntitySetCountEncoding(string url, bool sendAcceptCharset)
         {
             // Arrange
             await ResetDatasource();
-            var message = new HttpRequestMessage(HttpMethod.Get, requestUri);
+			string requestUri = this.BaseAddress + url;
+			var message = new HttpRequestMessage(HttpMethod.Get, requestUri);
             message.Headers.AcceptCharset.Clear();
             if (sendAcceptCharset)
             {

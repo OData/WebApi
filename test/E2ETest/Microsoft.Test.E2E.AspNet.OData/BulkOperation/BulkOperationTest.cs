@@ -134,7 +134,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -177,7 +177,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -218,7 +218,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -259,7 +259,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -298,7 +298,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
             requestForPost.Content = new StringContent(content);
 
             requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
@@ -326,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
            
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -352,7 +352,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -380,7 +380,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -421,7 +421,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -579,7 +579,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -619,7 +619,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -864,7 +864,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -895,7 +895,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -926,7 +926,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.0");
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;

@@ -37,6 +37,9 @@ public interface Microsoft.AspNet.OData.IDeltaDeletedEntityObject {
 	System.Nullable`1[[Microsoft.OData.DeltaDeletedEntryReason]] Reason  { public abstract get; public abstract set; }
 }
 
+public interface Microsoft.AspNet.OData.IDeltaSet {
+}
+
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
 	ODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
@@ -149,7 +152,7 @@ public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandle
 	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& createdObject, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
-	public virtual void UpdateLinkedObjects (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model)
+	internal virtual void UpdateLinkedObjects (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model)
 }
 
 public abstract class Microsoft.AspNet.OData.ODataAPIHandlerFactory {

@@ -67,7 +67,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     SkillSet=new List<Skill>{Skill.Web,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read|AccessLevel.Write
-
                 },
             };
         }
@@ -188,7 +187,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 Assert.Equal("Friend1", obj1.ToString());
             }
-
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -201,6 +199,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public ITestActionResult Get(int key)
         {
             var emp = Employees.SingleOrDefault(e => e.ID == key);
+
             return Ok(emp);
         }
 
@@ -208,6 +207,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public ITestActionResult GetFriends(int key)
         {
             var emp = Employees.SingleOrDefault(e => e.ID == key);
+
             return Ok(emp.Friends);
         }
 
@@ -229,6 +229,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return Ok(friends);
                 }
             }
+
             return Ok();
         }
 
@@ -375,6 +376,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 employee = new Employee();
                 delta.Patch(employee, new EmployeeAPIHandler(), new APIHandlerFactory(Request.GetModel()));
+
                 return Created(employee);
             }
 
@@ -432,6 +434,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             var comp = coll.First() as Delta<Company>;
             object val;
+
             if (comp.TryGetPropertyValue("Name", out val))
             {
                 if (val.ToString() == "Company02")

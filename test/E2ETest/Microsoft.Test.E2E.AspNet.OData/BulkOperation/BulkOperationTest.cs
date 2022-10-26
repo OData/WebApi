@@ -134,7 +134,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -177,7 +177,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -218,7 +218,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -259,7 +259,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -298,7 +298,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
             requestForPost.Content = new StringContent(content);
 
             requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
@@ -326,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
            
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -352,7 +352,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -380,7 +380,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -421,7 +421,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -579,7 +579,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -619,7 +619,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -864,14 +864,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
             //Act & Assert
             var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -895,14 +895,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company02\",\"MyOverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -926,7 +926,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            requestForPost.Headers.Add("OData-Version", "4.0");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
@@ -946,151 +946,156 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         #endregion
 
-        #region Post
-        [Fact]
-        public async Task PostCompany_WithODataId()
-        {
-            //Arrange
+        //#region Post
+        // Commented until we redesign the Bulk Insert
+        //[Fact]
+        //public async Task PostCompany_WithODataId()
+        //{
+        //    //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Companies";
+        //    string requestUri = this.BaseAddress + "/convention/Companies";
 
-            var content = @"{'Id':3,'Name':'Company03',
-                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
-                     }";
+        //    var content = @"{'Id':3,'Name':'Company03',
+        //                    'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+        //             }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+        //    requestForPost.Content = stringContent;
 
-            //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-            {
-                var json = response.Content.ReadAsStringAsync().Result;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
-        }
+        //    //Act & Assert
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+        //    {
+        //        var json = response.Content.ReadAsStringAsync().Result;
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //    }
+        //}
 
-        [Fact]
-        public async Task PostCompany_WithODataId_AndWithout()
-        {
-            //Arrange
+        //[Fact]
+        //public async Task PostCompany_WithODataId_AndWithout()
+        //{
+        //    //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Companies";
+        //    string requestUri = this.BaseAddress + "/convention/Companies";
 
-            var content = @"{'Id':4,'Name':'Company04',
-                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{Price:30}]
-                     }";
+        //    var content = @"{'Id':4,'Name':'Company04',
+        //                    'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{Price:30}]
+        //             }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+        //    requestForPost.Content = stringContent;
 
-            //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-            {
-                var json = response.Content.ReadAsStringAsync().Result;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
-        }
+        //    //Act & Assert
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+        //    {
+        //        var json = response.Content.ReadAsStringAsync().Result;
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //    }
+        //}
 
-        [Fact]
-        public async Task PostEmployee_WithCreateFriends()
-        {
-            //Arrange
+        //[Fact]
+        //public async Task PostEmployee_WithCreateFriends()
+        //{
+        //    //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees";
+        //    string requestUri = this.BaseAddress + "/convention/Employees";
 
-            var content = @"{
-                    'Name':'SqlUD',
-                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
-                     }";
+        //    var content = @"{
+        //            'Name':'SqlUD',
+        //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+        //             }";
 
-            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPatch.Content = stringContent;
+        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+        //    requestForPatch.Content = stringContent;
 
-            var expected = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+        //    var expected = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
 
-            //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var json = response.Content.ReadAsStringAsync().Result;
-                Assert.Contains("SqlUD", json);
-                Assert.Contains(expected, json);
-            }
-        }
+        //    //Act & Assert
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    {
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //        var json = response.Content.ReadAsStringAsync().Result;
+        //        Assert.Contains("SqlUD", json);
+        //        Assert.Contains(expected, json);
+        //    }
+        //}
 
-        [Fact]
-        public async Task PostEmployee_WithCreateFriendsFullMetadata()
-        {
-            //Arrange
+        //[Fact]
+        //public async Task PostEmployee_WithCreateFriendsFullMetadata()
+        //{
+        //    //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+        //    string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
 
-            string content = @"{
-                    'Name':'SqlUD',
-                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
-                     }";
+        //    string content = @"{
+        //            'Name':'SqlUD',
+        //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+        //             }";
 
-            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPatch.Content = stringContent;
+        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+        //    requestForPatch.Content = stringContent;
 
-            string friendsNavigationLink = "Friends@odata.navigationLink";
-            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
-            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+        //    string friendsNavigationLink = "Friends@odata.navigationLink";
+        //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+        //    string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
-            string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
+        //    string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
 
-            //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var json = response.Content.ReadAsStringAsync().Result;
-                Assert.Contains("SqlUD", json);
-                Assert.Contains(expected, json);
-                Assert.Contains(friendsNavigationLink, json);
-                Assert.Contains(newFriendsNavigationLink, json);
-                Assert.Contains(untypedFriendsNavigationLink, json);
-            }
-        }
+        //    //Act & Assert
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    {
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //        var json = response.Content.ReadAsStringAsync().Result;
+        //        Assert.Contains("SqlUD", json);
+        //        Assert.Contains(expected, json);
+        //        Assert.Contains(friendsNavigationLink, json);
+        //        Assert.Contains(newFriendsNavigationLink, json);
+        //        Assert.Contains(untypedFriendsNavigationLink, json);
+        //    }
+        //}
 
-        [Fact]
-        public async Task PostEmployee_WithFullMetadata()
-        {
-            //Arrange
+        //[Fact]
+        //public async Task PostEmployee_WithFullMetadata()
+        //{
+        //    //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+        //    string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
 
-            var content = @"{
-                    'Name':'SqlUD'
-                     }";
+        //    var content = @"{
+        //            'Name':'SqlUD'
+        //             }";
 
-            var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPatch.Content = stringContent;
+        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+        //    requestForPatch.Content = stringContent;
 
-            string friendsNavigationLink = "Friends@odata.navigationLink";
-            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
-            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+        //    string friendsNavigationLink = "Friends@odata.navigationLink";
+        //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+        //    string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
-            //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var json = response.Content.ReadAsStringAsync().Result;
-                Assert.Contains("SqlUD", json);
-                Assert.Contains(friendsNavigationLink, json);
-                Assert.Contains(newFriendsNavigationLink, json);
-                Assert.Contains(untypedFriendsNavigationLink, json);
-            }
-        }
+        //    //Act & Assert
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    {
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //        var json = response.Content.ReadAsStringAsync().Result;
+        //        Assert.Contains("SqlUD", json);
+        //        Assert.Contains(friendsNavigationLink, json);
+        //        Assert.Contains(newFriendsNavigationLink, json);
+        //        Assert.Contains(untypedFriendsNavigationLink, json);
+        //    }
+        //}
+
+        //#endregion
+
+        #region Full Metadata
 
         [Fact]
         public async Task GetEmployee_WithFullMetadata()

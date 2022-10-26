@@ -547,16 +547,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.ResourceBase.TypeName);
                 IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
-                // todo: any issues with using UnresolvedPathSegment? will not have an edmtype -- is that a problem? should we just use PropertySegment for dynamic?
-                //Routing.ODataPath path = new Routing.ODataPath(readContext.Path.Segments.Append(new Routing.UnresolvedPathSegment(propertyName)));
-                value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext/*, path*/);
+                value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
             }
 
             DeserializationHelpers.SetDynamicProperty(resource, propertyName, value,
                 resourceStructuredType.StructuredDefinition(), readContext.Model);
         }
 
-        private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext/*, Routing.ODataPath nestedPath*/)
+        private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             Contract.Assert(edmType != null);
             Contract.Assert(readContext != null);

@@ -22,15 +22,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public List<Skill> SkillSet { get; set; }
         public Gender Gender { get; set; }
         public AccessLevel AccessLevel { get; set; }
-        
         public List<Friend> Friends { get; set; }
-
         public List<NewFriend> NewFriends { get; set; }
-
         public List<UnTypedFriend> UnTypedFriends { get; set; }
-
         public FavoriteSports FavoriteSports { get; set; }
-
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
@@ -70,13 +65,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-    
         public string Name { get; set; }
-       
         public int Age { get; set; }
-
         public List<Order> Orders { get; set; }
-
     }
 
 
@@ -84,7 +75,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public int Price { get; set; }
     }
 
@@ -92,9 +82,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public string Name { get; set; }
-
         public int Age { get; set; }
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
 
@@ -115,11 +103,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public int Price { get; set; }
-
         public int Quantity { get; set; }
-
         public ODataIdContainer Container { get; set; }
     }
 
@@ -127,11 +112,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public int Price { get; set; }
-
         public int Quantity { get; set; }
-
         public ODataIdContainer Container {get;set;}
     }
 
@@ -140,11 +122,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public string Name { get; set; }
-
         public List<NewOrder> OverdueOrders { get; set; }
-
         public List<MyNewOrder> MyOverdueOrders { get; set; }
     }
 
@@ -153,7 +132,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         [Key]
         public int ID { get; set; }
         public String Name { get; set; }
-       
         public List<UnTypedFriend> UnTypedFriends { get; set; }
     }
 
@@ -161,13 +139,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public string Name { get; set; }
-
         public int Age { get; set; }
-               
         public UnTypedAddress Address { get; set; }
-
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
@@ -175,18 +149,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         [Key]
         public int Id { get; set; }
-
         public string Street { get; set; }
     }
 
     public class FriendColl<T> : ICollection<T>
     {
         public FriendColl() { _items = new List<T>(); }
-
         private IList<T> _items;
-
         public int Count => _items.Count;
-
         public bool IsReadOnly => _items.IsReadOnly;
 
         public void Add(T item)
@@ -232,5 +202,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return ((IEnumerable)_items).GetEnumerator();
         }
     }
-
 }

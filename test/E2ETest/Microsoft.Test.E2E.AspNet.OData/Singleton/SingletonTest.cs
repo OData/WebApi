@@ -88,80 +88,58 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             }
         }
 
-        [Fact]
-        public async Task SingletonContainerGeneratesCorrectNextLinks()
+        [Theory]
+        [InlineData("expAttr")]
+        // [InlineData("conAttr")] // 500 Internal Server Error
+        public async Task SingletonContainerGeneratesCorrectNextLinks(string model)
         {
-            //await ResetDataSource("conCon", "Umbrella");
-
-            string model = "expAttr"; // 200 OK
-                                      // result (same) = "{\"@odata.context\":\"http://laptop-4k4fhff3:11002/expAttr/$metadata#Projects\",\"value\":[{\"Id\":1,\"Title\":\"In Closet Scare\",\"ProjectDetails\":[{},{},{},{}]},{\"Id\":2,\"Title\":\"Under Bed Scare\",\"ProjectDetails\":[{},{}]}],\"@odata.nextLink\":\"http://laptop-4k4fhff3:11002/expAttr/MonstersInc/Projects?$skip=2\"}"
-                                      // Q: Why don't the project details seem to be expanded -- and why isn't the list of project details truncated?
-            //string model = "conAttr"; // 500 Internal Server Error
+            // Arrange
             string singletonName = "MonstersInc";
 
-            string requestUri = string.Format(this.BaseAddress + "/{0}/{1}/Projects", model, singletonName); // "http://LAPTOP-4K4FHFF3:11001/expAttr/MonstersInc/Projects"
+            string requestUri = string.Format(this.BaseAddress.ToLower() + "/{0}/{1}/Projects", model, singletonName); // "http://LAPTOP-4K4FHFF3:11001/expAttr/MonstersInc/Projects"
+            string nextLinkUri = requestUri + "?$skip=2";
+            string nestedNextLinkUri = requestUri + "/1/ProjectDetails?$skip=2";
+            
             await ResetDataSource(model, singletonName);
 
-            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
-            string result = await response.Content.ReadAsStringAsync();
-            response.EnsureSuccessStatusCode();
+            // Act & Assert
+            string metadataUri = string.Format(this.BaseAddress.ToLower() + "/{0}/$metadata#{1}/Projects", model, singletonName);
+            string expectedOriginalResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(ProjectDetails())\"," +
+                        "\"value\":[" +
+                        "{\"Id\":1,\"Title\":\"In Closet Scare\",\"ProjectDetails\":[" +
+                            "{\"Id\":1,\"Comment\":\"The original scare\"}," +
+                            "{\"Id\":2,\"Comment\":\"Leaving the door open is the worst mistake any employee can make\"}]," +
+                            "\"ProjectDetails@odata.nextLink\":\"" + requestUri + "(1)/ProjectDetails?$skip=2\"}," +
+                        "{\"Id\":2,\"Title\":\"Under Bed Scare\",\"ProjectDetails\":[" +
+                            "{\"Id\":5,\"Comment\":\"Tried and true\"}," +
+                            "{\"Id\":6,\"Comment\":\"Tip: grab a foot\"}]}]," +
+                        "\"@odata.nextLink\":\"" + requestUri + "?$skip=2\"" +
+                    "}";
+            await RequestYieldsExpectedResult(requestUri, expectedOriginalResult);
 
-            // Arrange
-            /*string requestUri = "odata/MonstersInc/Projects";
-            //string nextLinkUri = "odata/MonstersInc/Projects?$skip=2";
-            //string nestedNextLinkUri = "odata/MonstersInc/Projects/1/ProjectDetails?$skip=2";
+            string expectedNextResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(ProjectDetails())\"," +
+                        "\"value\":[{\"Id\":3,\"Title\":\"Midnight Snack in Kitchen Scare\",\"ProjectDetails\":[]}]}";
+            await RequestYieldsExpectedResult(nextLinkUri, expectedNextResult);
 
-            //using (HttpClient client = CreateClient())
-            //{
-                // Act & Assert
-                string expectedOriginalResult =
-                        "{\"@odata.context\":\"http://localhost/odata/$metadata#MonstersInc/Projects(ProjectDetails())\"," +
-                            "\"value\":[" +
-                            "{\"Id\":1,\"Title\":\"In Closet Scare\",\"ProjectDetails\":[" +
-                                "{\"Id\":1,\"Comment\":\"The original scare\"}," +
-                                "{\"Id\":2,\"Comment\":\"Leaving the door open is the worst mistake any employee can make\"}]," +
-                                "\"ProjectDetails@odata.nextLink\":\"http://localhost/odata/MonstersInc/Projects/1/ProjectDetails?$skip=2\"}," +
-                            "{\"Id\":2,\"Title\":\"Under Bed Scare\",\"ProjectDetails\":[" +
-                                "{\"Id\":5,\"Comment\":\"Tried and true\"}," +
-                                "{\"Id\":6,\"Comment\":\"Tip: grab a foot\"}]}]," +
-                            "\"@odata.nextLink\":\"http://localhost/odata/MonstersInc/Projects?$skip=2\"" +
-                        "}";
-                await RequestYieldsExpectedResult(requestUri, expectedOriginalResult);
-
-                /*string expectedNextResult =
-                        "{\"@odata.context\":\"http://localhost/odata/$metadata#MonstersInc/Projects(ProjectDetails())\"," +
-                            "\"value\":[{\"Id\":3,\"Title\":\"Midnight Snack in Kitchen Scare\",\"ProjectDetails\":[]}]}";
-                await RequestYieldsExpectedResult(nextLinkUri, expectedNextResult);
-
-                string expectedNestedNextResult =
-                        "{\"@odata.context\":\"http://localhost/odata/$metadata#MonstersInc/Projects(1)/ProjectDetails\"," +
-                            "\"value\":[" +
-                            "{\"Id\":3,\"Comment\":\"Leaving the door open could let it not only a draft, but a child\"}," +
-                            "{\"Id\":4,\"Comment\":\"Has led to the intrusion of a young girl, Boo\"}]}";
-                await RequestYieldsExpectedResult(nestedNextLinkUri, expectedNestedNextResult);*/
-            //}*/
+            string expectedNestedNextResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(1)/ProjectDetails\"," +
+                        "\"value\":[" +
+                        "{\"Id\":3,\"Comment\":\"Leaving the door open could let it not only a draft, but a child\"}," +
+                        "{\"Id\":4,\"Comment\":\"Has led to the intrusion of a young girl, Boo\"}]}";
+            await RequestYieldsExpectedResult(nestedNextLinkUri, expectedNestedNextResult);
         }
 
-        /*private async Task RequestYieldsExpectedResult(string url, string expectedResult)
+        private async Task RequestYieldsExpectedResult(string requestUri, string expectedResult)
         {
-            // Arrange
-            //await ResetDataSource("expAttr", "MonstersInc");
-            //await ResetDataSource("expCon", "MonstersInc");
-            //await ResetDataSource("conAttr", "MonstersInc");
-            await ResetDataSource("conCon", "Umbrella");
-
-            //using (HttpResponseMessage response = await client.GetAsync(requestUri))
-            //var requestUri = string.Format("{0}/{1}", this.BaseAddress, url);
-            //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-
-            var requestUri = string.Format("{0}/{1}/{2}", this.BaseAddress, "conCon", "Umbrella/Partners/$count"); // "http://LAPTOP-4K4FHFF3:11001/odata/MonstersInc/Projects"
             // Act
-            HttpResponseMessage response = await this.Client.GetAsync(requestUri); // 404 error "Not Found"
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             // Assert
             string result = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResult, result);
-        }*/
+        }
 
         [Theory]
         [InlineData("expCon", "Umbrella/Partners/$count")]

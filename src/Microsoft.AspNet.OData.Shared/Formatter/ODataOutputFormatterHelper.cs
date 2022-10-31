@@ -70,9 +70,9 @@ namespace Microsoft.AspNet.OData.Formatter
             // of the formatter. However, according to the OData spec, the service shouldn't be sending
             // a character set unless explicitly specified, so if the client didn't send the charset we chose
             // we just clean it.
-            if (mediaType != null &&
-                !acceptCharsetValues
-                    .Any(cs => cs.Equals(mediaType.CharSet, StringComparison.OrdinalIgnoreCase)))
+            if (mediaType != null && 
+                acceptCharsetValues.Any() &&
+                !acceptCharsetValues.Any(cs => cs.Equals(mediaType.CharSet, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }

@@ -90,13 +90,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [Theory]
         [InlineData("expAttr")]
-        // [InlineData("conAttr")] // 500 Internal Server Error
+        [InlineData("conAttr")]
         public async Task SingletonContainerGeneratesCorrectNextLinks(string model)
         {
             // Arrange
             string singletonName = "MonstersInc";
 
-            string requestUri = string.Format(this.BaseAddress.ToLower() + "/{0}/{1}/Projects", model, singletonName); // "http://LAPTOP-4K4FHFF3:11001/expAttr/MonstersInc/Projects"
+            string requestUri = string.Format(this.BaseAddress.ToLower() + "/{0}/{1}/Projects", model, singletonName);
             string nextLinkUri = requestUri + "?$skip=2";
             string nestedNextLinkUri = requestUri + "/1/ProjectDetails?$skip=2";
             

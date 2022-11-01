@@ -95,28 +95,28 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
         }
 
-        private ResourceContext GetOrderTestResourceForNewSingletonContainer()
+        private ResourceContext GetOrderItemResourceForNewSingletonContainer()
         {
             // Arrange
             IEdmSingleton myVipOrder = _model.Model.FindDeclaredSingleton("VipOrder");
             IEdmEntityType vipOrderType = (IEdmEntityType)myVipOrder.Type;
-            IEdmNavigationProperty orderTestsProperty = vipOrderType.NavigationProperties().Single(x => x.ContainsTarget && x.Name == "OrderTests");
-            IEdmContainedEntitySet orderTests = (IEdmContainedEntitySet)myVipOrder.FindNavigationTarget(orderTestsProperty);
-            IEdmEntityType orderTest = _model.OrderTest;
-            IEdmNavigationProperty orderTestDetailsNav = orderTest.NavigationProperties().First();
+            IEdmNavigationProperty orderItemsProperty = vipOrderType.NavigationProperties().Single(x => x.ContainsTarget && x.Name == "OrderItems");
+            IEdmContainedEntitySet orderItems = (IEdmContainedEntitySet)myVipOrder.FindNavigationTarget(orderItemsProperty);
+            IEdmEntityType orderItem = _model.OrderItem;
+            IEdmNavigationProperty orderItemDetailsNav = orderItem.NavigationProperties().First();
 
             var request = RequestFactory.CreateFromModel(_model.Model);
 
             ODataPath path = new ODataPath(
                     new SingletonSegment(myVipOrder),
-                    new NavigationPropertySegment(orderTestsProperty, orderTests));
+                    new NavigationPropertySegment(orderItemsProperty, orderItems));
 
-            ODataSerializerContext orderTestSerializerContext = ODataSerializerContextFactory.Create(_model.Model, orderTests, path, request);
-            orderTestSerializerContext.EdmProperty = orderTestDetailsNav;
-            ResourceContext orderTestResource = new ResourceContext(orderTestSerializerContext, orderTest.AsReference(), new { ID = 21 });
-            orderTestSerializerContext.ExpandedResource = orderTestResource;
+            ODataSerializerContext orderItemSerializerContext = ODataSerializerContextFactory.Create(_model.Model, orderItems, path, request);
+            orderItemSerializerContext.EdmProperty = orderItemDetailsNav;
+            ResourceContext orderItemResource = new ResourceContext(orderItemSerializerContext, orderItem.AsReference(), new { ID = 21 });
+            orderItemSerializerContext.ExpandedResource = orderItemResource;
 
-            return orderTestResource;
+            return orderItemResource;
         }
 
         [Fact]
@@ -124,15 +124,15 @@ namespace Microsoft.AspNet.OData.Test.Builder
         {
             Assert.Equal(3, 3);
             // Arrange
-            ResourceContext orderTestResource = GetOrderTestResourceForNewSingletonContainer();
+            ResourceContext orderItemResource = GetOrderItemResourceForNewSingletonContainer();
 
             // Act
-            IList<ODataPathSegment> newPaths = orderTestResource.GenerateBaseODataPathSegments();
+            IList<ODataPathSegment> newPaths = orderItemResource.GenerateBaseODataPathSegments();
 
             // Assert
             Assert.Equal(3, newPaths.Count);
             Assert.IsType<Microsoft.OData.UriParser.SingletonSegment>(newPaths[0]); // VipOrder
-            Assert.IsType<Microsoft.OData.UriParser.NavigationPropertySegment>(newPaths[1]); // OrderTests
+            Assert.IsType<Microsoft.OData.UriParser.NavigationPropertySegment>(newPaths[1]); // OrderItems
             Assert.IsType<Microsoft.OData.UriParser.KeySegment>(newPaths[2]); // 21
         }
 
@@ -140,13 +140,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
         public void GenerateSelfLink_WorksToGenerateExpectedSelfLink_ForSingletonContainer()
         {
             // Arrange
-            ResourceContext orderTestResource = GetOrderTestResourceForNewSingletonContainer();
+            ResourceContext orderItemResource = GetOrderItemResourceForNewSingletonContainer();
 
             // Act
-            Uri selfLink = orderTestResource.GenerateSelfLink(false);
+            Uri selfLink = orderItemResource.GenerateSelfLink(false);
 
             // Assert
-            Assert.Equal("http://localhost/VipOrder/OrderTests(21)", selfLink.AbsoluteUri);
+            Assert.Equal("http://localhost/VipOrder/OrderItems(21)", selfLink.AbsoluteUri);
         }
 
 

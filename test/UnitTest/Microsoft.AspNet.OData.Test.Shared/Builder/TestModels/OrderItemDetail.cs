@@ -6,19 +6,13 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.AspNet.OData.Builder;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
-    public class OrderTest
+    public class OrderItemDetail
     {
         public int ID { get; set; }
-
-        public string Name { get; set; }
-
-        public int OrderId { get; set; }
-
-        [Contained]
-        public IList<OrderLineDetail> OrderLineDetails { get; set; }
     }
 }

@@ -121,31 +121,31 @@ namespace Microsoft.AspNet.OData.Test.Common
             model.AddElement(tag);
 
             // order test
-            EdmEntityType orderTest = new EdmEntityType("NS", "OrderTest");
-            orderTest.AddKeys(orderTest.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
-            orderTest.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
-            model.AddElement(orderTest);
+            EdmEntityType orderItem = new EdmEntityType("NS", "OrderItem");
+            orderItem.AddKeys(orderItem.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            orderItem.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(orderItem);
 
-            EdmNavigationProperty orderTestsNavProp = myOrder.AddUnidirectionalNavigation(
+            EdmNavigationProperty orderItemsNavProp = myOrder.AddUnidirectionalNavigation(
                 new EdmNavigationPropertyInfo
                 {
-                    Name = "OrderTests",
+                    Name = "OrderItems",
                     TargetMultiplicity = EdmMultiplicity.Many,
-                    Target = orderTest,
+                    Target = orderItem,
                     ContainsTarget = true,
                 });
 
             // order line detail
-            EdmEntityType orderLineDetail = new EdmEntityType("NS", "OrderLineDetail");
-            orderLineDetail.AddKeys(orderTest.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
-            model.AddElement(orderLineDetail);
+            EdmEntityType orderItemDetail = new EdmEntityType("NS", "OrderItemDetail");
+            orderItemDetail.AddKeys(orderItem.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            model.AddElement(orderItemDetail);
 
-            EdmNavigationProperty orderLineDetailsNavProp = orderTest.AddUnidirectionalNavigation(
+            EdmNavigationProperty orderItemDetailsNavProp = orderItem.AddUnidirectionalNavigation(
                 new EdmNavigationPropertyInfo
                 {
-                    Name = "OrderLineDetails",
+                    Name = "OrderItemDetails",
                     TargetMultiplicity = EdmMultiplicity.Many,
-                    Target = orderLineDetail,
+                    Target = orderItemDetail,
                     ContainsTarget = true,
                 });
 
@@ -167,8 +167,8 @@ namespace Microsoft.AspNet.OData.Test.Common
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
-            IEdmContainedEntitySet orderTests = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderTestsNavProp);
-            IEdmContainedEntitySet orderLineDetails = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLineDetailsNavProp);
+            IEdmContainedEntitySet orderItems = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderItemsNavProp);
+            IEdmContainedEntitySet orderItemDetails = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderItemDetailsNavProp);
 
             // no-containment
             IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
@@ -403,9 +403,9 @@ namespace Microsoft.AspNet.OData.Test.Common
             VipOrder = vipOrder;
             OrderLine = orderLine;
             OrderLines = orderLines;
-            OrderTest = orderTest;
-            OrderTests = orderTests;
-            OrderLineDetails = orderLineDetails;
+            OrderItem = orderItem;
+            OrderItems = orderItems;
+            OrderItemDetails = orderItemDetails;
             NonContainedOrderLines = nonContainedOrderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
@@ -427,9 +427,9 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public EdmEntityType OrderLine { get; private set; }
 
-        public EdmEntityType OrderTest { get; private set; }
+        public EdmEntityType OrderItem { get; private set; }
 
-        public EdmEntityType OrderLineDetail { get; private set; }
+        public EdmEntityType OrderItemDetail { get; private set; }
 
         public EdmComplexType Address { get; private set; }
 
@@ -449,9 +449,9 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public IEdmContainedEntitySet OrderLines { get; private set; }
 
-        public IEdmContainedEntitySet OrderTests { get; private set; }
+        public IEdmContainedEntitySet OrderItems { get; private set; }
 
-        public IEdmContainedEntitySet OrderLineDetails { get; private set; }
+        public IEdmContainedEntitySet OrderItemDetails { get; private set; }
 
         public IEdmNavigationSource NonContainedOrderLines { get; private set; }
 

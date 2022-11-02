@@ -427,7 +427,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         [InlineData("conAttr", "MonstersInc")]
         public async Task SingletonQueryOptionsTest(string model, string singletonName)
         {
-            string requestUri = string.Format(this.BaseAddress + "/{0}/{1}", model, singletonName);
+            string requestUri = string.Format(this.BaseAddress + "/{0}/{1}", model, singletonName); // "http://LAPTOP-4K4FHFF3:11003/conAttr/MonstersInc"
 
             await ResetDataSource(model, singletonName);
 
@@ -439,8 +439,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             {
                 i++;
             }
-            int numExpectedProps = model[0] == 'e' ? 2 : 3; // originally 2
-            Assert.Equal(numExpectedProps, i);
+            Assert.Equal(3, i);
 
             // POST /singleton/Partners
             Partner partner = new Partner() { ID = 100, Name = "NewHire" };

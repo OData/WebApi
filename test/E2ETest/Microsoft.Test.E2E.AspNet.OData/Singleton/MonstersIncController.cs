@@ -108,15 +108,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             return Ok(MonstersInc.Projects);
         }
 
-        /*[HttpGet]
-        [ODataRoute("Projects/{key}")]
-        [EnableQuery]
-        public ITestActionResult GetProject([FromODataUri] int key)
-        {
-            var project = MonstersInc.Projects.FirstOrDefault(a => a.Id == key);
-            return Ok(project);
-        }*/
-
         [HttpGet]
         [ODataRoute("Projects/{key}/ProjectDetails")]
         [EnableQuery]

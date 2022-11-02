@@ -8,7 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -122,7 +121,6 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void GenerateBaseODataPathSegments_WorksToGenerateExpectedPath_ForSingletonContainer()
         {
-            Assert.Equal(3, 3);
             // Arrange
             ResourceContext orderItemResource = GetOrderItemResourceForNewSingletonContainer();
 

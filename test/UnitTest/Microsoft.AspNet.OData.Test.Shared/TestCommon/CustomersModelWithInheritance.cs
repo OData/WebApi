@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
             model.AddElement(tag);
 
-            // order test
+            // order item
             EdmEntityType orderItem = new EdmEntityType("NS", "OrderItem");
             orderItem.AddKeys(orderItem.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             orderItem.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);

@@ -446,11 +446,11 @@ namespace Microsoft.AspNet.OData
             //To apply ODataId based handler to apply properties on original.
             if (apiHandlerFactory != null)
             {
-                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataPath);
+                IODataAPIHandler refApiHandler = apiHandlerFactory.GetHandler(ODataPath);
 
-                if (refapiHandler != null && ODataPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
+                if (refApiHandler != null && ODataPath.Any() && apiHandler.ToString() != refApiHandler.ToString())
                 {
-                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refApiHandler as ODataAPIHandler<TStructuralType>;
 
                     ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, ODataPath.GetKeys());
                 }
@@ -535,16 +535,16 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// This is a patch on ODataId. It applies the ODataId parsed navigation paths, gets the identified values and copies them to the original object.
         /// </summary>    
-        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refapiHandlerOfT, Dictionary<string, object> keyProperties)
+        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refApiHandlerOfT, Dictionary<string, object> keyProperties)
         {
-            Debug.Assert(refapiHandlerOfT != null, "refapiHandlerOfT != null");
+            Debug.Assert(refApiHandlerOfT != null, "refapiHandlerOfT != null");
 
             TStructuralType referencedObj;
             string error;
 
             //todo: this logic feels brittle to me
             //Checking to get the referenced entity, get the properties and apply it on original object
-            if (refapiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            if (refApiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
             {
                 foreach (string property in _updatableProperties)
                 {
@@ -871,11 +871,14 @@ namespace Microsoft.AspNet.OData
 
                 if (deltaNestedResource is IDeltaSet)
                 {
-                    IODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(original, nestedResourceName);
-
-                    if (apiHandlerNested != null)
+                    if (apiHandler != null)
                     {
-                        deltaNestedResource.CopyChangedValues(apiHandlerNested, apiHandlerFactory);
+                        IODataAPIHandler nestedApiHandler = apiHandler.GetNestedHandler(original, nestedResourceName);
+
+                        if (nestedApiHandler != null)
+                        {
+                            deltaNestedResource.CopyChangedValues(nestedApiHandler, apiHandlerFactory);
+                        }
                     }
                 }
                 else

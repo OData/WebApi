@@ -22,6 +22,11 @@ namespace Microsoft.AspNet.OData
         IEdmEntityType entityType;
         ICollection<IEdmStructuredObject> originalList;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultEdmODataAPIHandler"/> class.
+        /// </summary>
+        /// <param name="originalList">Original collection of the type which needs to be updated.</param>
+        /// <param name="entityType">The Edm entity type of the collection.</param>
         public DefaultEdmODataAPIHandler(ICollection<IEdmStructuredObject> originalList, IEdmEntityType entityType)
         {
             Debug.Assert(entityType != null, "entityType != null");
@@ -106,7 +111,7 @@ namespace Microsoft.AspNet.OData
         {
             IEdmNavigationProperty navProperty = entityType.NavigationProperties().FirstOrDefault(navProp => navProp.Name == navigationPropertyName);
 
-            if(navProperty == null)
+            if (navProperty == null)
             {
                 return null;
             }
@@ -115,7 +120,7 @@ namespace Microsoft.AspNet.OData
 
             object obj;
 
-            if(parent.TryGetPropertyValue(navigationPropertyName, out obj))
+            if (parent.TryGetPropertyValue(navigationPropertyName, out obj))
             {
                 ICollection<IEdmStructuredObject> nestedList = obj as ICollection<IEdmStructuredObject>;
 
@@ -125,13 +130,12 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
-
         private EdmStructuredObject GetFilteredItem(IDictionary<string, object> keyValues)
         {
             //This logic is for filtering the object based on the set of keys,
             //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
 
-            if(originalList == null)
+            if (originalList == null)
             {
                 return null;
             }

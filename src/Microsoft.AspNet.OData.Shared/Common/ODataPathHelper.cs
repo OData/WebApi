@@ -56,9 +56,7 @@ namespace Microsoft.AspNet.OData.Common
 
             for (int i = currentPosition; i < pathSegments.Count; i++)
             {
-                ODataPathSegment currentSegment = pathSegments[i];
-
-                if (currentSegment is KeySegment)
+                if (pathSegments[i] is KeySegment)
                 {
                     return i;
                 }

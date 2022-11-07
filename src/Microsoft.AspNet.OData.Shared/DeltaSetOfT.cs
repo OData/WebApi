@@ -110,11 +110,11 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
+                    ODataAPIResponseStatus odataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
-                    if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
+                    if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && odataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
                     {
                         IDeltaSetItem deltaSetItem = changedObj;
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
@@ -135,7 +135,7 @@ namespace Microsoft.AspNet.OData
                         {
                             //Handle Failed Operation - Delete                           
                             
-                            if (ODataAPIResponseStatus == ODataAPIResponseStatus.Success)
+                            if (odataAPIResponseStatus == ODataAPIResponseStatus.Success)
                             {
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
                                 deltaSet.Add(changedObject);
@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        if (ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
+                        if (odataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
 
@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.OData
                                 continue;
                             }                            
                         }
-                        else if (ODataAPIResponseStatus == ODataAPIResponseStatus.Success)
+                        else if (odataAPIResponseStatus == ODataAPIResponseStatus.Success)
                         {
                             operation = DataModificationOperationKind.Update;
                         }

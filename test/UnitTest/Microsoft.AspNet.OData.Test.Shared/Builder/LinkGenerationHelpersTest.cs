@@ -129,9 +129,9 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // Assert
             Assert.Equal(3, newPaths.Count);
-            Assert.IsType<Microsoft.OData.UriParser.SingletonSegment>(newPaths[0]); // VipOrder
-            Assert.IsType<Microsoft.OData.UriParser.NavigationPropertySegment>(newPaths[1]); // OrderItems
-            Assert.IsType<Microsoft.OData.UriParser.KeySegment>(newPaths[2]); // 21
+            Assert.IsType<SingletonSegment>(newPaths[0]); // VipOrder
+            Assert.IsType<NavigationPropertySegment>(newPaths[1]); // OrderItems
+            Assert.IsType<KeySegment>(newPaths[2]); // 21
         }
 
         [Fact]

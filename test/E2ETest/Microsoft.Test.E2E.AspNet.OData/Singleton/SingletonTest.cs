@@ -427,7 +427,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         [InlineData("conAttr", "MonstersInc")]
         public async Task SingletonQueryOptionsTest(string model, string singletonName)
         {
-            string requestUri = string.Format(this.BaseAddress + "/{0}/{1}", model, singletonName); // "http://LAPTOP-4K4FHFF3:11003/conAttr/MonstersInc"
+            string requestUri = string.Format(this.BaseAddress + "/{0}/{1}", model, singletonName);
 
             await ResetDataSource(model, singletonName);
 

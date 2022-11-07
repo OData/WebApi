@@ -5,9 +5,6 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using Microsoft.AspNet.OData.Builder;
-using System.Collections.Generic;
-
 namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
     public class OrderLine

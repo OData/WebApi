@@ -74,10 +74,10 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Patch for Types without underlying CLR types
+        /// Patch for types without underlying CLR types.
         /// </summary>
-        /// <param name="originalCollection"></param>
-        /// <returns>ChangedObjectCollection response</returns>
+        /// <param name="originalCollection">Original collection of the type which needs to be updated.</param>
+        /// <returns>ChangedObjectCollection response.</returns>
         internal EdmChangedObjectCollection Patch(ICollection<IEdmStructuredObject> originalCollection)
         {
             EdmODataAPIHandler apiHandler = new DefaultEdmODataAPIHandler(originalCollection, _entityType);
@@ -86,9 +86,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
+        /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject.
         /// </summary>
-        /// <returns>ChangedObjectCollection response</returns>
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <returns>ChangedObjectCollection response.</returns>
         internal EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
             return CopyChangedValues(apiHandler, apiHandlerFactory);
@@ -146,8 +148,6 @@ namespace Microsoft.AspNet.OData
                                 continue;
                             }
                         }
-
-
 
                         changedObjectCollection.Add(deletedObj);
                     }
@@ -257,7 +257,6 @@ namespace Microsoft.AspNet.OData
                 }
             }
         }
-
 
         private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {

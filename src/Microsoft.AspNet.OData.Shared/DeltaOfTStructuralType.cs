@@ -519,10 +519,10 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
         /// <param name="apiHandler">API Handler for the entity.</param>
-        /// <param name="apiHandlerFactory">API Handler Factory</param>
-        internal void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        public void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            Debug.Assert(apiHandler != null);
+            Debug.Assert(apiHandler != null, "apiHandler != null");
 
             if (IsComplexType)
             {
@@ -533,11 +533,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// This is basically Patch on ODataId. This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
+        /// This is a patch on ODataId. It applies the ODataId parsed navigation paths, gets the identified values and copies them to the original object.
         /// </summary>    
         private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refapiHandlerOfT, Dictionary<string, object> keyProperties)
         {
-            Debug.Assert(refapiHandlerOfT != null);
+            Debug.Assert(refapiHandlerOfT != null, "refapiHandlerOfT != null");
 
             TStructuralType referencedObj;
             string error;

@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -52,10 +51,10 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
-        /// <param name="originalCollection">Original collection of the Type which needs to be updated</param>
-        /// /// <returns>DeltaSet response</returns>
+        /// <param name="originalCollection">Original collection of the type which needs to be updated.</param>
+        /// /// <returns>DeltaSet response.</returns>
         public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> originalCollection)
         {
             ODataAPIHandler<TStructuralType> apiHandler = new DefaultODataAPIHandler<TStructuralType>(originalCollection);
@@ -63,28 +62,28 @@ namespace Microsoft.AspNet.OData
             return CopyChangedValues(apiHandler);
         }
 
-
         /// <summary>
-        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
-        /// </summary>     
-        /// <returns>DeltaSet response</returns>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// </summary>
+        /// <param name="apiHandlerOfT">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <returns>DeltaSet response.</returns>
         public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
         {         
-            Debug.Assert(apiHandlerOfT != null);
+            Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
 
             return CopyChangedValues(apiHandlerOfT, apiHandlerFactory);
         }
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal DeltaSet<TStructuralType> CopyChangedValues(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             //Here we are getting the keys and using the keys to find the original object 
-            //to patch from the list of collection
+            //to patch from the collection.
 
             ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
 
-            Debug.Assert(apiHandlerOfT != null);
+            Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
 
             DeltaSet<TStructuralType> deltaSet = CreateDeltaSet();
 
@@ -111,19 +110,17 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(changedObj.ODataPath.GetKeys(), out original, out getErrorMessage);
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
                     if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
                     {
                         IDeltaSetItem deltaSetItem = changedObj;
-
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
                         dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
 
                         deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
-
                         deltaSet.Add(deltaSetItem);
                         
                         continue;
@@ -132,7 +129,6 @@ namespace Microsoft.AspNet.OData
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
-
                         changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);
 
                         if (apiHandlerOfT.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
@@ -157,7 +153,7 @@ namespace Microsoft.AspNet.OData
 
                             if (apiHandlerOfT.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
                             {
-                                //Handle failed Opreataion - create
+                                //Handle a failed Operation - create
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
                                 deltaSet.Add(changedObject);
                                 continue;
@@ -169,7 +165,7 @@ namespace Microsoft.AspNet.OData
                         }
                         else
                         {
-                            //Handle failed operation 
+                            //Handle a failed operation
                             IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, getErrorMessage);
                             deltaSet.Add(changedObject);
                             continue;
@@ -206,8 +202,8 @@ namespace Microsoft.AspNet.OData
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
             dataModificationExceptionType.MessageType = new MessageType { Message = errorMessage };
 
-            // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
-            //The failed operation will be based on the protocol
+            // This handles the DataModificationException. It adds the Core.DataModificationException annotation and also copies other instance annotations.
+            // The failed operation will be based on the protocol
             switch (operation)
             {
                 case DataModificationOperationKind.Update:
@@ -216,7 +212,6 @@ namespace Microsoft.AspNet.OData
                 case DataModificationOperationKind.Insert:
                     {
                         deltaSetItem = CreateDeletedEntityForFailedOperation(changedObj);
-
                         break;
                     }
                 case DataModificationOperationKind.Delete:
@@ -226,11 +221,10 @@ namespace Microsoft.AspNet.OData
                     }
             }
 
-
             deltaSetItem.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
             deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
 
-            Contract.Assert(deltaSetItem != null);
+            Debug.Assert(deltaSetItem != null, "deltaSetItem != null");
 
             return deltaSetItem;
         }

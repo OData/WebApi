@@ -12,8 +12,8 @@ using System.Reflection;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// This is the default ODataAPIHandler for CLR type. This calss has default Get, Create and Update
-    /// and will do these actions. This will be used when the original collection to be Patched is provided.
+    /// This is the default ODataAPIHandler for CLR types. This class has default get, create and update
+    /// methods that are used to patch an original collection when the collection is provided.
     /// </summary>
     /// <typeparam name="TStructuralType"></typeparam>
     internal class DefaultODataAPIHandler<TStructuralType> : ODataAPIHandler<TStructuralType> where TStructuralType :class
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData
         public DefaultODataAPIHandler(ICollection<TStructuralType> originalList)
         {
             this._clrType = typeof(TStructuralType);
-            this.originalList = originalList?? new List<TStructuralType>();
+            this.originalList = originalList ?? new List<TStructuralType>();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]

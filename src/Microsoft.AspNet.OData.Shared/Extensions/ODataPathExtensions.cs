@@ -13,7 +13,7 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData.Extensions
 {
     /// <summary>
-    /// Extensions method for <see cref="ODataPath"/>.
+    /// Extension methods for <see cref="ODataPath"/>.
     /// </summary>
     internal static class ODataPathExtensions
     {
@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="path"><see cref="ODataPath"/>.</param>
         /// <returns>Dictionary of keys.</returns>
-        internal static Dictionary<string, object> GetKeys(this ODataPath path)
+        public static Dictionary<string, object> GetKeys(this ODataPath path)
         {
             Dictionary<string, object> keys = new Dictionary<string, object>();
 

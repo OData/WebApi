@@ -16,7 +16,7 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Handler Class to handle users methods for create, delete and update.
+    /// The handler class for handling users' create, delete and update methods.
     /// This is the handler for data modification where there is a CLR type.
     /// </summary>
     public abstract class ODataAPIHandler<TStructuralType>: IODataAPIHandler where TStructuralType : class
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// TryCreate method to create a new object.
         /// </summary>        
-        /// <param name="keyValues">TheKey value pair of the objecct to be created. Optional</param>
+        /// <param name="keyValues">The key-value pair of the object to be created. Optional</param>
         /// <param name="createdObject">The created object (CLR or Typeless)</param>
         /// <param name="errorMessage">Any error message in case of an exception</param>
         /// <returns>The status of the TryCreate method <see cref="ODataAPIResponseStatus"/> </returns>
@@ -33,19 +33,19 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage);
 
         /// <summary>
-        /// TryGet method which tries to get the Origignal object based on a keyvalues.
+        /// TryGet method which tries to get the original object based on key-values.
         /// </summary>
-        /// <param name="keyValues">Key value pair for the entity keys</param>        
-        /// <param name="originalObject">Object to return</param>
-        /// <param name="errorMessage">Any error message in case of an exception</param>
-        /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/> </returns>
+        /// <param name="keyValues">Key-value pair for the entity keys.</param>
+        /// <param name="originalObject">Object to return.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/>.</returns>
         public abstract ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage);
 
         /// <summary>
-        /// TryDelete Method which will delete the object based on keyvalue pairs.
+        /// TryDelete Method which will delete the object based on key-value pairs.
         /// </summary>
-        /// <param name="keyValues"></param>
-        /// <param name="errorMessage"></param>
+        /// <param name="keyValues">Key-value pair for the entity keys.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/> </returns>
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 

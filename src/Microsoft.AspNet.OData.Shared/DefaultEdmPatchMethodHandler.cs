@@ -7,15 +7,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// This is the default Patch Handler for non CLR type. This calss has default Get, Create and Update
-    /// and will do these actions. This will be used when the original collection to be Patched is provided.
+    /// This is the default patch handler for non-CLR types. This class has default get, create and update
+    /// methods that are used to patch an original collection when the collection is provided.
     /// </summary>
     internal class DefaultEdmODataAPIHandler : EdmODataAPIHandler
     {
@@ -24,10 +24,10 @@ namespace Microsoft.AspNet.OData
 
         public DefaultEdmODataAPIHandler(ICollection<IEdmStructuredObject> originalList, IEdmEntityType entityType)
         {
-            Contract.Assert(entityType != null);
+            Debug.Assert(entityType != null, "entityType != null");
 
             this.entityType = entityType;
-            this.originalList = originalList?? new List<IEdmStructuredObject>();
+            this.originalList = originalList ?? new List<IEdmStructuredObject>();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.OData
             errorMessage = string.Empty;
             originalObject = null;
 
-            Contract.Assert(keyValues != null);
+            Debug.Assert(keyValues != null, "keyValues != null");
 
             try
             {
@@ -114,6 +114,7 @@ namespace Microsoft.AspNet.OData
             IEdmEntityType nestedEntityType = navProperty.ToEntityType();
 
             object obj;
+
             if(parent.TryGetPropertyValue(navigationPropertyName, out obj))
             {
                 ICollection<IEdmStructuredObject> nestedList = obj as ICollection<IEdmStructuredObject>;

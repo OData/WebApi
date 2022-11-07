@@ -5,24 +5,31 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
 {
     public class ServerSidePagingCustomer
-	{
-		[Key]
-		public int Id { get; set; }
-		public string Name { get; set; }
-		public IList<ServerSidePagingOrder> ServerSidePagingOrders { get; set; }
-	}
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public IList<ServerSidePagingOrder> ServerSidePagingOrders { get; set; }
+    }
 
-	public class ServerSidePagingOrder
-	{
-		[Key]
-		public int Id { get; set; }
-		public decimal Amount { get; set; }
-		public ServerSidePagingCustomer ServerSidePagingCustomer { get; set; }
-	}
+    public class ServerSidePagingOrder
+    {
+        [Key]
+        public int Id { get; set; }
+        public decimal Amount { get; set; }
+        public ServerSidePagingCustomer ServerSidePagingCustomer { get; set; }
+    }
+
+    public class ServerSidePagingEmployee
+    {
+        public int Id { get; set; }
+        public DateTime HireDate { get; set; }
+    }
 }

@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
@@ -59,7 +58,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             }));
 
         [EnableQuery(PageSize = 3)]
-        public ActionResult GetEmployeesHiredInPeriod([FromRoute] DateTime fromDate, [FromRoute] DateTime toDate)
+        public ITestActionResult GetEmployeesHiredInPeriod([FromODataUri] DateTime fromDate, [FromODataUri] DateTime toDate)
         {
             var hiredInPeriod = employees.Where(d => d.HireDate >= fromDate && d.HireDate <= toDate);
 

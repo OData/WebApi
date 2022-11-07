@@ -18,12 +18,16 @@ namespace Microsoft.AspNet.OData
     /// <typeparam name="TStructuralType"></typeparam>
     internal class DefaultODataAPIHandler<TStructuralType> : ODataAPIHandler<TStructuralType> where TStructuralType :class
     {
-        Type _clrType;
+        Type clrType;
         ICollection<TStructuralType> originalList;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultODataAPIHandler{TStructuralType}"/> class.
+        /// </summary>
+        /// <param name="originalList">Original collection of the type which needs to be updated.</param>
         public DefaultODataAPIHandler(ICollection<TStructuralType> originalList)
         {
-            this._clrType = typeof(TStructuralType);
+            this.clrType = typeof(TStructuralType);
             this.originalList = originalList ?? new List<TStructuralType>();
         }
 
@@ -60,12 +64,12 @@ namespace Microsoft.AspNet.OData
 
             try
             {
-                if(originalList != null)
+                if (originalList != null)
                 {
                     originalList = new List<TStructuralType>();
                 }
 
-                createdObject = Activator.CreateInstance(_clrType) as TStructuralType;
+                createdObject = Activator.CreateInstance(clrType) as TStructuralType;
                 originalList.Add(createdObject);
 
                 return ODataAPIResponseStatus.Success;
@@ -100,7 +104,7 @@ namespace Microsoft.AspNet.OData
 
         public override IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName)
         {
-            foreach (PropertyInfo property in _clrType.GetProperties())
+            foreach (PropertyInfo property in clrType.GetProperties())
             {
                 if (property.Name == navigationPropertyName)
                 {
@@ -113,13 +117,12 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
-
         private TStructuralType GetFilteredItem(IDictionary<string, object> keyValues)
         {
             //This logic is for filtering the object based on the set of keys,
             //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
 
-            if(originalList == null || originalList.Count == 0)
+            if (originalList == null || originalList.Count == 0)
             {
                 return default(TStructuralType);
             }
@@ -128,7 +131,7 @@ namespace Microsoft.AspNet.OData
 
             foreach (string key in keyValues.Keys)
             {
-                propertyInfos.Add(key, _clrType.GetProperty(key));
+                propertyInfos.Add(key, clrType.GetProperty(key));
             }
 
             foreach (TStructuralType item in originalList)

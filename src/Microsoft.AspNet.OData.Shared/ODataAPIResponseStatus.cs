@@ -8,20 +8,20 @@
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Enum for Patch Status
+    /// Enum for Patch status.
     /// </summary>
     public enum ODataAPIResponseStatus
     {
         /// <summary>
-        /// Success Status
+        /// Success status.
         /// </summary>
         Success,
         /// <summary>
-        /// Failure Status
+        /// Failure status.
         /// </summary>
         Failure,
         /// <summary>
-        /// Resource Not Found
+        /// Resource not found.
         /// </summary>
         NotFound
     }

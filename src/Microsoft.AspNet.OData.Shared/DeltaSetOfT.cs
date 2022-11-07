@@ -20,6 +20,7 @@ namespace Microsoft.AspNet.OData
     public class DeltaSet<TStructuralType> : Collection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
     {
         private Type _clrType;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private IList<string> _keys;
 
         /// <summary>

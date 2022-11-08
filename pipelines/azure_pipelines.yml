@@ -23,7 +23,7 @@ stages:
       timeoutInMinutes: 180
 
       pool:
-        vmImage: windows-latest
+        vmImage: windows-2019  # The project is still targeting on .NET 4.5, we need this vm image to finish .NET 4.5 build. We should update it later.
 
       steps:
         - template: ./common.yml

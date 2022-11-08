@@ -229,7 +229,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Fact]
-        public async Task PatchEmployee_WithMultipleUpdatesinOrder1()
+        public async Task PatchEmployee_WithMultipleFriendUpdatesAndOneDelete()
         {
             //Arrange
 
@@ -255,7 +255,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Fact]
-        public async Task PatchEmployee_WithMultipleUpdatesinOrder2()
+        public async Task PatchEmployee_WithMultipleFriendUpdatesAndMultipleDelete()
         {
             //Arrange
 

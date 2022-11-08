@@ -972,7 +972,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.entityType = entityType;
         }
 
-        public override ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -1080,7 +1080,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.entityType = entityType;
         }
 
-        public override ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;

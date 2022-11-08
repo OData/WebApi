@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch()
         {
             //Arrange
-               var lstId = new List<string>();
+            var lstId = new List<string>();
             lstId.Add("Id");
             var deltaSet = new DeltaSet<Friend>(lstId);
 
@@ -67,7 +67,6 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("Friend1", friends[0].Name);
             Assert.Equal("Friend2", friends[1].Name);
         }
-
 
         [Fact]
         public void DeltaSet_Add_WrongItem_ThrowsError()

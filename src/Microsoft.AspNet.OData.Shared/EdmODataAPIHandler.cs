@@ -9,12 +9,11 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData
 {
-
     /// <summary>
     /// Handler Class to handle users methods for create, delete and update.
     /// This is the handler for data modification where there is no CLR type.
     /// </summary>
-    public abstract class EdmODataAPIHandler
+    public abstract class EdmODataAPIHandler : IODataAPIHandler
     {
         /// <summary>
         /// TryCreate method to create a new object.

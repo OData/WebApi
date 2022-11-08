@@ -25,8 +25,10 @@ stages:
       displayName: Main Build
       # setting a 3hour timeout as webapi tests normally take about 2hr 30 mins
       timeoutInMinutes: 180
+
+      # The project is still targeting on .NET 4.5, we need this vm image to finish .NET 4.5 build. We should update it later.
       pool:
-        vmImage: windows-latest
+        vmImage: windows-2019
       steps:
       - template: ./common.yml
       - task: MSBuild@1

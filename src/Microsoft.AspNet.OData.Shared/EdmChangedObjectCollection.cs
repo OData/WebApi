@@ -157,9 +157,9 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if (apiHandler.TryCreate(changedObj, out original, out errorMessage) != ODataAPIResponseStatus.Success)
+                            if (apiHandler.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
                             {
-                                //Handle failed Opreataion - create
+                                //Handle failed Operation - create
                                 IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, original, keys, errorMessage, apiHandler);
                                 changedObjectCollection.Add(changedObject);
                                 continue;

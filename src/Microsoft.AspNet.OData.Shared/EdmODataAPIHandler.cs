@@ -19,11 +19,11 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// TryCreate method to create a new object.
         /// </summary>
-        /// <param name="changedObject">Changed object which can be applied on created object, optional.</param>
+        /// <param name="keyValues">Key-value pair for the entity keys.</param>
         /// <param name="createdObject">The created object (Typeless).</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the TryCreate method, statuses are <see cref="ODataAPIResponseStatus"/>.</returns>
-        public abstract ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage);
+        public abstract ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out IEdmStructuredObject createdObject, out string errorMessage);
 
         /// <summary>
         ///  TryGet method which tries to get the original object based on a key-values.

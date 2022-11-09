@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
@@ -41,6 +42,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<ServerSidePagingOrder>("ServerSidePagingOrders").EntityType.HasRequired(d => d.ServerSidePagingCustomer);
             builder.EntitySet<ServerSidePagingCustomer>("ServerSidePagingCustomers").EntityType.HasMany(d => d.ServerSidePagingOrders);
+
+            var getEmployeesHiredInPeriodFunction = builder.EntitySet<ServerSidePagingEmployee>(
+                "ServerSidePagingEmployees").EntityType.Collection.Function("GetEmployeesHiredInPeriod");
+            getEmployeesHiredInPeriodFunction.Parameter(typeof(DateTime), "fromDate");
+            getEmployeesHiredInPeriodFunction.Parameter(typeof(DateTime), "toDate");
+            getEmployeesHiredInPeriodFunction.ReturnsCollectionFromEntitySet<ServerSidePagingEmployee>("ServerSidePagingEmployees");
+
             return builder.GetEdmModel();
         }
 
@@ -62,6 +70,27 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             // Orders child collection
             Assert.Contains("ServerSidePagingOrders@odata.nextLink", content);
             Assert.Contains("/prefix/ServerSidePagingCustomers(1)/ServerSidePagingOrders?$skip=5",
+                content);
+        }
+
+        [Fact]
+        public async Task VerifyParametersInNextPageLinkInEdmFunctionResponseBodyAreInSameCaseAsInRequestUrl()
+        {
+            // Arrange
+            var requestUri = this.BaseAddress + "/prefix/ServerSidePagingEmployees/" +
+                "GetEmployeesHiredInPeriod(fromDate=@fromDate,toDate=@toDate)" +
+                "?@fromDate=2023-01-07T00:00:00%2B00:00&@toDate=2023-05-07T00:00:00%2B00:00";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Contains("\"@odata.nextLink\":", content);
+            Assert.Contains(
+                "/prefix/ServerSidePagingEmployees/GetEmployeesHiredInPeriod(fromDate=@fromDate,toDate=@toDate)" +
+                "?%40fromDate=2023-01-07T00%3A00%3A00%2B00%3A00&%40toDate=2023-05-07T00%3A00%3A00%2B00%3A00&$skip=3",
                 content);
         }
     }

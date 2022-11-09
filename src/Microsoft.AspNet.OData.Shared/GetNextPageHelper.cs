@@ -68,6 +68,7 @@ namespace Microsoft.AspNet.OData
                     case "$skiptoken":
                         continue;
                     default:
+                        key = kvp.Key; // Leave parameters that are not OData query options in initial form
                         break;
                 }
 

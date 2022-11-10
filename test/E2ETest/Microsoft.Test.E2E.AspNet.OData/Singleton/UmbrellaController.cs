@@ -37,6 +37,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
                 Category = CompanyCategory.Communication,
                 Partners = new List<Partner>(),
                 Branches = new List<Office>(),
+                Projects = new List<Project>(),
             };
         }
 

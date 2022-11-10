@@ -139,6 +139,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
         <Property Name=""City"" Type=""Edm.String"" />
         <Property Name=""Address"" Type=""Edm.String"" />
       </ComplexType>
+      <ComplexType Name=""Projects"">
+        <Property Name=""Id"" Type=""Edm.Int32"" />
+        <Property Name=""Title"" Type=""Edm.String"" />
+        <NavigationProperty Name=""ProjectDetails"" Type=""Collection(Microsoft.Test.E2E.AspNet.OData.ComplexType.ProjectDetail)"" />
+      </ComplexType>
+      <ComplexType Name=""ProjectDetail"">
+        <Property Name=""Id"" Type=""Edm.Int32"" />
+        <Property Name=""Comment"" Type=""Edm.String"" />
+      </ComplexType>
       <EntityType Name=""SubCompany"" BaseType=""Microsoft.Test.E2E.AspNet.OData.Singleton.Company"">
         <Property Name=""Location"" Type=""Edm.String"" />
         <Property Name=""Description"" Type=""Edm.String"" />

@@ -89,6 +89,59 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         }
 
         [Theory]
+        [InlineData("expAttr")]
+        [InlineData("conAttr")]
+        public async Task SingletonContainerGeneratesCorrectNextLinks(string model)
+        {
+            // Arrange
+            string singletonName = "MonstersInc";
+
+            string requestUri = string.Format(this.BaseAddress.ToLower() + "/{0}/{1}/Projects", model, singletonName);
+            string nextLinkUri = requestUri + "?$skip=2";
+            string nestedNextLinkUri = requestUri + "/1/ProjectDetails?$skip=2";
+            
+            await ResetDataSource(model, singletonName);
+
+            // Act & Assert
+            string metadataUri = string.Format(this.BaseAddress.ToLower() + "/{0}/$metadata#{1}/Projects", model, singletonName);
+            string expectedOriginalResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(ProjectDetails())\"," +
+                        "\"value\":[" +
+                        "{\"Id\":1,\"Title\":\"In Closet Scare\",\"ProjectDetails\":[" +
+                            "{\"Id\":1,\"Comment\":\"The original scare\"}," +
+                            "{\"Id\":2,\"Comment\":\"Leaving the door open is the worst mistake any employee can make\"}]," +
+                            "\"ProjectDetails@odata.nextLink\":\"" + requestUri + "(1)/ProjectDetails?$skip=2\"}," +
+                        "{\"Id\":2,\"Title\":\"Under Bed Scare\",\"ProjectDetails\":[" +
+                            "{\"Id\":5,\"Comment\":\"Tried and true\"}," +
+                            "{\"Id\":6,\"Comment\":\"Tip: grab a foot\"}]}]," +
+                        "\"@odata.nextLink\":\"" + requestUri + "?$skip=2\"" +
+                    "}";
+            await RequestYieldsExpectedResult(requestUri, expectedOriginalResult);
+
+            string expectedNextResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(ProjectDetails())\"," +
+                        "\"value\":[{\"Id\":3,\"Title\":\"Midnight Snack in Kitchen Scare\",\"ProjectDetails\":[]}]}";
+            await RequestYieldsExpectedResult(nextLinkUri, expectedNextResult);
+
+            string expectedNestedNextResult =
+                    "{\"@odata.context\":\"" + metadataUri + "(1)/ProjectDetails\"," +
+                        "\"value\":[" +
+                        "{\"Id\":3,\"Comment\":\"Leaving the door open could let it not only a draft, but a child\"}," +
+                        "{\"Id\":4,\"Comment\":\"Has led to the intrusion of a young girl, Boo\"}]}";
+            await RequestYieldsExpectedResult(nestedNextLinkUri, expectedNestedNextResult);
+        }
+
+        private async Task RequestYieldsExpectedResult(string requestUri, string expectedResult)
+        {
+            // Act
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            // Assert
+            string result = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Theory]
         [InlineData("expCon", "Umbrella/Partners/$count")]
         [InlineData("conCon", "Umbrella/Partners/$count")]
         public async Task NotCountable(string model, string url)
@@ -386,7 +439,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             {
                 i++;
             }
-            Assert.Equal(2, i);
+            Assert.Equal(3, i);
 
             // POST /singleton/Partners
             Partner partner = new Partner() { ID = 100, Name = "NewHire" };

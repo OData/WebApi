@@ -43,6 +43,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             var companyBranches = company.CollectionProperty(p => p.Branches);
 
+            // Define EntityType of Project
+            var project = builder.EntityType<Project>();
+            project.HasKey(p => p.Id);
+            project.Property(p => p.Title);
+            var companyProjects = company.ContainsMany(p => p.Projects);
+            companyProjects.AutoExpand = true;
+
+            // Define EntityType of ProjectDetails
+            var detail = builder.EntityType<ProjectDetail>();
+            detail.HasKey(p => p.Id);
+            detail.Property(p => p.Comment);
+            var projectDetails = project.ContainsMany(p => p.ProjectDetails);
+            projectDetails.AutoExpand = true;
+
             // Define Complex Type: Office
             var office = builder.ComplexType<Office>();
             office.Property(p => p.City);
@@ -59,7 +73,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // Define PartnerSet and Company(singleton)
             EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
-            partnersConfiguration.HasIdLink(c=>c.GenerateSelfLink(false), true);
+            partnersConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
             partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
             Func<ResourceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
             partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
@@ -72,6 +86,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
             companyConfiguration.EntityType.Action("ResetDataSource");
             companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();
+
+            // Define ProjectSet and add to Company
+            EntitySetConfiguration<Project> projectsConfiguration = builder.EntitySet<Project>("Projects");
+            projectsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            projectsConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            companyConfiguration.HasManyBinding(c => c.Projects, "Projects");
+            companyConfiguration.HasNavigationPropertyLink(companyProjects, linkFactory, true);
+
+            // Define ProjectDetailsSet and add to Project
+            EntitySetConfiguration<ProjectDetail> detailsConfiguration = builder.EntitySet<ProjectDetail>("ProjectDetails");
+            detailsConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
+            detailsConfiguration.EntityType.Collection.Action("ResetDataSource");
+
+            projectsConfiguration.HasManyBinding(c => c.ProjectDetails, "ProjectDetails");
+            Func<ResourceContext<Project>, IEdmNavigationProperty, Uri> projectLinkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            projectsConfiguration.HasNavigationPropertyLink(projectDetails, projectLinkFactory, true);
 
             return builder.GetEdmModel();
         }

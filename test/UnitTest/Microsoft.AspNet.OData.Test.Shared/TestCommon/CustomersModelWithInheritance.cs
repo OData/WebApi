@@ -120,6 +120,35 @@ namespace Microsoft.AspNet.OData.Test.Common
             tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
             model.AddElement(tag);
 
+            // order item
+            EdmEntityType orderItem = new EdmEntityType("NS", "OrderItem");
+            orderItem.AddKeys(orderItem.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            orderItem.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(orderItem);
+
+            EdmNavigationProperty orderItemsNavProp = myOrder.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "OrderItems",
+                    TargetMultiplicity = EdmMultiplicity.Many,
+                    Target = orderItem,
+                    ContainsTarget = true,
+                });
+
+            // order line detail
+            EdmEntityType orderItemDetail = new EdmEntityType("NS", "OrderItemDetail");
+            orderItemDetail.AddKeys(orderItem.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            model.AddElement(orderItemDetail);
+
+            EdmNavigationProperty orderItemDetailsNavProp = orderItem.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "OrderItemDetails",
+                    TargetMultiplicity = EdmMultiplicity.Many,
+                    Target = orderItemDetail,
+                    ContainsTarget = true,
+                });
+
             // entity sets
             EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
             model.AddElement(container);
@@ -131,12 +160,15 @@ namespace Microsoft.AspNet.OData.Test.Common
             EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
             EdmSingleton mary = container.AddSingleton("Mary", customer);
             EdmSingleton rootOrder = container.AddSingleton("RootOrder", order);
+            EdmSingleton vipOrder = container.AddSingleton("VipOrder", myOrder);
 
             // annotations
             model.SetOptimisticConcurrencyAnnotation(customers, new[] { city });
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
+            IEdmContainedEntitySet orderItems = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderItemsNavProp);
+            IEdmContainedEntitySet orderItemDetails = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderItemDetailsNavProp);
 
             // no-containment
             IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
@@ -368,8 +400,12 @@ namespace Microsoft.AspNet.OData.Test.Common
             VipCustomer = vipCustomer;
             Mary = mary;
             RootOrder = rootOrder;
+            VipOrder = vipOrder;
             OrderLine = orderLine;
             OrderLines = orderLines;
+            OrderItem = orderItem;
+            OrderItems = orderItems;
+            OrderItemDetails = orderItemDetails;
             NonContainedOrderLines = nonContainedOrderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
@@ -391,6 +427,10 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public EdmEntityType OrderLine { get; private set; }
 
+        public EdmEntityType OrderItem { get; private set; }
+
+        public EdmEntityType OrderItemDetail { get; private set; }
+
         public EdmComplexType Address { get; private set; }
 
         public EdmComplexType Account { get; private set; } // Open Complex Type
@@ -405,7 +445,13 @@ namespace Microsoft.AspNet.OData.Test.Common
 
         public EdmSingleton RootOrder { get; private set; }
 
+        public EdmSingleton VipOrder { get; private set; }
+
         public IEdmContainedEntitySet OrderLines { get; private set; }
+
+        public IEdmContainedEntitySet OrderItems { get; private set; }
+
+        public IEdmContainedEntitySet OrderItemDetails { get; private set; }
 
         public IEdmNavigationSource NonContainedOrderLines { get; private set; }
 

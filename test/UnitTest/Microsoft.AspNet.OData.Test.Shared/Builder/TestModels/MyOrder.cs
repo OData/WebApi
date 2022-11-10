@@ -20,6 +20,9 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         [Contained]
         public virtual ICollection<OrderLine> OrderLines { get; set; }
 
+        [Contained]
+        public virtual ICollection<OrderItem> OrderItems { get; set; }
+
         [Required]
         [Contained]
         public virtual OrderHeader OrderHeader { get; set; }

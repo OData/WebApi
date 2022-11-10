@@ -47,6 +47,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         [NotCountable]
         public IList<Partner> Partners { get; set; }
         public IList<Office> Branches { get; set; }
+
+        [Contained]
+        [AutoExpand]
+        public IList<Project> Projects { get; set; }
     }
 
     /// <summary>
@@ -56,6 +60,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
     {
         public string City { get; set; }
         public string Address { get; set; }
+    }
+
+    /// <summary>
+    /// Present a contained navigation property
+    /// </summary>
+    public class Project
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+
+        [AutoExpand]
+        [Contained]
+        public IList<ProjectDetail> ProjectDetails { get; set; }
+    }
+
+    /// <summary>
+    /// Present a nested contained navigation property
+    /// </summary>
+    public class ProjectDetail
+    {
+        public int Id { get; set; }
+        public string Comment { get; set; }
     }
 
     /// <summary>

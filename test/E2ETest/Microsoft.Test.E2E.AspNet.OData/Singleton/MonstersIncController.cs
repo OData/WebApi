@@ -40,6 +40,36 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
                 Category = CompanyCategory.Electronics,
                 Partners = new List<Partner>(),
                 Branches = new List<Office>() { new Office { City = "Shanghai", Address = "Minhang" }, new Office { City = "Xi'an", Address = "Dayanta" } },
+                Projects = new List<Project>()
+                {
+                    new Project
+                    {
+                        Id = 1,
+                        Title = "In Closet Scare",
+                        ProjectDetails = new List<ProjectDetail>()
+                        {
+                            new ProjectDetail { Id = 1, Comment = "The original scare" },
+                            new ProjectDetail { Id = 2, Comment = "Leaving the door open is the worst mistake any employee can make" },
+                            new ProjectDetail { Id = 3, Comment = "Leaving the door open could let it not only a draft, but a child" },
+                            new ProjectDetail { Id = 4, Comment = "Has led to the intrusion of a young girl, Boo" }
+                        },
+                    },
+                    new Project
+                    {
+                        Id = 2,
+                        Title = "Under Bed Scare",
+                        ProjectDetails = new List<ProjectDetail>() {
+                            new ProjectDetail { Id = 5, Comment = "Tried and true" },
+                            new ProjectDetail { Id = 6, Comment = "Tip: grab a foot"}
+                        },
+                    },
+                    new Project
+                    {
+                        Id = 3,
+                        Title = "Midnight Snack in Kitchen Scare",
+                        ProjectDetails= new List<ProjectDetail>(),
+                    },
+                },
             };
         }
 
@@ -68,6 +98,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         public ITestActionResult GetCompanyRevenue()
         {
             return Ok(MonstersInc.Revenue);
+        }
+
+        [HttpGet]
+        [ODataRoute("Projects")]
+        [EnableQuery(PageSize = 2)]
+        public ITestActionResult GetCompanyProjects()
+        {
+            return Ok(MonstersInc.Projects);
+        }
+
+        [HttpGet]
+        [ODataRoute("Projects/{key}/ProjectDetails")]
+        [EnableQuery]
+        public ITestActionResult GetProjectDetails(/*[FromODataUri]*/ int key)
+        {
+            var project = MonstersInc.Projects.FirstOrDefault(a => a.Id == key);
+            if (project == null)
+            {
+                return NotFound($"Project with given key {key} does not exist.");
+            }
+
+            return Ok(project.ProjectDetails);
         }
 
         [HttpGet]

@@ -170,9 +170,9 @@ namespace Microsoft.AspNet.OData
                             deltaSet.Add(changedObject);
                             continue;
                         }
-                        
-                        //Patch for addition/update. This will call Delta<T> for each item in the collection
-                        // This will work in case we use delegates for using users method to create an object
+
+                        // Patch for addition/update. This will call Delta<T> for each item in the collection.
+                        // This will work in cases where we use delegates to create objects.
                         changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);                                                
 
                         deltaSet.Add(changedObj);

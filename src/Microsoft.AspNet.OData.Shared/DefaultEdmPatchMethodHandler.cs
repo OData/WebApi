@@ -19,8 +19,8 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal class DefaultEdmODataAPIHandler : EdmODataAPIHandler
     {
-        IEdmEntityType entityType;
-        ICollection<IEdmStructuredObject> originalList;
+        private IEdmEntityType entityType;
+        private ICollection<IEdmStructuredObject> originalList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultEdmODataAPIHandler"/> class.

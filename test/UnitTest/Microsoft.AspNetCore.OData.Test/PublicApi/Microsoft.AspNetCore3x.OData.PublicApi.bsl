@@ -114,11 +114,11 @@ public abstract class Microsoft.AspNet.OData.Delta : System.Dynamic.DynamicObjec
 	public abstract bool TrySetPropertyValue (string name, object value)
 }
 
-public abstract class Microsoft.AspNet.OData.EdmODataAPIHandler {
+public abstract class Microsoft.AspNet.OData.EdmODataAPIHandler : IODataAPIHandler {
 	protected EdmODataAPIHandler ()
 
 	public abstract EdmODataAPIHandler GetNestedHandler (IEdmStructuredObject parent, string navigationPropertyName)
-	public abstract ODataAPIResponseStatus TryCreate (IEdmChangedObject changedObject, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
 }
@@ -347,6 +347,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public TStructuralType Patch (TStructuralType original)
+	public void Patch (TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
 	public void Put (TStructuralType original)
 	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)

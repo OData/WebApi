@@ -443,19 +443,6 @@ namespace Microsoft.AspNet.OData
                 throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
-            //To apply ODataId based handler to apply properties on original.
-            if (apiHandlerFactory != null)
-            {
-                IODataAPIHandler refApiHandler = apiHandlerFactory.GetHandler(ODataPath);
-
-                if (refApiHandler != null && ODataPath.Any() && apiHandler.ToString() != refApiHandler.ToString())
-                {
-                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refApiHandler as ODataAPIHandler<TStructuralType>;
-
-                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, ODataPath.GetKeys());
-                }
-            }
-
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             // For regular non-structural properties at current level.
@@ -530,30 +517,6 @@ namespace Microsoft.AspNet.OData
             }
 
             CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);            
-        }
-
-        /// <summary>
-        /// This is a patch on ODataId. It applies the ODataId parsed navigation paths, gets the identified values and copies them to the original object.
-        /// </summary>    
-        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refApiHandlerOfT, Dictionary<string, object> keyProperties)
-        {
-            Debug.Assert(refApiHandlerOfT != null, "refapiHandlerOfT != null");
-
-            TStructuralType referencedObj;
-            string error;
-
-            //todo: this logic feels brittle to me
-            //Checking to get the referenced entity, get the properties and apply it on original object
-            if (refApiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
-            {
-                foreach (string property in _updatableProperties)
-                {
-                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
-
-                    object value = propertyInfo.GetValue(referencedObj);
-                    propertyInfo.SetValue(original, value);
-                }
-            }            
         }
 
         /// <summary>

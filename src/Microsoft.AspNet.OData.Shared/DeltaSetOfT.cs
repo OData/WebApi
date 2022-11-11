@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -89,6 +90,47 @@ namespace Microsoft.AspNet.OData
 
             foreach (Delta<TStructuralType> changedObj in Items)
             {
+                ODataAPIHandler<TStructuralType> handler = apiHandlerOfT;
+
+                if (apiHandlerFactory != null)
+                {
+                    //{
+                    //    "@odata.context": "http://localhost:11001/convention/$metadata#Companies/$delta",
+                    //    "value": [
+                    //        {
+                    //            "@odata.type": "#Namespace.Company",
+                    //            "Id": 1,
+                    //            "Name": "Company02",
+                    //            "MyOverdueOrders@odata.delta": [
+                    //                {
+                    //                    "Id": 1,
+                    //                    "Name": "Order 1",
+                    //                    "Quantity": 9
+                    //                }
+                    //                {
+                    //                    "@odata.id": "Employees(2)/NewFriends(2)/Namespace.MyNewFriend/MyNewOrders(2)",
+                    //                    "Quantity": 9
+                    //                }
+                    //            ]
+                    //        }
+                    //    ]
+                    //}
+
+                    // If we have a request payload above and we are handling the changed values in MyOverdueOrders,
+                    // The apiHandlerOfT is MyOverdueOrdersAPIHandler.
+                    // The object with id 1 will use MyOverdueOrdersAPIHandler since odata path will be MyOverdueOrders(1)
+                    // The object with odata id Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend/MyNewOrders(2)
+                    // will use NewOrdersAPIHandler.
+                    // The codebelow ensures we use the correct handler.
+
+                    IODataAPIHandler odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath);
+
+                    if (odataPathApiHandler != null && changedObj.ODataPath.Any() && apiHandler.ToString() != odataPathApiHandler.ToString())
+                    {
+                        handler = odataPathApiHandler as ODataAPIHandler<TStructuralType>;
+                    }
+                }
+
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
 
                 //Get filtered item based on keys
@@ -110,7 +152,7 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    ODataAPIResponseStatus odataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
+                    ODataAPIResponseStatus odataAPIResponseStatus = handler.TryGet(changedObj.ODataPath.GetKeys(), out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
@@ -129,9 +171,9 @@ namespace Microsoft.AspNet.OData
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
-                        changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);
+                        changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
 
-                        if (apiHandlerOfT.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
+                        if (handler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
                             //Handle Failed Operation - Delete                           
                             
@@ -151,7 +193,7 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if (apiHandlerOfT.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
+                            if (handler.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
                             {
                                 //Handle a failed Operation - create
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
@@ -173,7 +215,7 @@ namespace Microsoft.AspNet.OData
 
                         // Patch for addition/update. This will call Delta<T> for each item in the collection.
                         // This will work in cases where we use delegates to create objects.
-                        changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);                                                
+                        changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
 
                         deltaSet.Add(changedObj);
                     }

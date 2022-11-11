@@ -855,7 +855,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
             string requestUri = this.BaseAddress + "/convention/Companies";
 
-            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company01',
                             'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)', 'Quantity': 9}]
                                 }]
@@ -885,8 +885,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             //Arrange
             string requestUri = this.BaseAddress + "/convention/Companies";
 
-            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':1,'Name':'Company02',
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':2,'Name':'Company03',
                             'MyOverdueOrders@odata.delta':[{'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
                                 }]
                      }";
@@ -898,8 +898,38 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPost.Content = stringContent;
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company02\",\"MyOverdueOrders@delta\":" +
+            var expected = "$delta\",\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
                 "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+        }
+
+        [Fact]
+        public async Task PatchCompanies_WithMultipleUpdates_ODataId_WithCast()
+        {
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':2,'Name':'Company03',
+                            'MyOverdueOrders@odata.delta':[{'Id': 1, 'Price': 10, 'Quantity': 5}, {'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            var expected = "$delta\",\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
+                "[{\"Id\":1,\"Price\":10,\"Quantity\":5},{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {

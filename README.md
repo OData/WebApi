@@ -119,7 +119,7 @@ Please refer to the [How to debug](https://docs.microsoft.com/en-us/odata/webapi
 
 ### Code of Conduct
 
-This project has adopted the [.NET Foundation Contributor Covenant Code of Conduct](https://dotnetfoundation.org/about/code-of-conduct). For more information see the [Code of Conduct FAQ](https://dotnetfoundation.org/about/faq).
+This project has adopted the [.NET Foundation Contributor Covenant Code of Conduct](https://dotnetfoundation.org/about/policies/code-of-conduct). For more information see the [Code of Conduct FAQ](https://dotnetfoundation.org/about/faq).
 
 ### .NET Foundation
 

@@ -782,4 +782,75 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             }
         }
     }
+
+    public class NestedComplexPropertyAggregationTests : WebHostTestBase
+    {
+        private string AggregationTestBaseUrl => "{0}/aggregation/Employees";
+
+        public NestedComplexPropertyAggregationTests(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(EmployeesController));
+
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Select().Filter().OrderBy().Expand().Count().SkipToken().MaxTop(null);
+
+            var builder = configuration.CreateConventionModelBuilder();
+            builder.EntitySet<Employee>("Employees");
+
+            configuration.MapODataServiceRoute("aggregation", "aggregation",
+                builder.GetEdmModel());
+        }
+
+        [Fact]
+        public async Task GroupByComplexProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format(
+                AggregationTestBaseUrl + "?$apply=groupby((NextOfKin/Name))",
+                BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(3, results.Count);
+            Assert.Equal("NoK 1", (results[0]["NextOfKin"] as JObject)["Name"].ToString());
+            Assert.Equal("NoK 2", (results[1]["NextOfKin"] as JObject)["Name"].ToString());
+            Assert.Equal("NoK 3", (results[2]["NextOfKin"] as JObject)["Name"].ToString());
+        }
+
+        [Fact]
+        public async Task GroupByNestedComplexProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format(
+                AggregationTestBaseUrl + "?$apply=groupby((NextOfKin/PhysicalAddress/City))",
+                BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("Redmond", ((results[0]["NextOfKin"] as JObject)["PhysicalAddress"] as JObject)["City"].ToString());
+            Assert.Equal("Nairobi", ((results[1]["NextOfKin"] as JObject)["PhysicalAddress"] as JObject)["City"].ToString());
+        }
+    }
 }

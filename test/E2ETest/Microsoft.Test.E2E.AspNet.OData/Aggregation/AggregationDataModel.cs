@@ -88,4 +88,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         Medium,
         Big
     }
+
+    public class Employee
+    {
+        public int Id { get; set; }
+        public NextOfKin NextOfKin { get; set; }
+    }
+
+    public class NextOfKin
+    {
+        public string Name { get; set; }
+        public Location PhysicalAddress { get; set; }
+    }
+
+    public class Location
+    {
+        public string City { get; set; }
+    }
 }

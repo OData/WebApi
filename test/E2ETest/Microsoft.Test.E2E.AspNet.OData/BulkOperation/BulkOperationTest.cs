@@ -940,6 +940,42 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Fact]
+        public async Task PatchCompanies_WithMultipleReplace()
+        {
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Company', 'Id':2,'Name':'Company03',
+                            'MyOverdueOrders':[{'Id': 1, 'Price': 10, 'Quantity': 5},{'Id': 2, 'Price': 20, 'Quantity': 10}]
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Act & Assert
+            var expected = "\"value\":[{\"Id\":1,\"Price\":10,\"Quantity\":5},{\"Id\":2,\"Price\":20,\"Quantity\":10}]}";
+
+            requestUri = this.BaseAddress + "/convention/Companies(2)/MyOverdueOrders";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+        }
+
+        [Fact]
         public async Task PatchUntypedEmployee_WithOdataId()
         {
             //Arrange

@@ -1176,17 +1176,29 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else
             {
                 return GetFlattenedPropertyExpression(propertyPath)
-                    ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, (this.HasInstancePropertyContainer && !propertyPath.Contains("\\") ? "Instance\\" : String.Empty) + propertyName));
+                    ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, (this.HasInstancePropertyContainer && !propertyPath.Contains("\\") ? "Instance\\" : String.Empty) + propertyName, property, Model));
             }
         }
 
-        internal static Expression GetPropertyExpression(Expression source, string propertyPath)
+        internal static Expression GetPropertyExpression(Expression source, string propertyPath, IEdmProperty property = null, IEdmModel model = null)
         {
             string[] propertyNameParts = propertyPath.Split('\\');
             Expression propertyValue = source;
-            foreach (var propertyName in propertyNameParts)
+            for (int i = 0; i < propertyNameParts.Length; i++)
             {
-                propertyValue = Expression.Property(propertyValue, propertyName);
+                // property access over declaring type from model without extra casts
+                // - solves property path expressions like Stamp/CreatedByUser/Name, where CreatedByUser is interface which do not directly have a Name property, but the Name is in some base interface up in the hierarchy
+                // - 'property' argument should correspond to the last part of the given 'propertyPath'
+                if (property != null && model != null && i == propertyNameParts.Length - 1)
+                {
+                    var propertyDeclaringClrType = EdmLibHelpers.GetClrType(property.DeclaringType, model);
+                    if (propertyDeclaringClrType != null)
+                        propertyValue = Expression.Property(propertyValue, propertyDeclaringClrType, propertyNameParts[i]);
+                    else
+                        propertyValue = Expression.Property(propertyValue, propertyNameParts[i]);
+                }
+                else
+                    propertyValue = Expression.Property(propertyValue, propertyNameParts[i]);
             }
             return propertyValue;
         }

@@ -125,7 +125,7 @@ namespace Microsoft.AspNet.OData
 
                     IODataAPIHandler odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath);
 
-                    if (odataPathApiHandler != null && changedObj.ODataPath.Any() && apiHandler.ToString() != odataPathApiHandler.ToString())
+                    if (odataPathApiHandler != null && changedObj.ODataPath.Any() && apiHandler != odataPathApiHandler)
                     {
                         handler = odataPathApiHandler as ODataAPIHandler<TStructuralType>;
                     }

@@ -530,6 +530,39 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedValues(original);
         }
 
+        internal void UpdateODataIdObject(TStructuralType original)
+        {
+            if (original == null)
+            {
+                throw Error.ArgumentNull(nameof(original));
+            }
+
+            if (!_structuredType.IsInstanceOfType(original))
+            {
+                throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+            }
+
+            IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
+            foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
+            {
+                propertyToCopy.Copy(original, _instance);
+            }
+        }
+
+        internal void UpdateCreatedObjectWithPropertiesFromOdataIdObject(TStructuralType original, TStructuralType odataIdObject)
+        {
+            Debug.Assert(original != null, "original != null");
+            Debug.Assert(odataIdObject != null, "odataIdObject != null");
+
+            foreach (string property in _updatableProperties)
+            {
+                PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+
+                object value = propertyInfo.GetValue(odataIdObject);
+                propertyInfo.SetValue(original, value);
+            }
+        }
+
         /// <summary>
         /// Creates a new object of the derived type in a delta request.
         /// </summary>

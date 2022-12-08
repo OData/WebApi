@@ -483,11 +483,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [ODataRoute("Companies({key})/MyOverdueOrders")]
-        public ITestActionResult GetFriends(int key)
+        public ITestActionResult GetMyOverdueOrders(int key)
         {
             var emp = Companies.SingleOrDefault(e => e.Id == key);
 
             return Ok(emp.MyOverdueOrders);
+        }
+
+        [ODataRoute("Companies({key})/OverdueOrders")]
+        public ITestActionResult GetOverdueOrders(int key)
+        {
+            var emp = Companies.SingleOrDefault(e => e.Id == key);
+
+            return Ok(emp.OverdueOrders);
         }
 
         private static void AddNewOrder(Company company)

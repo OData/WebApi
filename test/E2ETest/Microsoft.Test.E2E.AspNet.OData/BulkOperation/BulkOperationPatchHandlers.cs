@@ -145,6 +145,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         }
                         return null;
 
+                    case "Friends":
+                        return new FriendAPIHandler(employee);
+
                     default:
                         return null;
                 }

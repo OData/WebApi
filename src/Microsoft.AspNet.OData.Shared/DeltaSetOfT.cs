@@ -67,6 +67,16 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
         /// <param name="apiHandlerOfT">API Handler for the entity.</param>
+        /// <returns>DeltaSet response.</returns>
+        public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT)
+        {
+            return Patch(apiHandlerOfT, null);
+        }
+
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// </summary>
+        /// <param name="apiHandlerOfT">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         /// <returns>DeltaSet response.</returns>
         public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)

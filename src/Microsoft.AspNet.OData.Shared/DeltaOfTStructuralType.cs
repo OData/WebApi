@@ -506,6 +506,16 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
         /// <param name="apiHandler">API Handler for the entity.</param>
+        public void Patch(TStructuralType original, IODataAPIHandler apiHandler)
+        {
+            Patch(original, apiHandler, null);
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the values stored in this delta.
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        /// <param name="apiHandler">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         public void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {

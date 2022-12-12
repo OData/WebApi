@@ -559,20 +559,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        internal void UpdateCreatedObjectWithPropertiesFromOdataIdObject(TStructuralType original, TStructuralType odataIdObject)
-        {
-            Debug.Assert(original != null, "original != null");
-            Debug.Assert(odataIdObject != null, "odataIdObject != null");
-
-            foreach (string property in _updatableProperties)
-            {
-                PropertyInfo propertyInfo = _structuredType.GetProperty(property);
-
-                object value = propertyInfo.GetValue(odataIdObject);
-                propertyInfo.SetValue(original, value);
-            }
-        }
-
         /// <summary>
         /// Creates a new object of the derived type in a delta request.
         /// </summary>

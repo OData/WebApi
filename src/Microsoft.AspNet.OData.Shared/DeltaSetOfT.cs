@@ -171,6 +171,10 @@ namespace Microsoft.AspNet.OData
 
                     if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && odataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
                     {
+                        if (deletedObj != null) // To confirm when handling exceptions for DELETE
+                        {
+                            operation = DataModificationOperationKind.Delete;
+                        }
                         IDeltaSetItem deltaSetItem = changedObj;
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
                         dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
@@ -220,17 +224,12 @@ namespace Microsoft.AspNet.OData
 
                             if (hasODataId)
                             {
-                                TStructuralType createOriginal = null;
-                                ODataAPIResponseStatus createResponseStatus = apiHandlerOfT.TryCreate(keyValues, out createOriginal, out errorMessage);
+                                ODataAPIResponseStatus createResponseStatus = apiHandlerOfT.AddRelatedObject(original, out errorMessage);
 
                                 if (createResponseStatus == ODataAPIResponseStatus.Failure)
                                 {
-                                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, createOriginal, errorMessage);
+                                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
                                     deltaSet.Add(changedObject);
-                                }
-                                else
-                                {
-                                    changedObj.UpdateCreatedObjectWithPropertiesFromOdataIdObject(createOriginal, original);
                                 }
                             }
                         }

@@ -46,15 +46,15 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="keyValues">Key-value pair for the entity keys.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
-        /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/> </returns>
+        /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/>.</returns>
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 
         /// <summary>
-        /// Get the ODataAPIHandler for the nested type
+        /// Get the ODataAPIHandler for the nested type.
         /// </summary>
         /// <param name="parent">Parent instance.</param>
-        /// <param name="navigationPropertyName">The name of the navigation property for the handler</param>
-        /// <returns>The type of Nested ODataAPIHandler</returns>
+        /// <param name="navigationPropertyName">The name of the navigation property for the handler.</param>
+        /// <returns>The type of Nested ODataAPIHandler.</returns>
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
@@ -74,6 +74,19 @@ namespace Microsoft.AspNet.OData
                 this.ParentObject = resource;
                 CheckAndApplyODataId(resource, model);
             }
+        }
+
+        /// <summary>
+        /// Add related object.
+        /// </summary>
+        /// <param name="resource">The object to be added.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public virtual ODataAPIResponseStatus AddRelatedObject(TStructuralType resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            return ODataAPIResponseStatus.Success;
         }
 
         private ODataPath GetODataPath(string path, IEdmModel model)

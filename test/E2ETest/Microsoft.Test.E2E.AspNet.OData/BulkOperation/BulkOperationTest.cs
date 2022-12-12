@@ -949,7 +949,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             //Act & Assert
             var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
+                "[{\"Id\":1,\"Price\":101,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -987,7 +987,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
-                "[{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
+                "[{\"Id\":2,\"Price\":444,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -1016,8 +1016,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPost.Content = stringContent;
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
-                "[{\"Id\":1,\"Price\":10,\"Quantity\":5},{\"Id\":0,\"Price\":0,\"Quantity\":9}]}]}";
+            var expected = "\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
+                "[{\"Id\":1,\"Price\":10,\"Quantity\":5},{\"Id\":2,\"Price\":444,\"Quantity\":9}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {

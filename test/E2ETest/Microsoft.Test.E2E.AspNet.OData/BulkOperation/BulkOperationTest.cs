@@ -54,13 +54,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{'Id':1,'Name':'Test2'},{'Id':2,'Name':'Test3'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -92,13 +92,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends':[{'Id':345,'Name':'Test2'},{'Id':400,'Name':'Test3'},{'Id':900,'Name':'Test93'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -131,18 +131,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
                 "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -174,17 +174,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ 'Id':2,'Name':'Friend2'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
                 "\"@id\":\""+this.BaseAddress+"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -215,17 +215,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
                 "\"@id\":\""+this.BaseAddress+"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -256,17 +256,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'@odata.removed' : {'reason':'changed'}, 'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
                 "\"@id\":\""+ this.BaseAddress +"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -294,18 +294,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
-            requestForPost.Content = new StringContent(content);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
+            requestForPatch.Content = new StringContent(content);
 
-            requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
+            requestForPatch.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
             
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"Id\":3,\"Name\":null,\"Age\":35}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -322,17 +322,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
            
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"Id\":3,\"Name\":null,\"Age\":3}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -349,18 +349,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":" +
                 "{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -378,18 +378,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test2\":\"testing\",\"@Core.ContentID\":3," +
                 "\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -416,11 +416,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
@@ -428,7 +428,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 "[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"UnTypedFriends@delta\":" +
                 "[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -445,14 +445,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':2, 'Name': 'Friend007', 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -470,14 +470,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':2, 'Age':35, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -495,14 +495,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -519,14 +519,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@NS.Test':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -544,14 +544,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -575,18 +575,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "\"value\":[{\"ID\":1,\"Name\":\"Name1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
                 "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Test0\",\"Age\":33}," +
                 "{\"Id\":2,\"Name\":\"Test1\",\"Age\":0}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -615,11 +615,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
@@ -627,7 +627,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
                 "\"Friends@delta\":[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0,\"Orders@delta\":[{\"Id\":3,\"Price\":30},{\"Id\":4,\"Price\":40}]},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -672,16 +672,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "/convention/$metadata#Employees/$entity\",\"ID\":1,\"Name\":\"Sql\"," +
                 "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"}}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -713,16 +713,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.bind':['Friends(3)']
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "/convention/$metadata#Employees(Friends())/$entity\",\"ID\":1,\"Name\":\"Bind1\"," +
                 "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":3,\"Name\":null,\"Age\":0}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -741,13 +741,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -780,13 +780,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':1,'Name':'Test_1'},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -820,13 +820,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':1,'Name':'Test_1'},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'},{ '@odata.removed' : {'reason':'changed'}, 'Id':1}]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -861,17 +861,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
                 "[{\"Id\":1,\"Price\":101,\"Quantity\":9}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -899,17 +899,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
                 "[{\"Id\":2,\"Price\":444,\"Quantity\":9}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -929,17 +929,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
             //Act & Assert
             var expected = "\"value\":[{\"Id\":2,\"Name\":\"Company03\",\"MyOverdueOrders@delta\":" +
                 "[{\"Id\":1,\"Price\":10,\"Quantity\":5},{\"Id\":2,\"Price\":444,\"Quantity\":9}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -959,13 +959,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -995,18 +995,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                 }]
                      }";
 
-            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-            requestForPost.Headers.Add("OData-Version", "4.01");
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPatch.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
             var expected = "/convention/$metadata#UnTypedEmployees/$delta\",\"value\":[{\"ID\":1,\"Name\":\"Employeeabcd\"," +
                 "\"UnTypedFriends@delta\":[{\"Id\":0,\"Name\":\"abcd\",\"Age\":0}]}]}";
 
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -1078,15 +1078,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
         //             }";
 
-        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
         //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPatch.Content = stringContent;
+        //    requestForPost.Content = stringContent;
 
         //    var expected = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
 
         //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
         //    {
         //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         //        var json = response.Content.ReadAsStringAsync().Result;
@@ -1107,10 +1107,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
         //             }";
 
-        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
         //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPatch.Content = stringContent;
+        //    requestForPost.Content = stringContent;
 
         //    string friendsNavigationLink = "Friends@odata.navigationLink";
         //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
@@ -1119,7 +1119,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         //    string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
 
         //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
         //    {
         //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         //        var json = response.Content.ReadAsStringAsync().Result;
@@ -1142,17 +1142,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         //            'Name':'SqlUD'
         //             }";
 
-        //    var requestForPatch = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
         //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPatch.Content = stringContent;
+        //    requestForPost.Content = stringContent;
 
         //    string friendsNavigationLink = "Friends@odata.navigationLink";
         //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
         //    string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
 
         //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
         //    {
         //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         //        var json = response.Content.ReadAsStringAsync().Result;

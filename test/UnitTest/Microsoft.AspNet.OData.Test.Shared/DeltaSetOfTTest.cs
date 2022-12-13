@@ -360,6 +360,11 @@ namespace Microsoft.AspNet.OData.Test
 
             return ODataAPIResponseStatus.Success;
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class NewFriendPatchHandler : ODataAPIHandler<NewFriend>
@@ -413,6 +418,11 @@ namespace Microsoft.AspNet.OData.Test
             errorMessage = string.Empty;
 
             return originalObject!=null? ODataAPIResponseStatus.Success : ODataAPIResponseStatus.NotFound;
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -58,6 +58,14 @@ namespace Microsoft.AspNet.OData
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
+        /// Add related object.
+        /// </summary>
+        /// <param name="resource">The object to be added.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage);
+
+        /// <summary>
         /// The parent object
         /// </summary>
         internal TStructuralType ParentObject { get; set; }
@@ -74,19 +82,6 @@ namespace Microsoft.AspNet.OData
                 this.ParentObject = resource;
                 CheckAndApplyODataId(resource, model);
             }
-        }
-
-        /// <summary>
-        /// Add related object.
-        /// </summary>
-        /// <param name="resource">The object to be added.</param>
-        /// <param name="errorMessage">Any error message in case of an exception.</param>
-        /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
-        public virtual ODataAPIResponseStatus AddRelatedObject(TStructuralType resource, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            return ODataAPIResponseStatus.Success;
         }
 
         private ODataPath GetODataPath(string path, IEdmModel model)

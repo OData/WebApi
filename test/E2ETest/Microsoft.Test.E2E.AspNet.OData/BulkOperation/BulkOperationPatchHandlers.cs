@@ -265,6 +265,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return null;
             }
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Company resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class OverdueOrderAPIHandler : ODataAPIHandler<NewOrder>
@@ -348,6 +353,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 default:
                     return null;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(NewOrder resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                parent.OverdueOrders.Add(resource);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
             }
         }
     }
@@ -437,6 +460,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return null;
             }
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(MyNewOrder resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                parent.MyOverdueOrders.Add(resource);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
     }
 
     internal class EmployeeAPIHandler : ODataAPIHandler<Employee>
@@ -518,6 +559,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Employee resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -606,6 +652,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return null;
             }
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class NewOrderAPIHandler : ODataAPIHandler<NewOrder>
@@ -692,6 +743,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         public override IODataAPIHandler GetNestedHandler(NewOrder parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(NewOrder resource, out string errorMessage)
         {
             throw new NotImplementedException();
         }
@@ -784,6 +840,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             throw new NotImplementedException();
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(MyNewOrder resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class OrderAPIHandler : ODataAPIHandler<Order>
@@ -870,6 +931,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         public override IODataAPIHandler GetNestedHandler(Order parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Order resource, out string errorMessage)
         {
             throw new NotImplementedException();
         }
@@ -962,6 +1028,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
         {
             throw new NotImplementedException();
         }

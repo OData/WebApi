@@ -156,6 +156,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         return null;
                 }
             }
+
+            public override ODataAPIResponseStatus TryAddRelatedObject(Employee resource, out string errorMessage)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal class FriendEFPatchHandler : ODataAPIHandler<Friend>
@@ -244,6 +249,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 return new OrderEFPatchHandler(parent);
             }
+
+            public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
@@ -325,6 +335,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 return null;
             }
+
+            public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal class OrderEFPatchHandler : ODataAPIHandler<Order>
@@ -402,6 +417,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
 
             public override IODataAPIHandler GetNestedHandler(Order parent, string navigationPropertyName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override ODataAPIResponseStatus TryAddRelatedObject(Order resource, out string errorMessage)
             {
                 throw new NotImplementedException();
             }

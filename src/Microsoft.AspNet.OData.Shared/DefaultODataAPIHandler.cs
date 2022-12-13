@@ -117,6 +117,7 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage)
         {
             errorMessage = string.Empty;

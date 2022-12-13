@@ -540,6 +540,10 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedValues(original);
         }
 
+        /// <summary>
+        /// Update the instance object properties with the properties from the @odata.id object.
+        /// </summary>
+        /// <param name="original">The @odata.id object.</param>
         internal void UpdateODataIdObject(TStructuralType original)
         {
             if (original == null)

@@ -117,6 +117,24 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
+        public override ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                originalList.Add(resource);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
         private TStructuralType GetFilteredItem(IDictionary<string, object> keyValues)
         {
             //This logic is for filtering the object based on the set of keys,

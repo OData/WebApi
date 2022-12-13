@@ -135,12 +135,28 @@ namespace Microsoft.AspNet.OData
                     // NOTE: Handler when we have odata.id will always be different than the parent handler.
                     // However this is true if handlers are applied correctly.
 
-                    IODataAPIHandler odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath);
+                    ODataAPIHandler<TStructuralType> odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
 
-                    if (odataPathApiHandler != null && changedObj.ODataPath.Any() && apiHandler != odataPathApiHandler)
+                    if (odataPathApiHandler != null && changedObj.ODataPath.Any())
                     {
-                        handler = odataPathApiHandler as ODataAPIHandler<TStructuralType>;
-                        hasODataId = true;
+                        // Using a 3rd party library to compare objects
+                        // https://github.com/GregFinzer/Compare-Net-Objects/wiki/Getting-Started
+                        // TODO:
+                        // a) Confirm to perf regressions are caused byt his library.
+                        // b) Investigate if there is a better library.
+
+                        KellermanSoftware.CompareNetObjects.CompareLogic compare = new KellermanSoftware.CompareNetObjects.CompareLogic();
+                        compare.Config.CaseSensitive = false;
+                        compare.Config.ComparePrivateProperties = true;
+                        compare.Config.ComparePrivateFields = true;
+
+                        KellermanSoftware.CompareNetObjects.ComparisonResult result = compare.Compare(handler, odataPathApiHandler);
+
+                        if (!result.AreEqual)
+                        {
+                            handler = odataPathApiHandler;
+                            hasODataId = true;
+                        }
                     }
                 }
 
@@ -169,12 +185,8 @@ namespace Microsoft.AspNet.OData
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
-                    if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && odataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
+                    if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure)
                     {
-                        if (deletedObj != null) // To confirm when handling exceptions for DELETE
-                        {
-                            operation = DataModificationOperationKind.Delete;
-                        }
                         IDeltaSetItem deltaSetItem = changedObj;
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
                         dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
@@ -188,20 +200,31 @@ namespace Microsoft.AspNet.OData
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
+
+                        if (odataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
+                        {
+                            // Handle Failed Operation - Delete when the object doesn't exist.
+                            IDeltaSetItem deltaSetItem = changedObj;
+                            DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                            dataModificationExceptionType.MessageType = new MessageType { Message = "Object to delete not found." };
+
+                            deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
+                            deltaSet.Add(deltaSetItem);
+
+                            continue;
+                        }
+
                         changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
 
                         if (handler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
-                            //Handle Failed Operation - Delete                           
-                            
-                            if (odataAPIResponseStatus == ODataAPIResponseStatus.Success)
-                            {
-                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
-                                deltaSet.Add(changedObject);
-                                continue;
-                            }                            
+                            // Handle Failed Operation - Delete
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                            deltaSet.Add(changedObject);
+
+                            continue;
                         }
-                                               
+
                         deltaSet.Add(deletedObj);
                     }
                     else
@@ -224,9 +247,9 @@ namespace Microsoft.AspNet.OData
 
                             if (hasODataId)
                             {
-                                ODataAPIResponseStatus createResponseStatus = apiHandlerOfT.AddRelatedObject(original, out errorMessage);
+                                ODataAPIResponseStatus linkResponseStatus = apiHandlerOfT.TryAddRelatedObject(original, out errorMessage);
 
-                                if (createResponseStatus == ODataAPIResponseStatus.Failure)
+                                if (linkResponseStatus == ODataAPIResponseStatus.Failure)
                                 {
                                     IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
                                     deltaSet.Add(changedObject);

@@ -149,6 +149,7 @@ public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandle
 	protected ODataAPIHandler`1 ()
 
 	public abstract IODataAPIHandler GetNestedHandler (TStructuralType parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryAddRelatedObject (TStructuralType resource, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& createdObject, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
@@ -343,6 +344,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public TStructuralType Patch (TStructuralType original)
+	public void Patch (TStructuralType original, IODataAPIHandler apiHandler)
 	public void Patch (TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
 	public void Put (TStructuralType original)
 	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
@@ -376,6 +378,7 @@ public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.
 
 	protected virtual void InsertItem (int index, IDeltaSetItem item)
 	public DeltaSet`1 Patch (ICollection`1 originalCollection)
+	public DeltaSet`1 Patch (ODataAPIHandler`1 apiHandlerOfT)
 	public DeltaSet`1 Patch (ODataAPIHandler`1 apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
 }
 

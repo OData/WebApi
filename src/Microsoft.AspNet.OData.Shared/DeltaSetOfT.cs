@@ -226,7 +226,7 @@ namespace Microsoft.AspNet.OData
                         }
 
                         // Confirm if we actually need to patch.
-                        //changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
+                        // changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
 
                         if (handler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
@@ -378,31 +378,25 @@ namespace Microsoft.AspNet.OData
         {
             Type type = typeof(DeltaDeletedEntityObject<>).MakeGenericType(changedObj.ExpectedClrType);
 
-            DeltaDeletedEntityObject<TStructuralType> deletedObject = Activator.CreateInstance(type, true, changedObj.InstanceAnnotationsPropertyInfo) as DeltaDeletedEntityObject<TStructuralType>;
-
-            //foreach (string property in changedObj.GetChangedPropertyNames())
-            //{
-            //    SetPropertyValues(changedObj, deletedObject, property);
-            //}
-
-            //foreach (string property in changedObj.GetUnchangedPropertyNames())
-            //{
-            //    SetPropertyValues(changedObj, deletedObject, property);
-            //}
+            DeltaDeletedEntityObject<TStructuralType> deletedObject = Activator.CreateInstance(type, _clrType, null, null, false,
+                changedObj.InstanceAnnotationsPropertyInfo) as DeltaDeletedEntityObject<TStructuralType>;
 
             foreach (string property in changedObj.GetAllPropertyNames())
             {
                 SetPropertyValues(changedObj, deletedObject, property);
             }
 
-            object annotationValue;
-            if (changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annotationValue))
+            if (changedObj.InstanceAnnotationsPropertyInfo != null)
             {
-                IODataInstanceAnnotationContainer instanceAnnotations = annotationValue as IODataInstanceAnnotationContainer;
-
-                if (instanceAnnotations != null)
+                object annotationValue;
+                if (changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annotationValue))
                 {
-                    deletedObject.TrySetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                    IODataInstanceAnnotationContainer instanceAnnotations = annotationValue as IODataInstanceAnnotationContainer;
+
+                    if (instanceAnnotations != null)
+                    {
+                        deletedObject.TrySetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                    }
                 }
             }
 

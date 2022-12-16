@@ -107,20 +107,19 @@ namespace Microsoft.AspNet.OData
             foreach (IEdmChangedObject changedObj in Items)
             {
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
-                EdmStructuredObject originalObj = null;
+                IEdmStructuredObject original = null;
                 string errorMessage = string.Empty;
                 string getErrorMessage = string.Empty;
                 IDictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
 
                 try
                 {
-                    IEdmStructuredObject original = null;
                     EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
 
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(deltaEntityObject.ODataPath.GetKeys(), out original, out getErrorMessage);
+                    ODataAPIResponseStatus odataAPIResponseStatus = apiHandler.TryGet(deltaEntityObject.ODataPath.GetKeys(), out original, out getErrorMessage);
 
                     EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
-                    if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
+                    if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && odataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
                     {
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
                         dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
@@ -141,7 +140,7 @@ namespace Microsoft.AspNet.OData
                         if (apiHandler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
                             //Handle Failed Operation - Delete                                                        
-                            if (ODataAPIResponseStatus == ODataAPIResponseStatus.Success)
+                            if (odataAPIResponseStatus == ODataAPIResponseStatus.Success)
                             {
                                 IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage, apiHandler);
                                 changedObjectCollection.Add(changedObject);
@@ -153,7 +152,7 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        if (ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
+                        if (odataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
 
@@ -165,7 +164,7 @@ namespace Microsoft.AspNet.OData
                                 continue;
                             }
                         }
-                        else if (ODataAPIResponseStatus == ODataAPIResponseStatus.Success)
+                        else if (odataAPIResponseStatus  == ODataAPIResponseStatus.Success)
                         {
                             operation = DataModificationOperationKind.Update;
                         }
@@ -186,7 +185,7 @@ namespace Microsoft.AspNet.OData
                 catch (Exception ex)
                 {
                     //Handle Failed Operation
-                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj as EdmEntityObject, operation, originalObj, keys, ex.Message, apiHandler);
+                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj as EdmEntityObject, operation, original, keys, ex.Message, apiHandler);
 
                     Contract.Assert(changedObject != null);
                     changedObjectCollection.Add(changedObject);

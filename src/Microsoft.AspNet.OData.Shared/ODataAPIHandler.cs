@@ -22,18 +22,18 @@ namespace Microsoft.AspNet.OData
     public abstract class ODataAPIHandler<TStructuralType>: IODataAPIHandler where TStructuralType : class
     {
         /// <summary>
-        /// TryCreate method to create a new object.
+        /// Create a new object.
         /// </summary>        
-        /// <param name="keyValues">The key-value pair of the object to be created. Optional</param>
-        /// <param name="createdObject">The created object (CLR or Typeless)</param>
-        /// <param name="errorMessage">Any error message in case of an exception</param>
-        /// <returns>The status of the TryCreate method <see cref="ODataAPIResponseStatus"/> </returns>
+        /// <param name="keyValues">The key-value pair of the object to be created. Optional.</param>
+        /// <param name="createdObject">The created object.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>The status of the TryCreate method <see cref="ODataAPIResponseStatus"/>.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public abstract ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage);
 
         /// <summary>
-        /// TryGet method which tries to get the original object based on key-values.
+        /// Get the original object based on key-values.
         /// </summary>
         /// <param name="keyValues">Key-value pair for the entity keys.</param>
         /// <param name="originalObject">Object to return.</param>
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage);
 
         /// <summary>
-        /// TryDelete Method which will delete the object based on key-value pairs.
+        /// Delete the object based on key-value pairs.
         /// </summary>
         /// <param name="keyValues">Key-value pair for the entity keys.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
@@ -66,14 +66,14 @@ namespace Microsoft.AspNet.OData
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
-        /// The parent object
+        /// The parent object.
         /// </summary>
         internal TStructuralType ParentObject { get; set; }
 
         /// <summary>
-        /// Apply OdataId for a resource with OdataID container
+        /// Apply OdataId for a resource with OdataID container.
         /// </summary>
-        /// <param name="resource">resource to apply odata id on</param>
+        /// <param name="resource">resource to apply odata id on.</param>
         /// <param name="model">The model.</param>
         internal virtual void UpdateLinkedObjects(TStructuralType resource, IEdmModel model)
         {

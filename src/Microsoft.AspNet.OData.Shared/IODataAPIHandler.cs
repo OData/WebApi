@@ -8,10 +8,12 @@
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Base Interface for ODataAPIHandler. 
+    /// Base interface for ODataAPIHandler.
+    /// </summary>
+    /// <remarks>
     /// This is being implemented by ODataAPIHandler{TStructuralType} which has a method returning nested ODataApiHandler.
     /// A generic empty interface is needed since the nestedpatch handler will be of different type.
-    /// </summary>
+    /// </remarks>
     public interface IODataAPIHandler
     {
 

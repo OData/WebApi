@@ -19,7 +19,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
 {
-    internal class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
+    internal class TypelessAPIHandlerFactory : EdmODataAPIHandlerFactory
     {
         IEdmEntityType entityType;
         IEdmStructuredObject employee;
@@ -420,6 +420,10 @@ namespace Microsoft.AspNet.OData.Test
             }
         }
 
+        public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class NewFriendTypelessPatchHandler : EdmODataAPIHandler
@@ -548,6 +552,10 @@ namespace Microsoft.AspNet.OData.Test
             return null;
         }
 
+        public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

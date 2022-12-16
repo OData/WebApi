@@ -225,7 +225,8 @@ namespace Microsoft.AspNet.OData
                             continue;
                         }
 
-                        changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
+                        // Confirm if we actually need to patch.
+                        //changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
 
                         if (handler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {

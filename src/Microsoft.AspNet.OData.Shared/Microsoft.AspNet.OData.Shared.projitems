@@ -86,7 +86,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaDeletedEntityObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataEdmAPIHandlerFactory.cs" />

@@ -14,7 +14,7 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// This is the default patch handler for non-CLR types. This class has default get, create and update
+    /// This is the default patch handler for non-CLR types. This class has default get, create, delete and updateRelatedObject
     /// methods that are used to patch an original collection when the collection is provided.
     /// </summary>
     internal class DefaultEdmODataAPIHandler : EdmODataAPIHandler
@@ -96,6 +96,25 @@ namespace Microsoft.AspNet.OData
                 {
                     originalList.Remove(originalObject);
                 }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                originalList.Add(resource);
 
                 return ODataAPIResponseStatus.Success;
             }

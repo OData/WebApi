@@ -16,7 +16,7 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// The handler class for handling users' create, delete and update methods.
+    /// The handler class for handling users' get, create, delete and updateRelatedObject methods.
     /// This is the handler for data modification where there is a CLR type.
     /// </summary>
     public abstract class ODataAPIHandler<TStructuralType>: IODataAPIHandler where TStructuralType : class
@@ -50,20 +50,20 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 
         /// <summary>
-        /// Get the ODataAPIHandler for the nested type.
-        /// </summary>
-        /// <param name="parent">Parent instance.</param>
-        /// <param name="navigationPropertyName">The name of the navigation property for the handler.</param>
-        /// <returns>The type of Nested ODataAPIHandler.</returns>
-        public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
-
-        /// <summary>
         /// Add related object.
         /// </summary>
         /// <param name="resource">The object to be added.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
         public abstract ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage);
+
+        /// <summary>
+        /// Get the ODataAPIHandler for the nested type.
+        /// </summary>
+        /// <param name="parent">Parent instance.</param>
+        /// <param name="navigationPropertyName">The name of the navigation property for the handler.</param>
+        /// <returns>The type of Nested ODataAPIHandler.</returns>
+        public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
         /// The parent object

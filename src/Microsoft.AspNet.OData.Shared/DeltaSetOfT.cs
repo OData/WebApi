@@ -86,6 +86,12 @@ namespace Microsoft.AspNet.OData
             return CopyChangedValues(apiHandlerOfT, apiHandlerFactory);
         }
 
+        /// <summary>
+        /// Get the keys and use the keys to find the original object to patch from the collection.
+        /// </summary>
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <returns>DeltaSet response.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal DeltaSet<TStructuralType> CopyChangedValues(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
@@ -373,20 +379,25 @@ namespace Microsoft.AspNet.OData
 
             DeltaDeletedEntityObject<TStructuralType> deletedObject = Activator.CreateInstance(type, true, changedObj.InstanceAnnotationsPropertyInfo) as DeltaDeletedEntityObject<TStructuralType>;
 
-            foreach (string property in changedObj.GetChangedPropertyNames())
+            //foreach (string property in changedObj.GetChangedPropertyNames())
+            //{
+            //    SetPropertyValues(changedObj, deletedObject, property);
+            //}
+
+            //foreach (string property in changedObj.GetUnchangedPropertyNames())
+            //{
+            //    SetPropertyValues(changedObj, deletedObject, property);
+            //}
+
+            foreach (string property in changedObj.GetAllPropertyNames())
             {
                 SetPropertyValues(changedObj, deletedObject, property);
             }
 
-            foreach (string property in changedObj.GetUnchangedPropertyNames())
+            object annotationValue;
+            if (changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annotationValue))
             {
-                SetPropertyValues(changedObj, deletedObject, property);
-            }
-
-            object annValue;
-            if (changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annValue))            
-            {
-                IODataInstanceAnnotationContainer instanceAnnotations = annValue as IODataInstanceAnnotationContainer;
+                IODataInstanceAnnotationContainer instanceAnnotations = annotationValue as IODataInstanceAnnotationContainer;
 
                 if (instanceAnnotations != null)
                 {
@@ -402,9 +413,10 @@ namespace Microsoft.AspNet.OData
         }
 
         //This is for ODL to work to set id as empty, because if there are missing keys, id wouldnt be set and we need to set it as empty.
+        // In a failed create request with no Id, we will create a DeltaDeletedEntityObject in a compensating transaction.
         private static void ValidateForDeletedEntityId(IList<string> keys, DeltaDeletedEntityObject<TStructuralType> edmDeletedObject)
         {
-            bool hasnullKeys = false;
+            bool hasNullKeys = false;
             for (int i = 0; i < keys.Count; i++)
             {
                 object value;
@@ -412,12 +424,12 @@ namespace Microsoft.AspNet.OData
 
                 if (value == null)
                 {
-                    hasnullKeys = true;
+                    hasNullKeys = true;
                     break;
                 }
             }
 
-            if (hasnullKeys)
+            if (hasNullKeys)
             {               
                 edmDeletedObject.Id = new Uri(string.Empty);                
             }

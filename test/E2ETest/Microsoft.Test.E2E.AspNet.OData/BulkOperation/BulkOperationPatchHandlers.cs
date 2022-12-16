@@ -156,7 +156,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
     }
 
-    internal class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
+    internal class TypelessAPIHandlerFactory : EdmODataAPIHandlerFactory
     {
         IEdmEntityType entityType;
 
@@ -1141,6 +1141,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return null;
             }
         }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class FriendTypelessAPIHandler : EdmODataAPIHandler
@@ -1280,6 +1285,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override EdmODataAPIHandler GetNestedHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             return null;
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 }

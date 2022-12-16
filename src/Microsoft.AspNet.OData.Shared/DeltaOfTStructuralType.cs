@@ -418,6 +418,18 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Returns all known properties in this <see cref="Delta"/> as an
+        /// <see cref="IEnumerable{T}" /> of property Names. Does not include the names of the changed dynamic
+        /// properties.
+        /// </summary>
+        internal IEnumerable<string> GetAllPropertyNames()
+        {
+            // UpdatableProperties could include arbitrary strings, filter by _allProperties
+            //return _updatableProperties.Intersect(_allProperties.Keys).Except(GetChangedPropertyNames());
+            return GetChangedPropertyNames().Concat(GetUnchangedPropertyNames());
+        }
+
+        /// <summary>
         /// Copies the changed property values from the underlying entity (accessible via <see cref="GetInstance()" />)
         /// to the <paramref name="original"/> entity recursively.
         /// </summary>

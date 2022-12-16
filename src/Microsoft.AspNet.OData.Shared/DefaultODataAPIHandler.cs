@@ -64,11 +64,6 @@ namespace Microsoft.AspNet.OData
 
             try
             {
-                if (originalList != null)
-                {
-                    originalList = new List<TStructuralType>();
-                }
-
                 createdObject = Activator.CreateInstance(clrType) as TStructuralType;
                 originalList.Add(createdObject);
 
@@ -136,37 +131,33 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        /// <summary>
+        /// Filter the object based on the set of keys.
+        /// </summary>
+        /// <param name="keyValues">Key-value pairs for the object keys.</param>
+        /// <returns>The filtered object.</returns>
+        /// <remarks>There will only be very few key elements usually, mostly 1, so performance wont be impacted.</remarks>
         private TStructuralType GetFilteredItem(IDictionary<string, object> keyValues)
         {
-            //This logic is for filtering the object based on the set of keys,
-            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
-
-            if (originalList == null || originalList.Count == 0)
+            if (originalList.Count == 0)
             {
                 return default(TStructuralType);
-            }
-
-            Dictionary<string, PropertyInfo> propertyInfos = new Dictionary<string, PropertyInfo>();
-
-            foreach (string key in keyValues.Keys)
-            {
-                propertyInfos.Add(key, clrType.GetProperty(key));
             }
 
             foreach (TStructuralType item in originalList)
             {
                 bool isMatch = true;
-
                 foreach (KeyValuePair<string, object> keyValue in keyValues)
                 {
-                    if (!Equals(propertyInfos[keyValue.Key].GetValue(item), keyValue.Value))
+                    PropertyInfo propertyInfo = clrType.GetProperty(keyValue.Key);
+
+                    if (!Equals(propertyInfo.GetValue(item), keyValue.Value))
                     {
                         // Not a match, so try the next one
                         isMatch = false;
                         break;
                     }
                 }
-
                 if (isMatch)
                 {
                     return item;

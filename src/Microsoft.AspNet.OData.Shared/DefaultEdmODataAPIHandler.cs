@@ -149,12 +149,15 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
+        /// <summary>
+        /// Filter the object based on the set of keys.
+        /// </summary>
+        /// <param name="keyValues">Key-value pairs for the object keys.</param>
+        /// <returns>The filtered object.</returns>
+        /// <remarks>There will only be very few key elements usually, mostly 1, so performance wont be impacted.</remarks>
         private EdmStructuredObject GetFilteredItem(IDictionary<string, object> keyValues)
         {
-            //This logic is for filtering the object based on the set of keys,
-            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
-
-            if (originalList == null)
+            if (originalList.Count == 0)
             {
                 return null;
             }

@@ -42,6 +42,14 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 
         /// <summary>
+        /// Add related object.
+        /// </summary>
+        /// <param name="resource">The object to be added.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage);
+
+        /// <summary>
         /// Get the API handler for the nested type.
         /// </summary>
         /// <param name="parent">Parent instance.</param>

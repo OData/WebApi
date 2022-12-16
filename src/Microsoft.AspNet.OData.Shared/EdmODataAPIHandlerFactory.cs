@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------------
-// <copyright file="ODataEdmAPIHandlerFactory.cs" company=".NET Foundation">
+// <copyright file="EdmODataAPIHandlerFactory.cs" company=".NET Foundation">
 //      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
 //      See License.txt in the project root for license information.
 // </copyright>
@@ -12,11 +12,11 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Factory class for ODataAPIHandlers for typeless entities
+    /// Factory class for ODataAPIHandlers for typeless entities.
     /// </summary>
-    internal abstract class ODataEdmAPIHandlerFactory
+    internal abstract class EdmODataAPIHandlerFactory
     {
-        protected ODataEdmAPIHandlerFactory(IEdmModel model)
+        protected EdmODataAPIHandlerFactory(IEdmModel model)
         {
             Model = model;
         }

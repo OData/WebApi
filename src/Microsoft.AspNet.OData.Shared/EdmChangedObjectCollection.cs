@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="apiHandler">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         /// <returns>ChangedObjectCollection response.</returns>
-        internal EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory)
+        internal EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, EdmODataAPIHandlerFactory apiHandlerFactory)
         {
             return CopyChangedValues(apiHandler, apiHandlerFactory);
         }
@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.OData
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
+        internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler, EdmODataAPIHandlerFactory apiHandlerFactory = null)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             IEdmStructuralProperty[] keys = _entityType.Key().ToArray();
@@ -214,7 +214,7 @@ namespace Microsoft.AspNet.OData
             return keyValues;
         }
 
-        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
+        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmODataAPIHandler apiHandler, EdmODataAPIHandlerFactory apiHandlerFactory = null)
         {
             if (apiHandlerFactory != null && changedObj is EdmEntityObject entityObject && entityObject.ODataPath != null)
             {
@@ -230,7 +230,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object, for typeless entities
         /// </summary> 
-        private void ApplyODataId(ODataPath oDataPath, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
+        private void ApplyODataId(ODataPath oDataPath, EdmStructuredObject original, EdmODataAPIHandlerFactory apiHandlerFactory)
         {
             EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(oDataPath);
 
@@ -258,7 +258,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
+        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmODataAPIHandler apiHandler, EdmODataAPIHandlerFactory apiHandlerFactory = null)
         {
             object value;
             if (changedObj.TryGetPropertyValue(propertyName, out value))

@@ -343,18 +343,18 @@ namespace Microsoft.AspNet.OData
         {
             Type type = typeof(Delta<>).MakeGenericType(_clrType);
 
-            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, null, null,false,
+            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, null, null, false,
                 changedObj.InstanceAnnotationsPropertyInfo) as Delta<TStructuralType>;
 
             SetProperties(originalObj, deltaObject);
 
             if (deltaObject.InstanceAnnotationsPropertyInfo != null)
             {
-                object instAnnValue;
-                changedObj.TryGetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, out instAnnValue);
-                if (instAnnValue != null)
+                object instanceAnnotationValue;
+                changedObj.TryGetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, out instanceAnnotationValue);
+                if (instanceAnnotationValue != null)
                 {
-                    IODataInstanceAnnotationContainer instanceAnnotations = instAnnValue as IODataInstanceAnnotationContainer;
+                    IODataInstanceAnnotationContainer instanceAnnotations = instanceAnnotationValue as IODataInstanceAnnotationContainer;
 
                     if (instanceAnnotations != null)
                     {

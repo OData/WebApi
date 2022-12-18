@@ -543,9 +543,9 @@ namespace Microsoft.AspNet.OData
 
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the values stored in this Delta.
-        /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
-        /// <param name="original">The entity to be updated.</param>
         /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
         public void Put(TStructuralType original)
         {
             CopyChangedValues(original);

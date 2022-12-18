@@ -64,10 +64,18 @@ namespace Microsoft.AspNet.OData
 
             try
             {
-                createdObject = Activator.CreateInstance(clrType) as TStructuralType;
-                originalList.Add(createdObject);
+                if (clrType.GetConstructor(Type.EmptyTypes) != null)
+                {
+                    createdObject = Activator.CreateInstance(clrType) as TStructuralType;
+                    originalList.Add(createdObject);
 
-                return ODataAPIResponseStatus.Success;
+                    return ODataAPIResponseStatus.Success;
+                }
+                else
+                {
+                    errorMessage = "Type has not parameterless constructor";
+                    return ODataAPIResponseStatus.Failure;
+                }
             }
             catch (Exception ex)
             {

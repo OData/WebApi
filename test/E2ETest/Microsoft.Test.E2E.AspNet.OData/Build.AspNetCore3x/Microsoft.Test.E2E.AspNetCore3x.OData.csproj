@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CompareNETObjects" Version="4.78.0" />
     <PackageReference Include="EntityFramework" Version="6.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
@@ -1663,6 +1664,21 @@
     </Compile>
     <Compile Include="..\Validation\DeltaOfTValidationTests.cs">
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationTest.cs">
+      <Link>BulkOperation\BulkOperationTest.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationDataModel.cs">
+      <Link>BulkOperation\BulkOperationDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationEdmModel.cs">
+      <Link>BulkOperation\BulkOperationEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationController.cs">
+      <Link>BulkOperation\BulkOperationController.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
     </Compile>
   </ItemGroup>
   

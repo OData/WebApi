@@ -421,7 +421,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 TypeName = typeof(SimpleOpenCustomer).FullName
             };
 
-
             IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
@@ -443,11 +442,13 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 IsCollection = true,
                 Name = "CollectionProperty"
             };
+
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(resourceInfo);
             ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet
             {
                 TypeName = String.Format("Collection({0})", typeof(SimpleOpenAddress).FullName)
             });
+
             foreach (var complexResource in complexResources)
             {
                 resourceSetWrapper.Resources.Add(new ODataResourceWrapper(complexResource));
@@ -557,7 +558,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 InstanceAnnotations = instAnn
             };
 
-
             IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
@@ -579,11 +579,13 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 IsCollection = true,
                 Name = "CollectionProperty"
             };
+
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(resourceInfo);
             ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet
             {
                 TypeName = String.Format("Collection({0})", typeof(SimpleOpenAddress).FullName)
             });
+
             foreach (var complexResource in complexResources)
             {
                 resourceSetWrapper.Resources.Add(new ODataResourceWrapper(complexResource));
@@ -632,7 +634,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             IEdmModel model = builder.GetEdmModel();
 
             IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
-
 
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
@@ -739,11 +740,13 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 IsCollection = true,
                 Name = "CollectionProperty"
             };
+
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(resourceInfo);
             ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet
             {
                 TypeName = String.Format("Collection({0})", typeof(SimpleOpenAddress).FullName)
             });
+
             foreach (var complexResource in complexResources)
             {
                 resourceSetWrapper.Resources.Add(new ODataResourceWrapper(complexResource));
@@ -1006,6 +1009,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("GuidProperty").Count);
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("CustomerId").Count);
         }
+
         [Fact]
         public void CreateResourceInstance_ThrowsArgumentNull_ReadContext()
         {
@@ -1068,6 +1072,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Model = _readContext.Model,
                 ResourceType = typeof(Delta<Product>)
             };
+
             var structuralProperties = _productEdmType.StructuralProperties().Select(p => p.Name).Union(_productEdmType.NavigationProperties().Select(p => p.Name));
 
             // Act
@@ -1319,7 +1324,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Model = model.Model,
                 Path = new ODataPath(new ODataPathSegment[1] {
                     new KeySegment(keys, entityType1, navigationSource )
-                }),
+                })
             };
 
             // Act
@@ -1341,7 +1346,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceDeserializer>)prov.GetService(typeof(Mock<ODataResourceDeserializer>))).Object);
                 builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceSetDeserializer>)prov.GetService(typeof(Mock<ODataResourceSetDeserializer>))).Object);
             });
-
 
             var originalContext = new ODataDeserializerContext
             {
@@ -1436,7 +1440,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 () => deserializer.ApplyStructuralProperty(42, structuralProperty: null, structuredType: _productEdmType, readContext: _readContext),
                 "structuralProperty");
         }
-
 
         [Fact]
         public void ApplyStructuralPropertiesAndInstanceAnnotations_Calls_ApplyStructuralPropertyOnEachPropertyInResource()
@@ -1628,7 +1631,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataPath path = ODataResourceDeserializerHelpers.ApplyIdToPath(currentContext, resourceWrapper);
             string value = path.ToString();
 
-            Assert.Equal("Products('Null')", value);
+            Assert.Equal("Products('')", value);
         }
 
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)

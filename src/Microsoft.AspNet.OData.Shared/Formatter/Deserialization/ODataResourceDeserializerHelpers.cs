@@ -339,9 +339,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     {
                         // Note: may be null if the payload did not include key values,
                         // but still need to add the key so the path is semantically correct.
-                        // Key value type is not validated, so just use string.
+                        // Key value type is not validated, so just use empty string.
                         // Consider adding tests to ODL to ensure we don't validate key property type in future.
-                        keyValue = "Null";
+                        keyValue = string.Empty;
                     }
 
                     keys.Add(new KeyValuePair<string, object>(keyName, keyValue));

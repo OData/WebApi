@@ -173,26 +173,35 @@ namespace Microsoft.AspNet.OData
                 string errorMessage = string.Empty;
                 string getErrorMessage = string.Empty;
 
-                Dictionary<string, object> keyValues = new Dictionary<string, object>();
-
-                foreach (string key in _keys)
-                {
-                    object value;
-
-                    if (changedObj.TryGetPropertyValue(key, out value))                   
-                    {
-                        keyValues.Add(key, value);
-                    }
-                }
-
                 try
                 {
-                    if (hasODataId)
+                    Dictionary<string, object> keyValues = new Dictionary<string, object>();
+                    keyValues = changedObj.ODataPath.GetKeys();
+
+                    bool containsKeyValue = false;
+
+                    foreach (string key in _keys)
                     {
-                        keyValues = changedObj.ODataPath.GetKeys();
+                        keyValues.TryGetValue(key, out object value);
+
+                        if (!string.IsNullOrEmpty(value.ToString()))
+                        {
+                            containsKeyValue = true;
+                            continue;
+                        }
+
                     }
 
-                    ODataAPIResponseStatus odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+                    ODataAPIResponseStatus odataAPIResponseStatus;
+
+                    if (containsKeyValue)
+                    {
+                        odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+                    }
+                    else
+                    {
+                        odataAPIResponseStatus = ODataAPIResponseStatus.NotFound;
+                    }
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 

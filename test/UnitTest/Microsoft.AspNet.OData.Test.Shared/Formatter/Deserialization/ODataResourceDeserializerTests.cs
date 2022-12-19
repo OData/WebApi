@@ -1631,7 +1631,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataPath path = ODataResourceDeserializerHelpers.ApplyIdToPath(currentContext, resourceWrapper);
             string value = path.ToString();
 
-            Assert.Equal("Products('Null')", value);
+            Assert.Equal("Products('')", value);
         }
 
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)

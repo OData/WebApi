@@ -184,12 +184,11 @@ namespace Microsoft.AspNet.OData
                     {
                         keyValues.TryGetValue(key, out object value);
 
-                        if (!string.IsNullOrEmpty(value.ToString()))
+                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
                         {
                             containsKeyValue = true;
                             continue;
                         }
-
                     }
 
                     ODataAPIResponseStatus odataAPIResponseStatus;

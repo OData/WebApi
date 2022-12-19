@@ -118,6 +118,7 @@ public abstract class Microsoft.AspNet.OData.EdmODataAPIHandler : IODataAPIHandl
 	protected EdmODataAPIHandler ()
 
 	public abstract EdmODataAPIHandler GetNestedHandler (IEdmStructuredObject parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryAddRelatedObject (IEdmStructuredObject resource, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
@@ -162,7 +163,6 @@ public abstract class Microsoft.AspNet.OData.ODataAPIHandlerFactory {
 	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 
 	public abstract IODataAPIHandler GetHandler (Microsoft.OData.UriParser.ODataPath odataPath)
-	public IODataAPIHandler GetHandler (string path)
 }
 
 [

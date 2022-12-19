@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// The IEdmModel for the factory.
         /// </summary>
-        public IEdmModel Model { get; private set; }
+        public IEdmModel Model { get; }
 
         /// <summary>
         /// Get the handler depending on OData path.

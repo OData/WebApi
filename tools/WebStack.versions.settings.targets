@@ -5,7 +5,7 @@
   <PropertyGroup>
     <VersionMajor Condition="'$(VersionMajor)' == ''">7</VersionMajor>
     <VersionMinor Condition="'$(VersionMinor)' == ''">6</VersionMinor>
-    <VersionBuild Condition="'$(VersionBuild)' == ''">2</VersionBuild>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">3</VersionBuild>
     <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
   </PropertyGroup>
 
@@ -15,7 +15,7 @@
     <AspNetCorePackageDependency>[2.0.1, 3.0.0)</AspNetCorePackageDependency>
     <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
     <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>
-    <ODataLibPackageDependency>[7.12.2, 8.0.0)</ODataLibPackageDependency>
+    <ODataLibPackageDependency>[7.13.0, 8.0.0)</ODataLibPackageDependency>
     <NewtonsoftJsonPackageDependency>13.0.1</NewtonsoftJsonPackageDependency>
   </PropertyGroup>
 

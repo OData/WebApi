@@ -45,7 +45,8 @@
         <Property Name="State" Type="Edm.String" />
         <Property Name="ZipCode" Type="Edm.String" />
         <Property Name="CountryOrRegion" Type="Edm.String" />
-      </ComplexType>
+        <NavigationProperty Name="Suppliers" Type="Collection(ODataDemo.Supplier)"/>
+	  </ComplexType>
       <Function Name="GetProductsByRating" m:HttpMethod="GET">
         <ReturnType Type="Collection(ODataDemo.Product)" />
         <Parameter Name="rating" Type="Edm.Int32" Nullable="false" />
@@ -65,7 +66,8 @@
               <PropertyPath>Concurrency</PropertyPath>
             </Collection>
           </Annotation>
-        </EntitySet>
+		  <NavigationPropertyBinding Path="Address/Suppliers" Target="Suppliers" />
+		</EntitySet>
         <FunctionImport Name="GetProductsByRating" Function="ODataDemo.GetProductsByRating" EntitySet="Products" IncludeInServiceDocument="true" />
       </EntityContainer>
     </Schema>

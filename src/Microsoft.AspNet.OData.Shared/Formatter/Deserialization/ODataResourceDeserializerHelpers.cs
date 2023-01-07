@@ -7,9 +7,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -82,7 +84,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     Contract.Assert(readContext.Path.NavigationSource != null, "Navigation property segment with null navigationSource");
                     IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
                     IEdmNavigationSource parentNavigationSource = readContext.Path.NavigationSource;
-                    IEdmNavigationSource navigationSource = parentNavigationSource.FindNavigationTarget(navigationProperty);
+                    IEdmPathExpression bindingPath = GetBindingPath(readContext.Path, navigationProperty.Name);
+                    IEdmNavigationSource navigationSource = parentNavigationSource.FindNavigationTarget(navigationProperty, bindingPath);
 
                     if (navigationProperty.ContainsTarget)
                     {
@@ -108,6 +111,39 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             return BuildNestedContextFromCurrentContext(readContext, path);
+        }
+
+        // Determines the binding path for an OData Path to a given navigationProperty
+        private static IEdmPathExpression GetBindingPath(Routing.ODataPath path, string navPropName)
+        {
+            List<string> segments = new List<string>();
+
+            if (path == null)
+            {
+                return null;
+            }
+
+            // Binding Path is made up of complex types, containment navigation properties, and type segments
+            foreach (ODataPathSegment segment in path.Segments)
+            {
+                if (segment is NavigationPropertySegment navSegment)
+                {
+                    Debug.Assert(navSegment.NavigationProperty.ContainsTarget, "Non-contained navigation property in binding path");
+                    segments.Add(navSegment.NavigationProperty.Name);
+                }
+                else if (segment is PropertySegment propertySegment)
+                {
+                    segments.Add(propertySegment.Property.Name);
+                }
+                else if (segment is TypeSegment typeSegment)
+                {
+                    segments.Add(typeSegment.Identifier);
+                }
+            }
+
+            segments.Add(navPropName);
+
+            return new EdmPathExpression(String.Join("/", segments));
         }
 
         /// <summary>

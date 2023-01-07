@@ -1274,14 +1274,15 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
             EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+            IEdmEntitySet navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
 
             var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
 
             ODataDeserializerContext readContext = new ODataDeserializerContext()
             {
                 Model = model.Model,
-                Path = new ODataPath(new ODataPathSegment[1] {
+                Path = new ODataPath(new ODataPathSegment[2] {
+                    new EntitySetSegment(navigationSource),
                     new KeySegment(keys, entityType1, navigationSource )
                 })
             };
@@ -1614,6 +1615,39 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ///Assert
             Assert.NotNull(nestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), nestedContext.Path.ToString());
+        }
+
+        [Fact]
+        public void GenerateNestedReadContext_Generates_NestedDeserializerContextForComplexType()
+        {
+            //Arrange
+            IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
+            ODataPath expectedOdataPath = new ODataPath(new EntitySetSegment(suppliersEntitySet));
+
+            var currentContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                Path = new ODataPath(new EntitySetSegment(suppliersEntitySet), new KeySegment(new KeyValuePair<string, object>[] {new KeyValuePair<string, object>("ID", 7)}, suppliersEntitySet.EntityType(), suppliersEntitySet)),
+                Request = RequestFactory.Create(),
+            };
+
+            ODataNestedResourceInfoWrapper addressNestedResourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo() { Name = "Address" });
+            addressNestedResourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(new ODataResource { Properties = new List<ODataProperty>() }));
+            ODataNestedResourceInfoWrapper supplierNestedResourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo() { Name = "Suppliers" });
+            supplierNestedResourceInfoWrapper.NestedItems.Add(new ODataResourceSetWrapper(new ODataResourceSet()));
+
+            IEdmEntityTypeReference supplierTypeReference = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
+            IEdmProperty addressProperty = supplierTypeReference.FindProperty("Address");
+            IEdmComplexTypeReference addressTypeReference = _edmModel.GetEdmTypeReference(typeof(Address)).AsComplex();
+            IEdmProperty suppliersProperty = addressTypeReference.FindProperty("Suppliers");
+
+            //Act
+            ODataDeserializerContext addressNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(addressNestedResourceInfoWrapper, currentContext, addressProperty);
+            ODataDeserializerContext supplierNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(addressNestedResourceInfoWrapper, addressNestedContext, suppliersProperty);
+
+            ///Assert
+            Assert.NotNull(supplierNestedContext.Path);
+            Assert.Equal(expectedOdataPath.ToString(), supplierNestedContext.Path.ToString());
         }
 
         [Fact]

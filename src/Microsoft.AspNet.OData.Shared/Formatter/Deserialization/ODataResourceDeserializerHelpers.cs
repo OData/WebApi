@@ -7,11 +7,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -68,7 +66,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     segmentType = readContext.Model.FindType(propertyTypeName);
                 }
 
-                // could it be a problem later that the navigationSource is null?
                 DynamicPathSegment pathSegment = new DynamicPathSegment(
                    nestedResourceInfo.Name,
                    segmentType,
@@ -81,13 +78,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (edmProperty.PropertyKind == EdmPropertyKind.Navigation)
                 {
-                    Contract.Assert(readContext.Path.NavigationSource != null, "Navigation property segment with null navigationSource");
                     IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
                     IEdmNavigationSource parentNavigationSource = readContext.Path.NavigationSource;
-                    IEdmPathExpression bindingPath = GetBindingPath(readContext.Path, navigationProperty.Name);
-                    IEdmNavigationSource navigationSource = parentNavigationSource.FindNavigationTarget(navigationProperty, bindingPath);
+                    IEdmPathExpression bindingPath = GetBindingPath(readContext.Path, navigationProperty);
+                    IEdmNavigationSource navigationSource = parentNavigationSource?.FindNavigationTarget(navigationProperty, bindingPath);
 
-                    if (navigationProperty.ContainsTarget)
+                    if (navigationProperty.ContainsTarget || navigationSource == null || navigationSource is IEdmUnknownEntitySet)
                     {
                         path = AppendToPath(path, new NavigationPropertySegment(navigationProperty, navigationSource), navigationProperty.DeclaringType, parentNavigationSource);
                     }
@@ -114,21 +110,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         // Determines the binding path for an OData Path to a given navigationProperty
-        private static IEdmPathExpression GetBindingPath(Routing.ODataPath path, string navPropName)
+        private static IEdmPathExpression GetBindingPath(Routing.ODataPath path, IEdmNavigationProperty navigationProperty)
         {
-            List<string> segments = new List<string>();
-
+            Contract.Assert(navigationProperty != null, "Called GetBindingPath with a null navigation property");
             if (path == null)
             {
                 return null;
             }
 
             // Binding Path is made up of complex types, containment navigation properties, and type segments
+            List<string> segments = new List<string>();
             foreach (ODataPathSegment segment in path.Segments)
             {
                 if (segment is NavigationPropertySegment navSegment)
                 {
-                    Debug.Assert(navSegment.NavigationProperty.ContainsTarget, "Non-contained navigation property in binding path");
                     segments.Add(navSegment.NavigationProperty.Name);
                 }
                 else if (segment is PropertySegment propertySegment)
@@ -141,7 +136,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            segments.Add(navPropName);
+            if(navigationProperty.DeclaringType != path.EdmType as IEdmStructuredType)
+            {
+                // Add a type cast segment
+                segments.Add(navigationProperty.DeclaringType.FullTypeName());
+            }
+
+            segments.Add(navigationProperty.Name);
 
             return new EdmPathExpression(String.Join("/", segments));
         }
@@ -190,11 +191,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             List<ODataPathSegment> segments = new List<ODataPathSegment>(path.Segments);
+            IEdmType pathType = path.EdmType;
 
             // Append type cast segment if required
-            if (declaringType != null && path.EdmType != declaringType)
+            if (declaringType != null && pathType != null && pathType != declaringType
+                && declaringType.IsOrInheritsFrom(pathType.AsElementType()))
             {
-                segments.Add(new TypeSegment(declaringType, navigationSource));
+                segments.Add(new TypeSegment(declaringType, pathType, navigationSource));
             }
 
             segments.Add(segment);

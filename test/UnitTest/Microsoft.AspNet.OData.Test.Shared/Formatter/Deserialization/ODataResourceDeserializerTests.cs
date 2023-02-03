@@ -1674,7 +1674,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [Fact]
         public void GenerateNestedReadContext_Generates_NestedDeserializerContextForUnboundNavigationProperty()
         {
-            //Arrange
+            // Arrange
             IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
             IEdmEntityTypeReference supplierTypeReference = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
             IEdmStructuralProperty addressProperty = supplierTypeReference.FindProperty("Address") as IEdmStructuralProperty;
@@ -1702,11 +1702,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Request = RequestFactory.Create(),
             };
 
-            //Act
+            // Act
             ODataDeserializerContext addressNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(addressNestedResourceInfoWrapper, currentContext, addressProperty);
             ODataDeserializerContext suppliersNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(suppliersNestedResourceInfoWrapper, addressNestedContext, suppliersProperty);
 
-            ///Assert
+            // Assert
             Assert.NotNull(suppliersNestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), suppliersNestedContext.Path.ToString());
         }
@@ -1714,7 +1714,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [Fact]
         public void GenerateNestedReadContext_Generates_NestedDeserializerContextForDerivedComplexType()
         {
-            //Arrange
+            // Arrange
             IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
             IEdmEntityTypeReference supplierTypeReference = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
             IEdmProperty addressProperty = supplierTypeReference.FindProperty("Address");
@@ -1736,11 +1736,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Request = RequestFactory.Create(),
             };
 
-            //Act
+            // Act
             ODataDeserializerContext addressNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(addressNestedResourceInfoWrapper, currentContext, addressProperty);
             ODataDeserializerContext derivedSuppliersNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(suppliersNestedResourceInfoWrapper, addressNestedContext, derivedSuppliersProperty);
 
-            ///Assert
+            // Assert
             Assert.NotNull(derivedSuppliersNestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), derivedSuppliersNestedContext.Path.ToString());
         }
@@ -1748,7 +1748,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [Fact]
         public void GenerateNestedReadContext_Generates_NestedDeserializerContextOnDynamicType()
         {
-            //Arrange
+            // Arrange
             IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
             IEdmComplexTypeReference addressTypeReference = _edmModel.GetEdmTypeReference(typeof(Address)).AsComplex();
             IEdmNavigationProperty suppliersProperty = addressTypeReference.FindNavigationProperty("Suppliers");
@@ -1775,13 +1775,13 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Request = RequestFactory.Create(),
             };
 
-            //Act
+            // Act
             // Dynamic
             ODataDeserializerContext dynamicNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(dynamicNestedResourceInfoWrapper, currentContext, null);
             // Supplier
             ODataDeserializerContext suppliersNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(supplierNestedResourceInfoWrapper, dynamicNestedContext, suppliersProperty);
 
-            ///Assert
+            // Assert
             Assert.NotNull(suppliersNestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), suppliersNestedContext.Path.ToString());
         }
@@ -1789,7 +1789,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [Fact(Skip = "Navigation property bindings ending in cast segments not yet fully supported.")]
         public void GenerateNestedReadContext_Generates_NestedDeserializerContextWithSingleBindingEndingInCastSegment()
         {
-            //Arrange
+            // Arrange
             IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
             IEdmEntitySet productsEntitySet = _edmModel.EntityContainer.FindEntitySet("Products");
             IEdmEntitySet preferredProductsEntitySet = _edmModel.EntityContainer.FindEntitySet("PreferredProducts");
@@ -1811,12 +1811,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Request = RequestFactory.Create(),
             };
 
-            ///Act
+            // Act
             ODataDeserializerContext productsNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(productsNestedResourceInfoWrapper, currentContext, productsProperty);
             ODataDeserializerContext preferredProductsNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(preferredProductsNestedResourceInfoWrapper, currentContext, productsProperty);
             ODataDeserializerContext preferredProductNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(preferredProductsNestedResourceInfoWrapper, preferredProductsNestedContext, productsProperty);
 
-            ///Assert
+            // Assert
             Assert.NotNull(productsNestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), productsNestedContext.Path.ToString());
             Assert.NotNull(preferredProductsNestedContext.Path);
@@ -1826,7 +1826,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [Fact(Skip = "Bindings ending in cast segments not fully supported yet.")]
         public void GenerateNestedReadContext_Generates_NestedDeserializerContextWithBindingEndingInCastSegment()
         {
-            //Arrange
+            // Arrange
             IEdmEntitySet suppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("Suppliers");
             IEdmEntitySet preferredSuppliersEntitySet = _edmModel.EntityContainer.FindEntitySet("PreferredSuppliers");
             IEdmEntityTypeReference supplierTypeReference = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
@@ -1852,11 +1852,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataDeserializerContext addressNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(addressNestedResourceInfoWrapper, currentContext, addressProperty);
             ODataDeserializerContext suppliersNestedContext = ODataResourceDeserializerHelpers.GenerateNestedReadContext(suppliersNestedResourceInfoWrapper, addressNestedContext, suppliersProperty);
 
-            ///Act
+            // Act
             ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(ODataDeserializerProviderFactory.Create());
             deserializer.ReadInline(suppliersNestedResourceSetWrapper, supplierTypeReference, suppliersNestedContext);
 
-            ///Assert
+            // Assert
             Assert.NotNull(suppliersNestedContext.Path);
             Assert.Equal(expectedOdataPath.ToString(), suppliersNestedContext.Path.ToString());
         }

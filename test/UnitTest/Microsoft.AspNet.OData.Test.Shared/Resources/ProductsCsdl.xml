@@ -20,6 +20,7 @@
         <NavigationProperty Name="Category" Type="ODataDemo.Category" Partner="Products" />
         <NavigationProperty Name="Supplier" Type="ODataDemo.Supplier" Partner="Products" />
       </EntityType>
+      <EntityType Name="PreferredProduct" BaseType="ODataDemo.Product"/>
       <EntityType Name="Category">
         <Key>
           <PropertyRef Name="ID" />
@@ -39,12 +40,20 @@
         <Property Name="Concurrency" Type="Edm.Int32" Nullable="false" />
         <NavigationProperty Name="Products" Type="Collection(ODataDemo.Product)" Partner="Supplier" />
       </EntityType>
+      <EntityType Name="PreferredSuppliers" BaseType="ODataDemo.Suppliers"/>
       <ComplexType Name="Address">
         <Property Name="Street" Type="Edm.String" />
         <Property Name="City" Type="Edm.String" />
         <Property Name="State" Type="Edm.String" />
         <Property Name="ZipCode" Type="Edm.String" />
         <Property Name="CountryOrRegion" Type="Edm.String" />
+        <NavigationProperty Name="Suppliers" Type="Collection(ODataDemo.Supplier)"/>
+        <NavigationProperty Name="UnboundSuppliers" Type="Collection(ODataDemo.Supplier)"/>
+        <NavigationProperty Name="HeterogenousSuppliers" Type="Collection(ODataDemo.Supplier)"/>
+	  </ComplexType>
+      <ComplexType Name="DerivedAddress" BaseType="ODataDemo.Address">
+        <NavigationProperty Name="DerivedSuppliers" Type="Collection(ODataDemo.Supplier)"/>
+        <NavigationProperty Name="DerivedUnboundSuppliers" Type="Collection(ODataDemo.Supplier)"/>
       </ComplexType>
       <Function Name="GetProductsByRating" m:HttpMethod="GET">
         <ReturnType Type="Collection(ODataDemo.Product)" />
@@ -58,14 +67,22 @@
         <EntitySet Name="Categories" EntityType="ODataDemo.Category">
           <NavigationPropertyBinding Path="Products" Target="Products" />
         </EntitySet>
-        <EntitySet Name="Suppliers" EntityType="ODataDemo.Supplier">
+        <EntitySet Name="PreferredSuppliers" EntityType="ODataDemo.PreferredSuppliers"/>
+        <EntitySet Name="PreferredProducts" EntityType="ODataDemo.PreferredProduct"/>
+		  <EntitySet Name="Suppliers" EntityType="ODataDemo.Supplier">
           <NavigationPropertyBinding Path="Products" Target="Products" />
           <Annotation Term="Org.OData.Core.V1.OptimisticConcurrency">
             <Collection>
               <PropertyPath>Concurrency</PropertyPath>
             </Collection>
           </Annotation>
-        </EntitySet>
+          <NavigationPropertyBinding Path="Products" Target="Products" />
+		  <NavigationPropertyBinding Path="Products/ODataDemo.PreferredProducts" Target="PreferredProducts" />
+		  <NavigationPropertyBinding Path="Address/Suppliers" Target="Suppliers" />
+          <NavigationPropertyBinding Path="Address/ODataDemo.DerivedAddress/DerivedSuppliers" Target="Suppliers" />
+          <NavigationPropertyBinding Path="Address/HeterogenousSuppliers" Target="Suppliers" />
+          <NavigationPropertyBinding Path="Address/HeterogenousSuppliers/ODataDemo.PreferredSuppliers" Target="PreferredSuppliers" />
+		  </EntitySet>
         <FunctionImport Name="GetProductsByRating" Function="ODataDemo.GetProductsByRating" EntitySet="Products" IncludeInServiceDocument="true" />
       </EntityContainer>
     </Schema>

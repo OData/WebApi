@@ -48,7 +48,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             configuration.AddControllers(
                 typeof (CustomersController), 
                 typeof (PeopleController),
-                typeof (NormalOrdersController));
+                typeof (NormalOrdersController),
+                typeof(EnableQueryMenusController),
+                typeof(QueryOptionsOfTMenusController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -287,6 +289,33 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             {
                 Assert.Contains("NotShownOrderDetail2", result);
             }
+        }
+
+        [Theory]
+        [InlineData("EnableQueryMenus")]
+        [InlineData("QueryOptionsOfTMenus")]
+        public async Task NonDefaultMaxExpansionDepthAppliesToAutoExpand(string entitySet)
+        {
+            // Arrange            
+            var requestUri = string.Format("{0}/autoexpand/{1}", BaseAddress, entitySet);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+            var client = new HttpClient();
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.EndsWith(
+                $"/autoexpand/$metadata#{entitySet}(Tabs(Items(Notes())))\"," +
+                "\"value\":[{\"Id\":1,\"Tabs\":[{\"Id\":1,\"Items\":[{\"Id\":1,\"Notes\":[{\"Id\":1}]}]}]}]" +
+                "}",
+                content);
         }
 
         private static void VerifyOrderAndChoiceOrder(JObject customer, bool special = false, bool vip = false)

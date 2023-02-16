@@ -6,8 +6,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
@@ -272,5 +274,89 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             //_db.Dispose();
         }
 #endif
+    }
+
+    public class EnableQueryMenusController : TestODataController
+    {
+        private static readonly List<Menu> menus = new List<Menu>
+        {
+            new Menu
+            {
+                Id = 1,
+                Tabs = new List<Tab>
+                {
+                    new Tab
+                    {
+                        Id = 1,
+                        Items = new List<Item>
+                        {
+                            new Item
+                            {
+                                Id = 1,
+                                Notes = new List<Note>
+                                {
+                                    new Note { Id = 1 }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        [EnableQuery(MaxExpansionDepth = 4)]
+        public ITestActionResult Get()
+        {
+            return Ok(menus);
+        }
+    }
+
+    public class QueryOptionsOfTMenusController : TestODataController
+    {
+        private static readonly List<Menu> menus = new List<Menu>
+        {
+            new Menu
+            {
+                Id = 1,
+                Tabs = new List<Tab>
+                {
+                    new Tab
+                    {
+                        Id = 1,
+                        Items = new List<Item>
+                        {
+                            new Item
+                            {
+                                Id = 1,
+                                Notes = new List<Note>
+                                {
+                                    new Note { Id = 1 }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        public ITestActionResult Get(ODataQueryOptions<Menu> queryOptions)
+        {
+            var validationSettings = new ODataValidationSettings
+            {
+                MaxExpansionDepth = 4
+            };
+
+            queryOptions.Validate(validationSettings);
+
+            var result = queryOptions.ApplyTo(menus.AsQueryable()).AsQueryable();
+
+            return Ok(result, result.GetType());
+        }
+
+        private ITestActionResult Ok(object content, Type type)
+        {
+            var resultType = typeof(TestOkObjectResult<>).MakeGenericType(type);
+            return Activator.CreateInstance(resultType, content, this) as ITestActionResult;
+        }
     }
 }

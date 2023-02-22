@@ -165,6 +165,94 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Fact]
+        public async Task PatchEmployee_WithUpdates_Friends_WithRelativeContextURL()
+        {
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+
+            var content = @"{
+                            '@odata.context':'Employees(1)/Friends/$delta',     
+                    'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
+                     }";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            //Act & Assert
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+
+            //Act & Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+
+                Assert.Equal(2, result.Count);
+                Assert.Contains("Friend1", result.ToString());
+                Assert.Contains("Friend2", result.ToString());
+            }
+        }
+
+        [Fact]
+        public async Task PatchEmployee_WithUpdates_Friends_WithOnlyDeltaContextURL()
+        {
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+
+            var content = @"{
+                            '@odata.context':'#$delta',     
+                    'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
+                     }";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            //Act & Assert
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
+            }
+
+            //Act & Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+
+                Assert.Equal(2, result.Count);
+                Assert.Contains("Friend1", result.ToString());
+                Assert.Contains("Friend2", result.ToString());
+            }
+        }
+
+        [Fact]
         public async Task PatchEmployee_WithDeletes_Friends()
         {
             //Arrange

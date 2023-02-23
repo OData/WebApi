@@ -56,7 +56,16 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             string propertyName = property.Name;
             if (edmProperty != null)
             {
-                propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
+                // The bellow code gets the actual CLR property name which might be diffrent than the one that 
+                // was provided when the model was built. E.g. CLR property ProductId might be exposed as Id
+                // The code that takes care of setting the annotation is the method AddClrPropertyInfoAnnotations in the class EdmModelHelperMethods.
+                // The propertyName must remain the same when working with the IDelta object type, as it does not know the name of the
+                // underlying CLR property. If this name is changed than the property will not be set in the IDelta object in the SetProperty method bellow
+                var isDelta = resource is IDelta;
+                if (!isDelta)
+                {
+                    propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
+                }
             }
             else
             {

@@ -45,6 +45,63 @@ namespace Microsoft.AspNet.OData
         // also clearly ties the property to code in this assembly.
         private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
 
+        private string ProcessActionArguments(ActionExecutingContext context)
+        {
+            // TODO: validate context.ActionArguments?
+            object obj = context.ActionArguments.First().Value;
+            Type type = obj.GetType();
+
+            // Ignore Action payloads
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
+            {
+                return string.Empty;
+            }
+
+            string expandString = GenerateExpandQueryString(obj, context.HttpContext.Request.GetModel(), true);
+
+            return expandString;
+        }
+
+        private string GenerateExpandQueryString(object obj, IEdmModel model, bool isFirstExpand)
+        {
+            Type type = obj.GetType();
+            Type _elementType = null;
+            bool isCollection = TypeHelper.IsCollection(type, out _elementType);
+
+            if (isCollection)
+            {
+                type = _elementType;
+                List<object> objList = (obj as IEnumerable<object>).Cast<object>().ToList();
+                obj = objList[0];
+            }
+
+            string edmFullName = type.EdmFullName();
+            IEdmSchemaType schemaType = model.FindType(edmFullName);
+            IEdmStructuredType edmStructuredType = schemaType as IEdmStructuredType;
+
+            IEnumerable<IEdmNavigationProperty> navigationProperties = edmStructuredType.NavigationProperties();
+            string expandString = "";
+
+            int count = 0;
+
+            foreach (IEdmNavigationProperty navProp in navigationProperties)
+            {
+                count++;
+                PropertyInfo prop = type.GetProperty(navProp.Name);
+                object nestedObj = prop.GetValue(obj);
+
+                if (nestedObj != null)
+                {
+                    expandString += isFirstExpand ? "" : "(";
+                    expandString += count>1 ? ","+prop.Name : string.Concat("$expand=",prop.Name);
+                    expandString += GenerateExpandQueryString(nestedObj, model,false);
+                    expandString += isFirstExpand ? "" : ")";
+                }
+            }
+
+            return expandString;
+        }
+
         /// <summary>
         /// Performs query validations before action is executed.
         /// </summary>
@@ -66,6 +123,18 @@ namespace Microsoft.AspNet.OData
             context.HttpContext.Items.Add(nameof(RequestQueryData), requestQueryData);
 
             HttpRequest request = context.HttpContext.Request;
+
+            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase))
+            {
+                string expand = ProcessActionArguments(context);
+
+                if (!string.IsNullOrEmpty(expand))
+                {
+                    expand = "?" + expand;
+                    request.QueryString = new QueryString(expand);
+                }
+            }
+
             ODataPath path = request.ODataFeature().Path;
 
             ODataQueryContext queryContext = null;

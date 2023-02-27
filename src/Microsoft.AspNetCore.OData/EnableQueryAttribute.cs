@@ -67,12 +67,11 @@ namespace Microsoft.AspNet.OData
             Type type = obj.GetType();
             Type _elementType = null;
             bool isCollection = TypeHelper.IsCollection(type, out _elementType);
-
+            List<object> objList = new List<object>();
             if (isCollection)
             {
                 type = _elementType;
-                List<object> objList = (obj as IEnumerable<object>).Cast<object>().ToList();
-                obj = objList[0];
+                objList = (obj as IEnumerable<object>).Cast<object>().ToList();
             }
 
             string edmFullName = type.EdmFullName();
@@ -88,7 +87,7 @@ namespace Microsoft.AspNet.OData
             {
                 count++;
                 PropertyInfo prop = type.GetProperty(navProp.Name);
-                object nestedObj = prop.GetValue(obj);
+                object nestedObj = isCollection ? GetObjectWithValue(prop, objList) : prop.GetValue(obj);
 
                 if (nestedObj != null)
                 {
@@ -100,6 +99,21 @@ namespace Microsoft.AspNet.OData
             }
 
             return expandString;
+        }
+
+        private object GetObjectWithValue(PropertyInfo prop, List<object> objList)
+        {
+            foreach (object obj in objList)
+            {
+                var value = prop.GetValue(obj);
+
+                if (value != null)
+                {
+                    return value;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

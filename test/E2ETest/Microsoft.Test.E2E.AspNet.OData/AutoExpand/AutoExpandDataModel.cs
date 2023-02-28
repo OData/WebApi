@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Data.Entity;
 using Microsoft.AspNet.OData.Builder;
 
@@ -123,5 +124,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
         public int Id { get; set; }
 
         public string Description { get; set; }
+    }
+
+    public class Menu
+    {
+        public int Id { get; set; }
+        [AutoExpand]
+        public List<Tab> Tabs { get; set; }
+    }
+
+    public class Tab
+    {
+        public int Id { get; set; }
+        [AutoExpand]
+        public List<Item> Items { get; set; }
+    }
+
+    public class Item
+    {
+        public int Id { get; set; }
+        [AutoExpand]
+        public List<Note> Notes { get; set; }
+    }
+
+    public class Note
+    {
+        public int Id { get; set; }
     }
 }

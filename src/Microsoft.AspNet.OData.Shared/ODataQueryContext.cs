@@ -156,6 +156,11 @@ namespace Microsoft.AspNet.OData
 
         internal string TargetName { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the query validation settings.
+        /// </summary>
+        internal ODataValidationSettings ValidationSettings { get; set; }
+
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
             Contract.Assert(model != null);

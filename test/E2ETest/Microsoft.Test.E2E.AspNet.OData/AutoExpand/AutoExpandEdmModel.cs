@@ -25,6 +25,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             builder.EntityType<DerivedOrder2>();
             builder.EntitySet<OrderDetail>("OrderDetails");
             builder.EntitySet<People>("People");
+            builder.EntitySet<Menu>("EnableQueryMenus");
+            builder.EntitySet<Menu>("QueryOptionsOfTMenus");
+            builder.EntitySet<Tab>("Tabs");
+            builder.EntitySet<Item>("Items");
+            builder.EntitySet<Note>("Notes");
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

@@ -17,6 +17,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -233,6 +234,26 @@ namespace Microsoft.AspNet.OData
                 // actionExecutedContext.Result might also indicate a status code that has not yet
                 // been applied to the result; make sure it's also successful.
                 ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
+
+                if (responseContent == null)
+                {
+                    Type createdODataResultType = actionExecutedContext.Result.GetType().GetGenericArguments().Count() > 0 ?
+                        typeof(CreatedODataResult<>).MakeGenericType(actionExecutedContext.Result.GetType().GetGenericArguments()[0]) : null;
+
+                    Type actionResultType = actionExecutedContext.Result.GetType();
+
+                    // Get the entity object from CreatedODataResult<T> via reflection.
+                    // Use the entity object to create an instance of ObjectResult.
+                    if (createdODataResultType != null &&
+                        (actionResultType == createdODataResultType || createdODataResultType.IsAssignableFrom(actionResultType)))
+                    {
+                        object entity = ((PropertyInfo)createdODataResultType.GetProperty("Entity")).GetValue(actionExecutedContext.Result);
+                        responseContent = new ObjectResult(entity)
+                        {
+                            StatusCode = response.StatusCode
+                        };
+                    }
+                }
 
                 if (responseContent != null && (responseContent.StatusCode == null || IsSuccessStatusCode(responseContent.StatusCode.Value)))
                 {

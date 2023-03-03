@@ -21,6 +21,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -82,10 +83,30 @@ namespace Microsoft.AspNet.OData
             if (response != null && response.IsSuccessStatusCode && response.Content != null)
             {
                 ObjectContent responseContent = response.Content as ObjectContent;
+
+                //if (responseContent == null)
+                //{
+                //    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                //        response.Content.GetType().FullName);
+                //}
+
                 if (responseContent == null)
                 {
-                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
-                        response.Content.GetType().FullName);
+                    response.TryGetContentValue(out object value);
+
+                    Type createdODataResultType = value.GetType().GetGenericArguments().Count() > 0 ?
+                        typeof(CreatedODataResult<>).MakeGenericType(value.GetType().GetGenericArguments()[0]) : null;
+
+                    Type actionResultType = value.GetType();
+
+                    // Get the entity object from CreatedODataResult<T> via reflection.
+                    // Use the entity object to create an instance of ObjectResult.
+                    if (createdODataResultType != null &&
+                        (actionResultType == createdODataResultType || createdODataResultType.IsAssignableFrom(actionResultType)))
+                    {
+                        object entity = ((PropertyInfo)createdODataResultType.GetProperty("Entity")).GetValue(value);
+                        responseContent = new ObjectContent(actionResultType,entity,null);
+                    }
                 }
 
                 // Get collection from SingleResult.

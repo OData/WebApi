@@ -84,29 +84,10 @@ namespace Microsoft.AspNet.OData
             {
                 ObjectContent responseContent = response.Content as ObjectContent;
 
-                //if (responseContent == null)
-                //{
-                //    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
-                //        response.Content.GetType().FullName);
-                //}
-
                 if (responseContent == null)
                 {
-                    response.TryGetContentValue(out object value);
-
-                    Type createdODataResultType = value.GetType().GetGenericArguments().Count() > 0 ?
-                        typeof(CreatedODataResult<>).MakeGenericType(value.GetType().GetGenericArguments()[0]) : null;
-
-                    Type actionResultType = value.GetType();
-
-                    // Get the entity object from CreatedODataResult<T> via reflection.
-                    // Use the entity object to create an instance of ObjectResult.
-                    if (createdODataResultType != null &&
-                        (actionResultType == createdODataResultType || createdODataResultType.IsAssignableFrom(actionResultType)))
-                    {
-                        object entity = ((PropertyInfo)createdODataResultType.GetProperty("Entity")).GetValue(value);
-                        responseContent = new ObjectContent(actionResultType,entity,null);
-                    }
+                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                        response.Content.GetType().FullName);
                 }
 
                 // Get collection from SingleResult.

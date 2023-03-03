@@ -138,7 +138,7 @@ namespace Microsoft.AspNet.OData
 
             HttpRequest request = context.HttpContext.Request;
 
-            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase) && !request.QueryString.ToString().Contains("$expand", StringComparison.OrdinalIgnoreCase))
             {
                 string expand = ProcessActionArguments(context);
 

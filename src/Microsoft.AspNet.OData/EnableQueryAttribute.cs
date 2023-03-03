@@ -21,7 +21,6 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNet.OData.Results;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -83,7 +82,6 @@ namespace Microsoft.AspNet.OData
             if (response != null && response.IsSuccessStatusCode && response.Content != null)
             {
                 ObjectContent responseContent = response.Content as ObjectContent;
-
                 if (responseContent == null)
                 {
                     throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,

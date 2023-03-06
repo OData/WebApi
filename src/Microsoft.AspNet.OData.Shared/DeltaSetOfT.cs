@@ -94,6 +94,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         /// <returns>DeltaSet response.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
         internal DeltaSet<TStructuralType> CopyChangedValues(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             //Here we are getting the keys and using the keys to find the original object 

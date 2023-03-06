@@ -99,5 +99,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.Equal(expectedResponse.ToString().ToLower(), json.ToString().ToLower());
             }
         }
+
+        [Fact]
+        public async Task PostEmployee_WithNavigationProperties()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees";
+
+            var content = @"{
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}],
+                    'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            var expectedFriends = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+            var expectedNewFriends = "NewFriends\":[{\"Id\":2001,\"Name\":\"NewFriend 2001\",\"Age\":21,\"NewOrders\":[]},{\"Id\":2002,\"Name\":\"NewFriend 2002\",\"Age\":22,\"NewOrders\":[{\"Id\":101,\"Price\":45,\"Quantity\":10}]}]";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expectedFriends, json);
+                Assert.Contains(expectedNewFriends, json);
+            }
+        }
     }
 }

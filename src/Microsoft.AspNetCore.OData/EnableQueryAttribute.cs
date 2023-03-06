@@ -62,60 +62,6 @@ namespace Microsoft.AspNet.OData
             return expandString;
         }
 
-        private string GenerateExpandQueryString(object obj, IEdmModel model, bool isFirstExpand)
-        {
-            Type type = obj.GetType();
-            Type _elementType = null;
-            bool isCollection = TypeHelper.IsCollection(type, out _elementType);
-            List<object> objList = new List<object>();
-            if (isCollection)
-            {
-                type = _elementType;
-                objList = (obj as IEnumerable<object>).Cast<object>().ToList();
-            }
-
-            string edmFullName = type.EdmFullName();
-            IEdmSchemaType schemaType = model.FindType(edmFullName);
-            IEdmStructuredType edmStructuredType = schemaType as IEdmStructuredType;
-
-            IEnumerable<IEdmNavigationProperty> navigationProperties = edmStructuredType.NavigationProperties();
-            string expandString = "";
-
-            int count = 0;
-
-            foreach (IEdmNavigationProperty navProp in navigationProperties)
-            {
-                count++;
-                PropertyInfo prop = type.GetProperty(navProp.Name);
-                object nestedObj = isCollection ? GetObjectWithValue(prop, objList) : prop.GetValue(obj);
-
-                if (nestedObj != null)
-                {
-                    expandString += isFirstExpand ? "" : "(";
-                    expandString += count>1 ? ","+prop.Name : string.Concat("$expand=",prop.Name);
-                    expandString += GenerateExpandQueryString(nestedObj, model,false);
-                    expandString += isFirstExpand ? "" : ")";
-                }
-            }
-
-            return expandString;
-        }
-
-        private object GetObjectWithValue(PropertyInfo prop, List<object> objList)
-        {
-            foreach (object obj in objList)
-            {
-                var value = prop.GetValue(obj);
-
-                if (value != null)
-                {
-                    return value;
-                }
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// Performs query validations before action is executed.
         /// </summary>
@@ -138,7 +84,7 @@ namespace Microsoft.AspNet.OData
 
             HttpRequest request = context.HttpContext.Request;
 
-            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase) && !request.QueryString.ToString().Contains("$expand", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase) && !request.QueryString.ToString().ToLowerInvariant().Contains("$expand"))
             {
                 string expand = ProcessActionArguments(context);
 

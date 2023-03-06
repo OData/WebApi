@@ -37,6 +37,23 @@ namespace Microsoft.AspNet.OData
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public partial class EnableQueryAttribute : ActionFilterAttribute
     {
+        private string ProcessActionArguments(HttpActionContext context)
+        {
+            // TODO: validate context.ActionArguments?
+            object obj = context.ActionArguments.First().Value;
+            Type type = obj.GetType();
+
+            // Ignore Action payloads
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
+            {
+                return string.Empty;
+            }
+
+            string expandString = GenerateExpandQueryString(obj, context.Request.GetModel(), true);
+
+            return expandString;
+        }
+
         /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
         /// returning response message. It then validates the query from uri based on the validation settings on
@@ -58,6 +75,18 @@ namespace Microsoft.AspNet.OData
             if (request == null)
             {
                 throw Error.Argument("actionExecutedContext", SRResources.ActionExecutedContextMustHaveRequest);
+            }
+
+            if (String.Equals(request.Method.ToString(), "post", StringComparison.OrdinalIgnoreCase) && !request.RequestUri.Query.ToLowerInvariant().Contains("$expand"))
+            {
+                string expand = ProcessActionArguments(actionExecutedContext.ActionContext);
+
+                if (!string.IsNullOrEmpty(expand))
+                {
+                    expand = "?" + expand;
+                    string currentUriString = request.RequestUri.AbsoluteUri.ToString();
+                    request.RequestUri = new Uri(currentUriString + expand);
+                }
             }
 
             HttpConfiguration configuration = request.GetConfiguration();

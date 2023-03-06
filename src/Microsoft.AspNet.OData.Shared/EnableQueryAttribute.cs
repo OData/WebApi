@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -461,6 +462,68 @@ namespace Microsoft.AspNet.OData
             }
 
             return returnValue;
+        }
+
+        /// <summary>
+        /// Generate a $expand query string from the object in the request.
+        /// </summary>
+        /// <param name="obj">The object in the request that is passed in controller methods.</param>
+        /// <param name="model">The service model.</param>
+        /// <param name="isFirstExpand">If we are calling for the first time.</param>
+        /// <returns>A $expand query string.</returns>
+        /// <remarks>The method is called recursively.</remarks>
+        private string GenerateExpandQueryString(object obj, IEdmModel model, bool isFirstExpand)
+        {
+            Type type = obj.GetType();
+            Type _elementType = null;
+            bool isCollection = TypeHelper.IsCollection(type, out _elementType);
+            List<object> objList = new List<object>();
+            if (isCollection)
+            {
+                type = _elementType;
+                objList = (obj as IEnumerable<object>).Cast<object>().ToList();
+            }
+
+            string edmFullName = type.EdmFullName();
+            IEdmSchemaType schemaType = model.FindType(edmFullName);
+            IEdmStructuredType edmStructuredType = schemaType as IEdmStructuredType;
+
+            IEnumerable<IEdmNavigationProperty> navigationProperties = edmStructuredType.NavigationProperties();
+            string expandString = "";
+
+            int count = 0;
+
+            foreach (IEdmNavigationProperty navProp in navigationProperties)
+            {
+                count++;
+                PropertyInfo prop = type.GetProperty(navProp.Name);
+                object nestedObj = isCollection ? GetObjectWithValue(prop, objList) : prop.GetValue(obj);
+
+                if (nestedObj != null)
+                {
+                    expandString += isFirstExpand ? "" : "(";
+                    expandString += count > 1 ? "," + prop.Name : string.Concat("$expand=", prop.Name);
+                    expandString += GenerateExpandQueryString(nestedObj, model, false);
+                    expandString += isFirstExpand ? "" : ")";
+                }
+            }
+
+            return expandString;
+        }
+
+        private object GetObjectWithValue(PropertyInfo prop, List<object> objList)
+        {
+            foreach (object obj in objList)
+            {
+                var value = prop.GetValue(obj);
+
+                if (value != null)
+                {
+                    return value;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

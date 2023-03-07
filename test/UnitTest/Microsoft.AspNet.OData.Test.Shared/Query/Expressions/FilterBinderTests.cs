@@ -2363,10 +2363,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange & Act & Assert
 #if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentNullException>(() => Bind<Product>(filter),
-                "Value cannot be null. (Parameter 'qualifiedName')");
+                "Value cannot be null. (Parameter 'typeName')");
 #else
             ExceptionAssert.Throws<ArgumentNullException>(() => Bind<Product>(filter),
-                "Value cannot be null.\r\nParameter name: qualifiedName");
+                "Value cannot be null.\r\nParameter name: typeName");
 #endif
         }
 

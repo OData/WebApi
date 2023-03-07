@@ -2281,6 +2281,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Object to delete not found..
+        /// </summary>
+        internal static string ObjectToDeleteNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("ObjectToDeleteNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Unknown function &apos;{0}&apos;..
         /// </summary>
         internal static string ODataFunctionNotSupported

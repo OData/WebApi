@@ -54,7 +54,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
 
-            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? messageReader.CreateODataDeltaResourceSetReader() : messageReader.CreateODataResourceSetReader();
+            // If we want to support '#$delta' context URL, then we need to pass the EntitySet and StructuredType params to the CreateODataDeltaResourceSetReader method. 
+            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? messageReader.CreateODataDeltaResourceSetReader(readContext.Path?.NavigationSource as IEdmEntitySetBase, edmType.AsEntity() as IEdmStructuredType) : messageReader.CreateODataResourceSetReader();
             object resourceSet = resourceSetReader.ReadResourceOrResourceSet();
             return ReadInline(resourceSet, edmType, readContext);
         }
@@ -76,7 +77,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
 
-            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? await messageReader.CreateODataDeltaResourceSetReaderAsync() : await messageReader.CreateODataResourceSetReaderAsync();
+            // If we want to support '#$delta' context URL, then we need to pass the EntitySet and StructuredType params to the CreateODataDeltaResourceSetReaderAsync method. 
+            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? await messageReader.CreateODataDeltaResourceSetReaderAsync(readContext.Path?.NavigationSource as IEdmEntitySetBase, edmType.AsEntity() as IEdmStructuredType) : await messageReader.CreateODataResourceSetReaderAsync();
             object resourceSet = await resourceSetReader.ReadResourceOrResourceSetAsync();
             return ReadInline(resourceSet, edmType, readContext);
         }

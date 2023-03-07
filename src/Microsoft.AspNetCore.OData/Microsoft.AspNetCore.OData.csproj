@@ -42,9 +42,9 @@
 
   <ItemGroup>
     <PackageReference Include="CompareNETObjects" Version="4.78.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.13.0" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.13.0" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.13.0" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.15.0" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.15.0" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.15.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

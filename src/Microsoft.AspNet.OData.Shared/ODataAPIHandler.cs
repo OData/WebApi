@@ -84,7 +84,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private ODataPath GetODataPath(string path, IEdmModel model)
+        private static ODataPath GetODataPath(string path, IEdmModel model)
         {
             ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
             ODataPath odataPath = parser.ParsePath();

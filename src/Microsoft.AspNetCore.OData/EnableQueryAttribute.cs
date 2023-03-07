@@ -84,6 +84,7 @@ namespace Microsoft.AspNet.OData
 
             HttpRequest request = context.HttpContext.Request;
 
+            // If POST request, if there is no expand query string.
             if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase) && !request.QueryString.ToString().ToLowerInvariant().Contains("$expand"))
             {
                 string expand = ProcessActionArguments(context);
@@ -91,9 +92,11 @@ namespace Microsoft.AspNet.OData
                 if (!string.IsNullOrEmpty(expand))
                 {
                     expand = "?" + expand;
-                    request.QueryString = new QueryString(expand);
+                    request.QueryString = new QueryString(expand); // Append $expand
                 }
             }
+
+            // Pluggable logic
 
             ODataPath path = request.ODataFeature().Path;
 

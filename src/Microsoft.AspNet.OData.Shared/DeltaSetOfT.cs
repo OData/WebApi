@@ -226,7 +226,7 @@ namespace Microsoft.AspNet.OData
                             // Handle Failed Operation - Delete when the object doesn't exist.
                             IDeltaSetItem deltaSetItem = changedObj;
                             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
-                            dataModificationExceptionType.MessageType = new MessageType { Message = "Object to delete not found." };
+                            dataModificationExceptionType.MessageType = new MessageType { Message = SRResources.ObjectToDeleteNotFound };
 
                             deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
                             deltaSet.Add(deltaSetItem);

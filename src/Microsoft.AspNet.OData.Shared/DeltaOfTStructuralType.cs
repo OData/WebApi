@@ -868,6 +868,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="original">The structural object</param>
         /// <param name="apiHandler">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void CopyChangedNestedProperties(TStructuralType original, ODataAPIHandler<TStructuralType> apiHandler = null, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             // For nested resources.

@@ -39,6 +39,8 @@ namespace Microsoft.AspNet.OData
         /// <param name="originalObject">Object to return.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public abstract ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage);
 
         /// <summary>
@@ -47,6 +49,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="keyValues">Key-value pair for the entity keys.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 
         /// <summary>
@@ -55,6 +58,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="resource">The object to be added.</param>
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the AddRelatedObject method <see cref="ODataAPIResponseStatus"/>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public abstract ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage);
 
         /// <summary>
@@ -84,7 +88,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private ODataPath GetODataPath(string path, IEdmModel model)
+        private static ODataPath GetODataPath(string path, IEdmModel model)
         {
             ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
             ODataPath odataPath = parser.ParsePath();

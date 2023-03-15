@@ -31,7 +31,6 @@ namespace Microsoft.AspNet.OData
             this.originalList = originalList ?? new List<TStructuralType>();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage)
         {
             ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
@@ -56,7 +55,6 @@ namespace Microsoft.AspNet.OData
             return status;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage)
         {
             createdObject = default(TStructuralType);
@@ -85,7 +83,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -120,7 +117,6 @@ namespace Microsoft.AspNet.OData
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage)
         {
             errorMessage = string.Empty;

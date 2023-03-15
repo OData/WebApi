@@ -14,7 +14,6 @@ namespace Microsoft.AspNet.OData
     /// This is being implemented by ODataAPIHandler{TStructuralType} which has a method returning nested ODataApiHandler.
     /// A generic empty interface is needed since the nested patch handler will be of different type.
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces")]
     public interface IODataAPIHandler
     {
 

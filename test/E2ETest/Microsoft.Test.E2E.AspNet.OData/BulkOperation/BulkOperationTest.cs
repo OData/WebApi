@@ -709,10 +709,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPatch.Content = stringContent;
 
-            // "value":[{"ID":1,"Name":"Employee1","SkillSet":["CSharp","Sql"],"Gender":"Female","AccessLevel":"Execute","FavoriteSports":{"Sport":"Football"},
-            // "Friends@delta":[{"Id":1,"Name":"Friend1","Age":33,"Orders@delta":[{"Id":1,"Price":10},{"Id":2,"Price":20}]},
-            // {"Id":2,"Name":"Friend2","Age":0}]},{"ID":2,"Name":"Employee2","SkillSet":[],"Gender":"Female","AccessLevel":"Read","FavoriteSports":null,
-            // "Friends@delta":[{"Id":3,"Name":"Friend3","Age":0,"Orders@delta":[{"Id":3,"Price":30},{"Id":4,"Price":40}]},{"Id":4,"Name":"Friend4","Age":0}]}]}
             //Act & Assert
             var expected = "\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"}," +
                 "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":33,\"Orders@delta\":[{\"Id\":1,\"Price\":10},{\"Id\":2,\"Price\":20}]}," +

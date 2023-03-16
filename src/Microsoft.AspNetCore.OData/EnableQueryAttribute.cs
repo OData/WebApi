@@ -237,10 +237,10 @@ namespace Microsoft.AspNet.OData
 
                 if (responseContent == null)
                 {
-                    Type createdODataResultType = actionExecutedContext.Result.GetType().GetGenericArguments().Count() > 0 ?
-                        typeof(CreatedODataResult<>).MakeGenericType(actionExecutedContext.Result.GetType().GetGenericArguments()[0]) : null;
-
                     Type actionResultType = actionExecutedContext.Result.GetType();
+                    Type[] actionResultGenericArgs = actionResultType.GetGenericArguments();
+                    Type createdODataResultType = actionResultGenericArgs.Length > 0 ?
+                        typeof(CreatedODataResult<>).MakeGenericType(actionResultGenericArgs[0]) : null;
 
                     // Get the entity object from CreatedODataResult<T> via reflection.
                     // Use the entity object to create an instance of ObjectResult.

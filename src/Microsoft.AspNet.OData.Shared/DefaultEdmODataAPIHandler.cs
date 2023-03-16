@@ -35,7 +35,6 @@ namespace Microsoft.AspNet.OData
             this.originalList = originalList ?? new List<IEdmStructuredObject>();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
             ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
@@ -62,7 +61,6 @@ namespace Microsoft.AspNet.OData
             return status;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
@@ -83,7 +81,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -107,7 +104,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
         {
             errorMessage = string.Empty;

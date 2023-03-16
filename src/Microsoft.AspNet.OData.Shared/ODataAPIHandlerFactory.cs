@@ -35,7 +35,6 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="odataPath">OData path corresponding to an @odata.id.</param>
         /// <returns>ODataAPIHandler for the specified OData path.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "1#")]
         public abstract IODataAPIHandler GetHandler(ODataPath odataPath);
 
         /// <summary>

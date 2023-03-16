@@ -394,6 +394,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new MyNewOrder();
+
+                if (parent.MyOverdueOrders == null)
+                {
+                    parent.MyOverdueOrders = new List<MyNewOrder>();
+                }
+
                 parent.MyOverdueOrders.Add(createdObject);
 
                 return ODataAPIResponseStatus.Success;
@@ -436,8 +442,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = parent.MyOverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
+                if (parent.MyOverdueOrders == null)
+                {
+                    originalObject = null;
+                }
+                else
+                {
+                    originalObject = parent.MyOverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                }
 
                 if (originalObject == null)
                 {
@@ -469,6 +482,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             try
             {
+                if (parent.MyOverdueOrders == null)
+                {
+                    parent.MyOverdueOrders = new List<MyNewOrder>();
+                }
+
                 parent.MyOverdueOrders.Add(resource);
 
                 return ODataAPIResponseStatus.Success;

@@ -268,7 +268,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Company resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -563,7 +565,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Employee resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -655,7 +659,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -749,7 +755,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(NewOrder resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -843,7 +851,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(MyNewOrder resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -937,7 +947,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Order resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -1034,7 +1046,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -1144,7 +1158,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -1289,7 +1305,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(IEdmStructuredObject resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            errorMessage = string.Empty;
+            return ODataAPIResponseStatus.Success;
         }
     }
 }

@@ -363,7 +363,9 @@ namespace Microsoft.AspNet.OData.Test
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            errorMessage = string.Empty;
+
+            return ODataAPIResponseStatus.Success;
         }
     }
 
@@ -422,7 +424,9 @@ namespace Microsoft.AspNet.OData.Test
 
         public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            errorMessage = string.Empty;
+
+            return ODataAPIResponseStatus.Success;
         }
     }
 }

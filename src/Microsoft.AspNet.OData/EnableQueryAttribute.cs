@@ -47,6 +47,8 @@ namespace Microsoft.AspNet.OData
         /// request message and HttpConfiguration etc.</param>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
             Justification = "The majority of types referenced by this method result from HttpActionExecutedContext")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "The majority of types referenced by this method result from HttpActionExecutedContext")]
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext == null)
@@ -69,6 +71,34 @@ namespace Microsoft.AspNet.OData
             if (actionExecutedContext.ActionContext == null)
             {
                 throw Error.Argument("actionExecutedContext", SRResources.ActionExecutedContextMustHaveActionContext);
+            }
+
+            bool hasExpandQueryParameter = false;
+            string queryString = request.RequestUri.Query;
+            var absoluteUri = request.RequestUri.AbsoluteUri;
+            bool queryStringIsEmpty = string.IsNullOrEmpty(queryString);
+
+            ReadOnlySpan<char> absoluteUriSpan = absoluteUri.AsSpan();
+            string baseUriWithPath = queryStringIsEmpty ? absoluteUri : absoluteUriSpan.Slice(0, absoluteUri.IndexOf('?', 0)).ToString();
+
+            if (!queryStringIsEmpty)
+            {
+                string[] queryParameters = queryString.Split('&');
+
+                hasExpandQueryParameter = queryParameters.Any(x => x.StartsWith("?$expand", StringComparison.OrdinalIgnoreCase) || x.StartsWith("$expand", StringComparison.OrdinalIgnoreCase) || x.StartsWith("expand", StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Create a $expand query string if 1) It's a POST request 2) if there is no expand query string.
+            if (String.Equals(actionExecutedContext.Request.Method, HttpMethod.Post) && !hasExpandQueryParameter)
+            {
+                string expand = GenerateExpandQueryFromPayload(actionExecutedContext.ActionContext);
+
+                if (!string.IsNullOrEmpty(expand))
+                {
+                    // If query string was empty, we add a new query string e.g ?$expand=Order. If not, we prepend a $expand query
+                    expand = queryStringIsEmpty ? "?" + expand : "?" + expand + "&" + queryString.TrimStart('?');
+                    request.RequestUri = new Uri(baseUriWithPath + expand);
+                }
             }
 
             HttpActionDescriptor actionDescriptor = actionExecutedContext.ActionContext.ActionDescriptor;
@@ -120,6 +150,30 @@ namespace Microsoft.AspNet.OData
                     responseContent.Value = queryResult;
                 }
             }
+        }
+
+        private static string GenerateExpandQueryFromPayload(HttpActionContext context)
+        {
+            object obj = null;
+
+            if (context.ActionArguments == null || context.ActionArguments.Count == 0 || (obj = context.ActionArguments.First().Value) == null)
+            {
+                return string.Empty;
+            }
+
+            Type type = obj.GetType();
+
+            // Ignore Action payloads
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
+            {
+                return string.Empty;
+            }
+
+            IExpandQueryBuilder expandQueryBuilder = context.Request.GetExpandQueryBuilder();
+
+            string expandString = expandQueryBuilder.GenerateExpandQueryParameter(obj, context.Request.GetModel());
+
+            return expandString;
         }
 
         /// <summary>

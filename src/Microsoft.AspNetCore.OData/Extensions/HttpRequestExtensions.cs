@@ -457,6 +457,21 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Gets the <see cref="IExpandQueryBuilder"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IExpandQueryBuilder"/> from the request container.</returns>
+        public static IExpandQueryBuilder GetExpandQueryBuilder(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<IExpandQueryBuilder>();
+        }
+
+        /// <summary>
         /// Checks whether the request is a POST targeted at a resource path ending in /$query.
         /// </summary>
         /// <param name="request">The request.</param>

@@ -76,6 +76,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         [Key]
         public int Id { get; set; }
         public int Price { get; set; }
+        public List<OrderLine> OrderLines { get; set; }
+    }
+
+    public class OrderLine
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Price { get; set; }
     }
 
     public class NewFriend

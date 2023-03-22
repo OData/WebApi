@@ -73,11 +73,99 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     }
                     return null;
                 case "Companies":
-                    return new CompanyAPIHandler();
+                    Company company;
+                    string msg2;
+                    if ((new CompanyAPIHandler().TryGet(keys, out company, out msg2)) == ODataAPIResponseStatus.Success)
+                    {
+                        return GetNestedHandlerForCompany(pathSegments, currentPosition, company);
+                    }
+
+                    return null;
+
+                case "NewFriends":
+
+                    if (currentPosition >= pathSegments.Count - 1)
+                    {
+                        return null;
+                    }
+
+                    ODataPathSegment nextPathSegment = pathSegments[++currentPosition];
+
+                    if (nextPathSegment is TypeSegment)
+                    {
+                        currentPosition++;
+                        TypeSegment typeSegment = nextPathSegment as TypeSegment;
+
+                        if (typeSegment.Identifier == "Microsoft.Test.E2E.AspNet.OData.BulkOperation.MyNewFriend")
+                        {
+                            MyNewFriend friend = EmployeesController.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]) as MyNewFriend;
+
+                            if (friend != null)
+                            {
+                                switch (pathSegments[++currentPosition].Identifier)
+                                {
+                                    case "MyNewOrders":
+                                        return new MyNewOrderAPIHandler(friend);
+
+                                    default:
+                                        return null;
+
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        NewFriend friend = EmployeesController.NewFriends.FirstOrDefault(x => x.Id == (int)keys["Id"]);
+
+                        if (friend != null)
+                        {
+                            switch (pathSegments[++currentPosition].Identifier)
+                            {
+                                case "NewOrders":
+                                    return new NewOrderAPIHandler(friend);
+
+                                default:
+                                    return null;
+                            }
+                        }
+                    }
+                    return null;
 
                 default:
                     return null;
             }
+        }
+
+        private static IODataAPIHandler GetNestedHandlerForCompany(List<ODataPathSegment> pathSegments, int currentPosition, Company company)
+        {
+            ++currentPosition;
+
+            if (pathSegments.Count <= currentPosition)
+            {
+                return null;
+            }
+
+            ODataPathSegment currentPathSegment = pathSegments[currentPosition];
+
+            if (currentPathSegment is NavigationPropertySegment)
+            {
+                int keySegmentPosition = ODataPathHelper.GetNextKeySegmentPosition(pathSegments, currentPosition);
+                KeySegment keySegment = (KeySegment)pathSegments[keySegmentPosition];
+
+                switch (currentPathSegment.Identifier)
+                {
+                    case "OverdueOrders":
+                        return new OverdueOrderAPIHandler(company);
+
+                    case "MyOverdueOrders":
+                        return new MyOverdueOrderAPIHandler(company);
+
+                    default:
+                        return null;
+                }
+            }
+            return null;
         }
 
         private static IODataAPIHandler GetNestedHandlerForEmployee(List<ODataPathSegment> pathSegments, int currentPosition, Employee employee)
@@ -237,7 +325,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = CompanyController.Companies.First(x => x.Id == Int32.Parse(id));
+                originalObject = CompanyController.Companies.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
                 if (originalObject == null)
                 {
@@ -268,8 +356,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Company resource, out string errorMessage)
         {
-            //throw new NotImplementedException();
             errorMessage = string.Empty;
+
             return ODataAPIResponseStatus.Success;
         }
     }
@@ -291,7 +379,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new NewOrder();
-                parent.OverdueOrders.Add(createdObject);
+
+                if (parent.OverdueOrders == null)
+                {
+                    parent.OverdueOrders = new List<NewOrder>();
+                }
+
+                var id = keyValues["Id"].ToString();
+                var originalObject = parent.OverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
+
+                if (originalObject == null)
+                {
+                    parent.OverdueOrders.Add(createdObject);
+                }
 
                 return ODataAPIResponseStatus.Success;
             }
@@ -333,7 +433,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = parent.OverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
+
+                if (parent.OverdueOrders == null)
+                {
+                    originalObject = null;
+                }
+                else
+                {
+                    originalObject = parent.OverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                }
 
                 if (originalObject == null)
                 {
@@ -364,7 +472,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             try
             {
-                parent.OverdueOrders.Add(resource);
+                if (parent.OverdueOrders == null)
+                {
+                    parent.OverdueOrders = new List<NewOrder>();
+                    parent.OverdueOrders.Add(resource);
+                }
+                else
+                {
+                    NewOrder newOrder = parent.OverdueOrders.FirstOrDefault(x => x.Id == resource.Id);
+
+                    if (newOrder == null)
+                    {
+                        parent.OverdueOrders.Add(resource);
+                    }
+                }
 
                 return ODataAPIResponseStatus.Success;
             }
@@ -604,6 +725,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new Friend();
+
+                if (employee.Friends == null)
+                {
+                    employee.Friends = new List<Friend>();
+                }
+
                 employee.Friends.Add(createdObject);
 
                 return ODataAPIResponseStatus.Success;
@@ -677,7 +804,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryAddRelatedObject(Friend resource, out string errorMessage)
         {
             errorMessage = string.Empty;
-            return ODataAPIResponseStatus.Success;
+
+            try
+            {
+                if (!employee.Friends.Contains(resource))
+                {
+                    employee.Friends.Add(resource);
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
         }
     }
 
@@ -772,7 +914,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryAddRelatedObject(NewOrder resource, out string errorMessage)
         {
             errorMessage = string.Empty;
-            return ODataAPIResponseStatus.Success;
+
+            try
+            {
+                if (!friend.NewOrders.Contains(resource))
+                {
+                    friend.NewOrders.Add(resource);
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
         }
     }
 
@@ -867,7 +1024,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public override ODataAPIResponseStatus TryAddRelatedObject(MyNewOrder resource, out string errorMessage)
         {
             errorMessage = string.Empty;
-            return ODataAPIResponseStatus.Success;
+
+            try
+            {
+                if (!friend.MyNewOrders.Contains(resource))
+                {
+                    friend.MyNewOrders.Add(resource);
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
         }
     }
 
@@ -956,13 +1128,144 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override IODataAPIHandler GetNestedHandler(Order parent, string navigationPropertyName)
         {
-            throw new NotImplementedException();
+            switch (navigationPropertyName)
+            {
+                case "OrderLines":
+                    return new OrderLineAPIHandler(parent);
+                default:
+                    return null;
+            }
         }
 
         public override ODataAPIResponseStatus TryAddRelatedObject(Order resource, out string errorMessage)
         {
             errorMessage = string.Empty;
-            return ODataAPIResponseStatus.Success;
+
+            try
+            {
+                if (!friend.Orders.Contains(resource))
+                {
+                    friend.Orders.Add(resource);
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+    }
+
+    internal class OrderLineAPIHandler : ODataAPIHandler<OrderLine>
+    {
+        Order order;
+        public OrderLineAPIHandler(Order order)
+        {
+            this.order = order;
+        }
+
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out OrderLine createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new OrderLine();
+
+                if (order.OrderLines == null)
+                {
+                    order.OrderLines = new List<OrderLine>();
+                }
+
+                order.OrderLines.Add(createdObject);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                var id = keyValues.First().Value.ToString();
+                var friend = this.order.OrderLines.FirstOrDefault(x => x.Id == int.Parse(id));
+
+                this.order.OrderLines.Remove(friend);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out OrderLine originalObject, out string errorMessage)
+        {
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                if (order.OrderLines != null)
+                {
+                    var id = keyValues["Id"].ToString();
+                    originalObject = order.OrderLines.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                }
+
+                if (originalObject == null)
+                {
+                    status = ODataAPIResponseStatus.NotFound;
+                }
+            }
+            catch (Exception ex)
+            {
+                status = ODataAPIResponseStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override IODataAPIHandler GetNestedHandler(OrderLine parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(OrderLine resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                if (!order.OrderLines.Contains(resource))
+                {
+                    order.OrderLines.Add(resource);
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
         }
     }
 
@@ -1054,13 +1357,43 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
         {
-            throw new NotImplementedException();
+            switch (navigationPropertyName)
+            {
+                case "NewOrders":
+                    return new NewOrderAPIHandler(parent);
+
+                default:
+                    return null;
+            }
         }
 
         public override ODataAPIResponseStatus TryAddRelatedObject(NewFriend resource, out string errorMessage)
         {
             errorMessage = string.Empty;
-            return ODataAPIResponseStatus.Success;
+
+            try
+            {
+                if (employee.NewFriends == null)
+                {
+                    employee.NewFriends = new List<NewFriend>();
+                    employee.NewFriends.Add(resource);
+                }
+                else
+                {
+                    if (!employee.NewFriends.Contains(resource))
+                    {
+                        employee.NewFriends.Add(resource);
+                    }
+                }
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
         }
     }
 

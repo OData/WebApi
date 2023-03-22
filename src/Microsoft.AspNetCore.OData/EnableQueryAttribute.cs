@@ -66,6 +66,31 @@ namespace Microsoft.AspNet.OData
             context.HttpContext.Items.Add(nameof(RequestQueryData), requestQueryData);
 
             HttpRequest request = context.HttpContext.Request;
+
+            bool hasExpandQueryParameter = false;
+
+            string queryString = request.QueryString.ToString();
+            bool queryStringIsEmpty = string.IsNullOrEmpty(queryString);
+
+            if (!queryStringIsEmpty)
+            {
+                string[] queryParameters = queryString.Split('&');
+                hasExpandQueryParameter = queryParameters.Any(x => x.StartsWith("?$expand", StringComparison.OrdinalIgnoreCase) || x.StartsWith("$expand", StringComparison.OrdinalIgnoreCase) || x.StartsWith("expand", StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Create a $expand query string if 1) It's a POST request 2) if there is no expand query string.
+            if (String.Equals(request.Method, "post", StringComparison.OrdinalIgnoreCase) && !hasExpandQueryParameter)
+            {
+                string expand = GenerateExpandQueryFromPayload(context);
+
+                if (!string.IsNullOrEmpty(expand))
+                {
+                    // If query string was empty, we add a new query string e.g ?$expand=Order. If not, we prepend a $expand query
+                    expand = queryStringIsEmpty ? "?" + expand : "?" + expand + "&" + queryString.TrimStart('?');
+                    request.QueryString = new QueryString(expand);
+                }
+            }
+
             ODataPath path = request.ODataFeature().Path;
 
             ODataQueryContext queryContext = null;
@@ -273,6 +298,30 @@ namespace Microsoft.AspNet.OData
                     }
                 }
             }
+        }
+
+        private string GenerateExpandQueryFromPayload(ActionExecutingContext context)
+        {
+            object obj = null;
+
+            if (context.ActionArguments == null || context.ActionArguments.Count == 0 || (obj = context.ActionArguments.First().Value) == null)
+            {
+                return string.Empty;
+            }
+
+            Type type = obj.GetType();
+
+            // Ignore Action payloads
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
+            {
+                return string.Empty;
+            }
+
+            IExpandQueryBuilder expandQueryBuilder = context.HttpContext.Request.GetExpandQueryBuilder();
+
+            string expandString = expandQueryBuilder.GenerateExpandQueryParameter(obj, context.HttpContext.Request.GetModel());
+
+            return expandString;
         }
 
         /// <summary>

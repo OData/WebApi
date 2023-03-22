@@ -236,6 +236,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PublicApi\PublicApiTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Controllers\CustomerControllers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Controllers\PrimitiveController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ExpandQueryBuilderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\AggregationBinderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DataModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperTests.cs" />

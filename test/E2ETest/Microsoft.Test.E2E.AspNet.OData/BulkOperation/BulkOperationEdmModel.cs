@@ -62,7 +62,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             EntitySetConfiguration<Friend> friends = builder.EntitySet<Friend>("Friends");
             EntitySetConfiguration<Order> orders = builder.EntitySet<Order>("Orders");
-            EntitySetConfiguration<NewFriend> fnewriends = builder.EntitySet<NewFriend>("NewFriends");
+            EntitySetConfiguration<NewFriend> newfriends = builder.EntitySet<NewFriend>("NewFriends");
             EntitySetConfiguration<UnTypedFriend> funtypenewriends = builder.EntitySet<UnTypedFriend>("UnTypedFriends");
             EntitySetConfiguration<UnTypedAddress> addresses = builder.EntitySet<UnTypedAddress>("Address");
 

@@ -10,6 +10,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -64,129 +66,203 @@ namespace Microsoft.AspNet.OData
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
-        /// The parent object.
+        /// Apply handlers to the top level resource and the nested resources.
         /// </summary>
-        internal TStructuralType ParentObject { get; set; }
-
-        /// <summary>
-        /// Apply OdataId for a resource with OdataID container.
-        /// </summary>
-        /// <param name="resource">resource to apply odata id on.</param>
+        /// <param name="resource">Resource to execute.</param>
         /// <param name="model">The model.</param>
-        internal virtual void UpdateLinkedObjects(TStructuralType resource, IEdmModel model)
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        public virtual void DeepInsert(TStructuralType resource, IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
         {
             if (resource != null && model != null)
             {
-                this.ParentObject = resource;
-                CheckAndApplyODataId(resource, model);
+                CopyObjectProperties(resource, model, this, apiHandlerFactory);
             }
         }
 
-        private static ODataPath GetODataPath(string path, IEdmModel model)
-        {
-            ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
-            ODataPath odataPath = parser.ParsePath();
-
-            return odataPath;
-        }
-
-        private void CheckAndApplyODataId(object obj, IEdmModel model)
+        internal static void CopyObjectProperties(object obj, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {
             Type type = obj.GetType();
-            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
-            if (property != null && property.GetValue(obj) is ODataIdContainer container && container != null)
+            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo odataIdContainerProperty = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
+
+            string edmFullName = type.EdmFullName();
+            IEdmSchemaType schemaType = model.FindType(edmFullName);
+            IEdmEntityType edmEntityType = schemaType as IEdmEntityType;
+
+            IEnumerable<IEdmStructuralProperty> entityKey = edmEntityType.Key();
+
+            IDictionary<string, object> keys = GetKeys(entityKey, obj, type);
+
+            IODataAPIHandler odataIdContainerHandler = null;
+
+            if (odataIdContainerProperty != null && odataIdContainerProperty.GetValue(obj) is ODataIdContainer container && container != null && apiHandlerFactory != null)
             {
                 ODataPath odataPath = GetODataPath(container.ODataId, model);
-                object res = ApplyODataIdOnContainer(obj, odataPath);
-                foreach (PropertyInfo prop in type.GetProperties())
-                {
-                    object resVal = prop.GetValue(res);
 
-                    if (resVal != null)
+                if (odataPath != null)
+                {
+                    odataIdContainerHandler = apiHandlerFactory.GetHandler(odataPath);
+
+                    if (odataIdContainerHandler != null)
                     {
-                        prop.SetValue(obj, resVal);
+                        keys = odataPath.GetKeys();
                     }
                 }
             }
-            else
+
+            List<IEdmNavigationProperty> navigationProperties = edmEntityType.NavigationProperties().ToList();
+
+            List<string> navPropNames = new List<string>();
+
+            foreach (IEdmNavigationProperty navProp in navigationProperties)
             {
-                foreach (PropertyInfo prop in type.GetProperties().Where(p => !p.PropertyType.IsPrimitive))
-                {
-                    object propVal = prop.GetValue(obj);
-                    if (propVal == null)
-                    {
-                        continue;
-                    }
-
-                    if (propVal is IEnumerable lst)
-                    {
-                        foreach (object item in lst)
-                        {
-                            if (item.GetType().IsPrimitive)
-                            {
-                                break;
-                            }
-
-                            CheckAndApplyODataId(item, model);
-                        }
-                    }
-                    else
-                    {
-                        CheckAndApplyODataId(propVal, model);
-                    }
-                }
+                navPropNames.Add(navProp.Name);
             }
+
+            ApplyHandlers(apiHandler, odataIdContainerHandler, obj, keys, navPropNames);
+
+            CopyNestedProperties(obj, type, model, apiHandler, apiHandlerFactory, navPropNames);
         }
 
-        private object ApplyODataIdOnContainer(object obj, ODataPath odataPath)
+        internal static void CopyNestedProperties(object obj, Type type, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory, List<string> navPropNames)
         {
-            KeySegment keySegment = odataPath.LastOrDefault() as KeySegment;
-            Dictionary<string, object> keys = keySegment?.Keys.ToDictionary(x => x.Key, x => x.Value);
-            if (keys != null)
+            foreach (string navPropertName in navPropNames)
             {
-                TStructuralType returnedObject;
-                string error;
-                if (this.ParentObject.Equals(obj))
+                PropertyInfo prop = type.GetProperty(navPropertName);
+                var navPropVal = prop.GetValue(obj);
+
+                if (navPropVal == null)
                 {
-                    if (this.TryGet(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                    continue;
+                }
+
+                object parentObj = GetObjectWithoutNavigationProperties(obj, navPropNames);
+
+                object[] nestedHandlerParams = new object[] { parentObj, navPropertName };
+                IODataAPIHandler nestedHandler = (IODataAPIHandler)apiHandler.GetType().GetMethod(nameof(GetNestedHandler)).Invoke(apiHandler, nestedHandlerParams);
+
+                if (navPropVal is IEnumerable lst)
+                {
+                    foreach (var item in lst)
                     {
-                        return returnedObject;
-                    }
-                    else
-                    {
-                        if (this.TryCreate(keys, out returnedObject, out error) == ODataAPIResponseStatus.Success)
+                        if (item.GetType().IsPrimitive)
                         {
-                            return returnedObject;
+                            break;
                         }
-                        else
-                        {
-                            return null;
-                        }
+
+                        CopyObjectProperties(item, model, nestedHandler, apiHandlerFactory);
                     }
                 }
                 else
                 {
-                    IODataAPIHandler apiHandlerNested = this.GetNestedHandler(this.ParentObject, odataPath.LastSegment.Identifier);
-                    object[] getParams = new object[] { keys, null, null };
-                    if (apiHandlerNested.GetType().GetMethod(nameof(TryGet)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
+                    CopyObjectProperties(navPropVal, model, nestedHandler, apiHandlerFactory);
+                }
+            }
+        }
+
+        // TODO: Error handling
+        internal static void ApplyHandlers(IODataAPIHandler odataApiHandler, IODataAPIHandler odataIdContainerHandler, object resource, IDictionary<string, object> keys, List<string> navigationProperties)
+        {
+            object[] handlerParams = new object[] { keys, null, null };
+
+            IODataAPIHandler handlerForGet = odataApiHandler;
+            ODataAPIResponseStatus getResponse = ODataAPIResponseStatus.NotFound;
+            object getObject = null;
+
+            if (odataIdContainerHandler != null)
+            {
+                handlerForGet = odataIdContainerHandler;
+                getResponse = (ODataAPIResponseStatus)handlerForGet.GetType().GetMethod(nameof(TryGet)).Invoke(handlerForGet, handlerParams);
+                getObject = handlerParams[1];
+            }
+
+            if (getResponse == ODataAPIResponseStatus.Success)
+            {
+                CopyProperties(getObject, resource, navigationProperties);
+
+                object[] addRelatedObjectParams = new object[] { getObject, null };
+
+                if (odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams).Equals(ODataAPIResponseStatus.Success))
+                {
+                }
+            }
+            else
+            {
+                if (odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams).Equals(ODataAPIResponseStatus.Success))
+                {
+                    CopyProperties(resource, handlerParams[1], navigationProperties);
+                }
+            }
+        }
+
+        private static object GetObjectWithoutNavigationProperties(object originalObj, List<string> navPropNames)
+        {
+            object newObject = Activator.CreateInstance(originalObj.GetType());
+
+            foreach (PropertyInfo prop in originalObj.GetType().GetProperties())
+            {
+                // Don't copy Navigation Properties. They will be handled in the next level nesting.
+                if (!navPropNames.Contains(prop.Name))
+                {
+                    object resVal = prop.GetValue(originalObj);
+
+                    if (resVal != null)
                     {
-                        return getParams[1];
-                    }
-                    else
-                    {
-                        if (apiHandlerNested.GetType().GetMethod(nameof(TryCreate)).Invoke(apiHandlerNested, getParams).Equals(ODataAPIResponseStatus.Success))
-                        {
-                            return getParams[1];
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        prop.SetValue(newObject, resVal);
                     }
                 }
             }
 
-            return null;
+            return newObject;
+        }
+
+        private static void CopyProperties(object fromPayload, object newObject, List<string> navPropNames)
+        {
+            foreach (PropertyInfo prop in fromPayload.GetType().GetProperties())
+            {
+                // Don't copy Navigation Properties. They will be handled in the next level nesting.
+                if (!navPropNames.Contains(prop.Name))
+                {
+                    object resVal = prop.GetValue(fromPayload);
+
+                    if (resVal != null)
+                    {
+                        prop.SetValue(newObject, resVal);
+                    }
+                }
+            }
+        }
+
+        private static IDictionary<string, object> GetKeys(IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)
+        {
+            IDictionary<string, object> keys = new Dictionary<string, object>();
+
+            foreach (IEdmStructuralProperty property in properties)
+            {
+                PropertyInfo prop = type.GetProperty(property.Name);
+                object value = prop.GetValue(resource, null);
+
+                keys.Add(new KeyValuePair<string, object>(property.Name, value));
+            }
+
+            return keys;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't need to throw an exception but instead return odataPath as null.")]
+        private static ODataPath GetODataPath(string path, IEdmModel model)
+        {
+            ODataPath odataPath;
+            try
+            {
+                ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
+                odataPath = parser.ParsePath();
+            }
+            catch (Exception)
+            {
+                odataPath = null;
+            }
+
+            return odataPath;
         }
     }
 }

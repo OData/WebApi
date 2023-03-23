@@ -108,12 +108,6 @@ namespace Microsoft.AspNet.OData
             foreach (Delta<TStructuralType> changedObj in Items)
             {
                 ODataAPIHandler<TStructuralType> handler = apiHandlerOfT;
-                ODataAPIHandler<TStructuralType> odataPathApiHandler = null;
-
-                if (apiHandlerFactory != null)
-                {
-                    odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
-                }
 
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
 
@@ -146,10 +140,15 @@ namespace Microsoft.AspNet.OData
                     {
                         odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
 
-                        if (odataAPIResponseStatus != ODataAPIResponseStatus.Success && odataPathApiHandler != null)
+                        if (odataAPIResponseStatus != ODataAPIResponseStatus.Success && apiHandlerFactory != null)
                         {
-                            handler = handler = odataPathApiHandler;
-                            odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+                            ODataAPIHandler<TStructuralType> odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
+
+                            if (odataPathApiHandler != null)
+                            {
+                                handler = odataPathApiHandler;
+                                odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+                            }
                         }
                     }
                     else
@@ -217,13 +216,12 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Update;
 
-                            ODataAPIResponseStatus linkResponseStatus = apiHandlerOfT.TryAddRelatedObject(original, out errorMessage);
+                            ODataAPIResponseStatus linkResponseStatus = handler.TryAddRelatedObject(original, out errorMessage);
 
                             if (linkResponseStatus == ODataAPIResponseStatus.Failure)
                             {
-                                // An exception may be thrown when you call TryAddRelatedObject twice or when the object to be linked
-                                // already exists. We should silently ignore.
-                                continue;
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                                deltaSet.Add(changedObject);
                             }
                         }
                         else

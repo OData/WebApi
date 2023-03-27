@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -73,7 +74,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
 
-        [ODataRoute("Employees")]
+     /*   [ODataRoute("Employees")]
         [HttpPatch]
         public ITestActionResult PatchEmployees([FromBody] DeltaSet<Employee> coll)
         {
@@ -84,6 +85,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 Assert.NotNull(coll);
 
                 var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(Request.GetModel(), dbContext));
+
+
+                return Ok(returncoll);
+            }
+        }*/
+
+        [ODataRoute("Employees")]
+        [HttpPatch]
+        public async Task<ITestActionResult> PatchEmployeesAsync([FromBody] DeltaSet<Employee> coll)
+        {
+            using (var dbContext = CreateDbContext())
+            {
+                GenerateData(dbContext);
+
+                Assert.NotNull(coll);
+
+                var returncoll = await coll.PatchAsync(new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(Request.GetModel(), dbContext));
 
 
                 return Ok(returncoll);

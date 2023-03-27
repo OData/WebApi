@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.OData
 {
@@ -172,6 +173,36 @@ namespace Microsoft.AspNet.OData
             }
 
             return default(TStructuralType);
-        }  
+        }
+
+        /// <inheritdoc/>
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(TStructuralType resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public override IODataAPIHandler GetNestedHandlerAsync(TStructuralType parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

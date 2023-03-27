@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -65,6 +66,18 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Asnchronously patch a DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// </summary>
+        /// <param name="originalCollection">Original collection of the type which needs to be updated.</param>
+        /// <returns>A task representing a DeltaSet response.</returns>
+        public async Task<DeltaSet<TStructuralType>> PatchAsync(ICollection<TStructuralType> originalCollection)
+        {
+            ODataAPIHandler<TStructuralType> apiHandler = new DefaultODataAPIHandler<TStructuralType>(originalCollection);
+
+            return await CopyChangedValuesAsync(apiHandler);
+        }
+
+        /// <summary>
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
         /// <param name="apiHandlerOfT">API Handler for the entity.</param>
@@ -78,6 +91,16 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
         /// <param name="apiHandlerOfT">API Handler for the entity.</param>
+        /// <returns>DeltaSet response.</returns>
+        public async Task<DeltaSet<TStructuralType>> PatchAsync(ODataAPIHandler<TStructuralType> apiHandlerOfT)
+        {
+            return await PatchAsync(apiHandlerOfT, null);
+        }
+
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// </summary>
+        /// <param name="apiHandlerOfT">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         /// <returns>DeltaSet response.</returns>
         public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
@@ -85,6 +108,19 @@ namespace Microsoft.AspNet.OData
             Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
 
             return CopyChangedValues(apiHandlerOfT, apiHandlerFactory);
+        }
+
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// </summary>
+        /// <param name="apiHandlerOfT">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <returns>DeltaSet response.</returns>
+        public async Task<DeltaSet<TStructuralType>> PatchAsync(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
+
+            return await CopyChangedValuesAsync(apiHandlerOfT, apiHandlerFactory);
         }
 
         /// <summary>
@@ -246,6 +282,172 @@ namespace Microsoft.AspNet.OData
                 {
                     //For handling the failed operations.
                     IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, ex.Message);                    
+                    deltaSet.Add(changedObject);
+                }
+            }
+
+            return deltaSet;
+        }
+
+        /// <summary>
+        /// Get the keys and use the keys to find the original object to patch from the collection asynchronously.
+        /// </summary>
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <returns> A task representing the DeltaSet response.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        internal async Task<DeltaSet<TStructuralType>> CopyChangedValuesAsync(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
+        {
+            //Here we are getting the keys and using the keys to find the original object 
+            //to patch from the collection.
+
+            ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
+
+            Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
+
+            DeltaSet<TStructuralType> deltaSet = CreateDeltaSet();
+
+            foreach (Delta<TStructuralType> changedObj in Items)
+            {
+                ODataAPIHandler<TStructuralType> handler = apiHandlerOfT;
+
+                DataModificationOperationKind operation = DataModificationOperationKind.Update;
+
+                //Get filtered item based on keys
+                TStructuralType original = null;
+                string errorMessage = string.Empty;
+                string getErrorMessage = string.Empty;
+
+                try
+                {
+                    Dictionary<string, object> keyValues = new Dictionary<string, object>();
+                    keyValues = changedObj.ODataPath.GetKeys();
+
+                    bool containsKeyValue = false;
+
+                    foreach (string key in _keys)
+                    {
+                        keyValues.TryGetValue(key, out object value);
+
+                        if (value != null && !string.IsNullOrEmpty(value.ToString()))
+                        {
+                            containsKeyValue = true;
+                            continue;
+                        }
+                    }
+
+                    ODataAPIResponseStatus odataAPIResponseStatus;
+
+                    if (containsKeyValue)
+                    {
+                        odataAPIResponseStatus = await handler.TryGetAsync(keyValues, out original, out getErrorMessage);
+
+                        if (odataAPIResponseStatus != ODataAPIResponseStatus.Success && apiHandlerFactory != null)
+                        {
+                            ODataAPIHandler<TStructuralType> odataPathApiHandler = await apiHandlerFactory.GetHandlerAsync(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
+
+                            if (odataPathApiHandler != null)
+                            {
+                                handler = odataPathApiHandler;
+                                odataAPIResponseStatus = await handler.TryGetAsync(keyValues, out original, out getErrorMessage);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        odataAPIResponseStatus = ODataAPIResponseStatus.NotFound;
+                    }
+
+                    DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
+
+                    if (odataAPIResponseStatus == ODataAPIResponseStatus.Failure)
+                    {
+                        IDeltaSetItem deltaSetItem = changedObj;
+                        DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                        dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
+
+                        deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
+                        deltaSet.Add(deltaSetItem);
+
+                        continue;
+                    }
+
+                    if (deletedObj != null)
+                    {
+                        operation = DataModificationOperationKind.Delete;
+
+                        if (odataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
+                        {
+                            // Handle Failed Operation - Delete when the object doesn't exist.
+                            IDeltaSetItem deltaSetItem = changedObj;
+                            DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                            dataModificationExceptionType.MessageType = new MessageType { Message = SRResources.ObjectToDeleteNotFound };
+
+                            deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
+                            deltaSet.Add(deltaSetItem);
+
+                            continue;
+                        }
+
+                        if (await handler.TryDeleteAsync(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
+                        {
+                            // Handle Failed Operation - Delete
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                            deltaSet.Add(changedObject);
+
+                            continue;
+                        }
+
+                        deltaSet.Add(deletedObj);
+                    }
+                    else
+                    {
+                        if (odataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
+                        {
+                            operation = DataModificationOperationKind.Insert;
+
+                            if (await handler.TryCreateAsync(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
+                            {
+                                //Handle a failed Operation - create
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                                deltaSet.Add(changedObject);
+                                continue;
+                            }
+                        }
+                        else if (odataAPIResponseStatus == ODataAPIResponseStatus.Success)
+                        {
+                            operation = DataModificationOperationKind.Update;
+
+                            ODataAPIResponseStatus linkResponseStatus = await handler.TryAddRelatedObjectAsync(original, out errorMessage);
+
+                            if (linkResponseStatus == ODataAPIResponseStatus.Failure)
+                            {
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                                deltaSet.Add(changedObject);
+                            }
+                        }
+                        else
+                        {
+                            //Handle a failed operation
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, getErrorMessage);
+                            deltaSet.Add(changedObject);
+                            continue;
+                        }
+
+                        // Update unchanged properties in instance object.
+                        changedObj.UpdateUnchangedPropertiesInInstanceObject(original);
+
+                        // Patch for addition/update. This will call Delta<T> for each item in the collection.
+                        // This will work in cases where we use delegates to create objects.
+                        changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
+
+                        deltaSet.Add(changedObj);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //For handling the failed operations.
+                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, ex.Message);
                     deltaSet.Add(changedObject);
                 }
             }

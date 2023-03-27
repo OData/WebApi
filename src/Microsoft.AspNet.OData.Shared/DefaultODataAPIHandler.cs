@@ -123,7 +123,10 @@ namespace Microsoft.AspNet.OData
 
             try
             {
-                originalList.Add(resource);
+                if (!originalList.Contains(resource))
+                {
+                    originalList.Add(resource);
+                }
 
                 return ODataAPIResponseStatus.Success;
             }

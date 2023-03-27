@@ -139,7 +139,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":33}," +
                 "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
@@ -183,7 +183,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":33}," +
                 "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
@@ -227,7 +227,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":33}," +
                 "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
@@ -670,7 +670,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPatch.Content = stringContent;
 
             //Act & Assert
-            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Name1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
+            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Name1\",\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"}," +
                 "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Test0\",\"Age\":33}," +
                 "{\"Id\":2,\"Name\":\"Test1\",\"Age\":0}]}]}";
 
@@ -710,9 +710,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             requestForPatch.Content = stringContent;
 
             //Act & Assert
-            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
-                "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0,\"Orders@delta\":[{\"Id\":1,\"Price\":10},{\"Id\":2,\"Price\":20}]}," +
-                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
+            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"}," +
+                "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":33,\"Orders@delta\":[{\"Id\":1,\"Price\":10},{\"Id\":2,\"Price\":20}]}," +
+                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"SkillSet\":[],\"Gender\":\"Female\",\"AccessLevel\":\"Read\",\"FavoriteSports\":null," +
                 "\"Friends@delta\":[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0,\"Orders@delta\":[{\"Id\":3,\"Price\":30},{\"Id\":4,\"Price\":40}]},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))

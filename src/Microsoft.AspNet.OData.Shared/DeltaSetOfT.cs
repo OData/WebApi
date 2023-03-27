@@ -108,64 +108,6 @@ namespace Microsoft.AspNet.OData
             foreach (Delta<TStructuralType> changedObj in Items)
             {
                 ODataAPIHandler<TStructuralType> handler = apiHandlerOfT;
-                bool hasODataId = false;
-
-                if (apiHandlerFactory != null)
-                {
-                    //{
-                    //    "@odata.context":"http://localhost:6285/odata/$metadata#Customers/$delta",
-                    //    "value":[
-                    //        {
-                    //            "@odata.type":"CustomersApiEF.Models.Customer",
-                    //            "Id":1,
-                    //            "Name":"Customer1",
-                    //            "Orders@odata.delta":[
-                    //                {
-                    //                    "@odata.id":"Customers(3)/Orders(1005)",
-                    //                    "Quantity": 1005
-                    //                },
-                    //                {
-                    //                    "Id": 2000,
-                    //                    "Price":200,
-                    //                    "Quantity":90
-                    //                }
-                    //            ]
-                    //        }
-                    //    ]
-                    //}
-
-                    // If we have a request payload above and we are handling the changed values in Orders,
-                    // The apiHandlerOfT is OrdersAPIHandler with parent as Customers(1).
-                    // The object with "@odata.id" will have OrdersAPIHandler with parent as Customers(3).
-                    // The object with id 2000 will have OrdersAPIHandler similar to apiHandlerOfT.
-                    // The codebelow ensures we use the correct handler.
-                    // NOTE: Handler when we have odata.id will always be different than the parent handler.
-                    // However this is true if handlers are applied correctly.
-
-                    ODataAPIHandler<TStructuralType> odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
-
-                    if (odataPathApiHandler != null && changedObj.ODataPath.Any())
-                    {
-                        // Using a 3rd party library to compare objects
-                        // https://github.com/GregFinzer/Compare-Net-Objects/wiki/Getting-Started
-                        // TODO:
-                        // a) Confirm to perf regressions are caused byt his library.
-                        // b) Investigate if there is a better library.
-
-                        KellermanSoftware.CompareNetObjects.CompareLogic compare = new KellermanSoftware.CompareNetObjects.CompareLogic();
-                        compare.Config.CaseSensitive = false;
-                        compare.Config.ComparePrivateProperties = true;
-                        compare.Config.ComparePrivateFields = true;
-
-                        KellermanSoftware.CompareNetObjects.ComparisonResult result = compare.Compare(handler, odataPathApiHandler);
-
-                        if (!result.AreEqual)
-                        {
-                            handler = odataPathApiHandler;
-                            hasODataId = true;
-                        }
-                    }
-                }
 
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
 
@@ -197,6 +139,17 @@ namespace Microsoft.AspNet.OData
                     if (containsKeyValue)
                     {
                         odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+
+                        if (odataAPIResponseStatus != ODataAPIResponseStatus.Success && apiHandlerFactory != null)
+                        {
+                            ODataAPIHandler<TStructuralType> odataPathApiHandler = apiHandlerFactory.GetHandler(changedObj.ODataPath) as ODataAPIHandler<TStructuralType>;
+
+                            if (odataPathApiHandler != null)
+                            {
+                                handler = odataPathApiHandler;
+                                odataAPIResponseStatus = handler.TryGet(keyValues, out original, out getErrorMessage);
+                            }
+                        }
                     }
                     else
                     {
@@ -234,9 +187,6 @@ namespace Microsoft.AspNet.OData
                             continue;
                         }
 
-                        // Confirm if we actually need to patch.
-                        // changedObj.CopyChangedValues(original, handler, apiHandlerFactory);
-
                         if (handler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
                             // Handle Failed Operation - Delete
@@ -266,15 +216,12 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Update;
 
-                            if (hasODataId)
-                            {
-                                ODataAPIResponseStatus linkResponseStatus = apiHandlerOfT.TryAddRelatedObject(original, out errorMessage);
+                            ODataAPIResponseStatus linkResponseStatus = handler.TryAddRelatedObject(original, out errorMessage);
 
-                                if (linkResponseStatus == ODataAPIResponseStatus.Failure)
-                                {
-                                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
-                                    deltaSet.Add(changedObject);
-                                }
+                            if (linkResponseStatus == ODataAPIResponseStatus.Failure)
+                            {
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                                deltaSet.Add(changedObject);
                             }
                         }
                         else
@@ -285,10 +232,8 @@ namespace Microsoft.AspNet.OData
                             continue;
                         }
 
-                        if (hasODataId)
-                        {
-                            changedObj.UpdateODataIdObject(original);
-                        }
+                        // Update unchanged properties in instance object.
+                        changedObj.UpdateUnchangedPropertiesInInstanceObject(original);
 
                         // Patch for addition/update. This will call Delta<T> for each item in the collection.
                         // This will work in cases where we use delegates to create objects.

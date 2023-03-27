@@ -556,7 +556,7 @@ namespace Microsoft.AspNet.OData
         /// Update the instance object properties with the properties from the @odata.id object.
         /// </summary>
         /// <param name="original">The @odata.id object.</param>
-        internal void UpdateODataIdObject(TStructuralType original)
+        internal void UpdateUnchangedPropertiesInInstanceObject(TStructuralType original)
         {
             if (original == null)
             {

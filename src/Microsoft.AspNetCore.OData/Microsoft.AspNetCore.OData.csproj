@@ -41,7 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CompareNETObjects" Version="4.78.0" />
     <PackageReference Include="Microsoft.OData.Core" Version="7.15.0" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.15.0" />
     <PackageReference Include="Microsoft.Spatial" Version="7.15.0" />

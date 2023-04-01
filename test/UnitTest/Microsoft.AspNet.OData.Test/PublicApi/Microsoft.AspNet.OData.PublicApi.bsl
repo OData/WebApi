@@ -2607,6 +2607,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	FilterQueryOption Filter  { public get; }
 	ETag IfMatch  { public virtual get; }
 	ETag IfNoneMatch  { public virtual get; }
+	AllowedQueryOptions IgnoreQueryOptions  { public get; public set; }
 	OrderByQueryOption OrderBy  { public get; }
 	ODataRawQueryOptions RawValues  { public get; }
 	System.Net.Http.HttpRequestMessage Request  { public get; }

@@ -602,6 +602,12 @@ public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Ht
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 }
 
+public class Microsoft.AspNet.OData.ODataOptions {
+	public ODataOptions ()
+
+	bool ParseODataQueryOptionsOnce  { public get; public set; }
+}
+
 public class Microsoft.AspNet.OData.ODataQueryContext {
 	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path)
 	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path)
@@ -2191,6 +2197,16 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensio
 	[
 	ExtensionAttribute(),
 	]
+	public static ODataOptions GetODataOptions (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static ODataQueryOptions GetODataQueryOptions (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static IODataPathHandler GetPathHandler (System.Net.Http.HttpRequestMessage request)
 
 	[
@@ -2222,6 +2238,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensio
 	ExtensionAttribute(),
 	]
 	public static HttpRequestMessageProperties ODataProperties (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataQueryOptions (System.Net.Http.HttpRequestMessage request, ODataQueryOptions queryOptions)
 }
 
 [

@@ -1154,6 +1154,39 @@ namespace Microsoft.AspNet.OData.Test.Query
                 responseString);
         }
 
+#if !NETCORE
+        [Fact]
+        public void OnActionExecuted_UseCachedODataQueryOptions()
+        {
+            var model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+
+            Customer customer = new Customer();
+            SingleResult singleResult = new SingleResult<Customer>(new Customer[] { customer }.AsQueryable());
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
+
+            ODataQueryOptions actualQueryOptions = null;
+            ODataQueryOptions expectedQueryOptions = new ODataQueryOptions(
+                new ODataQueryContext(model.Model, typeof(Customer)),
+                actionExecutedContext.Request);
+
+            actionExecutedContext.Request.GetODataOptions().ParseODataQueryOptionsOnce = true;
+            actionExecutedContext.Request.SetODataQueryOptions(expectedQueryOptions);
+
+            var mockAttribute = new Mock<EnableQueryAttribute>
+            {
+                CallBase = true,
+            };
+            mockAttribute
+                .Setup(x => x.ValidateQuery(It.IsAny<HttpRequestMessage>(), It.IsAny<ODataQueryOptions>()))
+                .Callback<HttpRequestMessage, ODataQueryOptions>((r, o) => { actualQueryOptions = o; });
+
+            mockAttribute.Object.OnActionExecuted(actionExecutedContext);
+
+            Assert.Same(expectedQueryOptions, actualQueryOptions);
+        }
+#endif
+
         [Theory]
         [InlineData("$filter=ID eq 1")]
         [InlineData("$orderby=ID")]

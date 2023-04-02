@@ -891,6 +891,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
                 builder.AddService(ServiceLifetime.Singleton, sp => configuration);
                 builder.AddService(ServiceLifetime.Singleton, sp => configuration.GetDefaultQuerySettings());
+                builder.AddService(ServiceLifetime.Singleton, sp => new ODataOptions());
 
                 // Currently, the ETagHandler is attached to the configuration.
                 //builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);

@@ -19,7 +19,6 @@ using System.Web.Http.Filters;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 
@@ -130,7 +129,21 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         private ODataQueryOptions CreateAndValidateQueryOptions(HttpRequestMessage request, ODataQueryContext queryContext)
         {
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            ODataQueryOptions queryOptions = null;
+
+            if (request.GetODataOptions().ParseODataQueryOptionsOnce)
+            {
+                queryOptions = request.GetODataQueryOptions();
+            }
+
+            // Only create new query options if we haven't already.
+            if (queryOptions == null)
+            {
+                queryOptions = new ODataQueryOptions(queryContext, request);
+            }
+
+            // Even if we didn't generate a new set of query options here we'll still validate because we cannot
+            // guarantee that it's already been done.
             ValidateQuery(request, queryOptions);
 
             return queryOptions;

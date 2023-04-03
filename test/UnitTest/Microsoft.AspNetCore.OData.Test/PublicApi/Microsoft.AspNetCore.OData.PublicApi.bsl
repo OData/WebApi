@@ -3159,7 +3159,7 @@ public class Microsoft.AspNet.OData.Results.BadRequestODataResult : Microsoft.As
 }
 
 public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : Microsoft.AspNetCore.Mvc.ObjectResult, IActionResult {
-	public CreatedODataResult`1 (object entity)
+	public CreatedODataResult`1 (T entity)
 
 	T Entity  { public virtual get; }
 

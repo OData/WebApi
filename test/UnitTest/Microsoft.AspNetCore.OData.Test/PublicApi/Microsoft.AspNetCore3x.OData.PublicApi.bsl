@@ -3346,7 +3346,7 @@ public class Microsoft.AspNet.OData.Results.ConflictODataResult : Microsoft.AspN
 }
 
 public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : Microsoft.AspNetCore.Mvc.ObjectResult, IActionResult, IStatusCodeActionResult {
-	public CreatedODataResult`1 (object entity)
+	public CreatedODataResult`1 (T entity)
 
 	T Entity  { public virtual get; }
 

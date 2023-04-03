@@ -31,15 +31,15 @@ namespace Microsoft.AspNet.OData.Results
         /// Initializes a new instance of the <see cref="CreatedODataResult{T}"/> class.
         /// </summary>
         /// <param name="entity">The created entity.</param>
-        public CreatedODataResult(object entity)
-            :base(entity)
+        public CreatedODataResult(T entity)
+            : base(entity)
         {
             if (entity == null)
             {
                 throw Error.ArgumentNull("entity");
             }
 
-            this._innerResult = (T)entity;
+            this._innerResult = entity;
         }
 
         /// <summary>

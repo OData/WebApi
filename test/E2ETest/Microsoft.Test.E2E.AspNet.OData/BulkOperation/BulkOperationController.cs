@@ -252,13 +252,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         [EnableQuery]
         public ITestActionResult Post([FromBody] Employee employee)
         {
-            //InitEmployees();
-
-            //var handler = new EmployeeAPIHandler();
-
-            //handler.UpdateLinkedObjects(employee, Request.GetModel());
-
-            //return Ok(employee);
             return Created(employee);
         }
 

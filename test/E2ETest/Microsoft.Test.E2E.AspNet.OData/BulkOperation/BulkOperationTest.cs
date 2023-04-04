@@ -445,8 +445,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":" +
-                "{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
+            var expected = "{\"@context\":\"" + this.BaseAddress + "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Delete\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"The method or operation is not implemented.\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {
@@ -474,8 +473,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
-            var expected = "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test2\":\"testing\",\"@Core.ContentID\":3," +
-                "\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
+            var expected = "{\"@context\":\"" + this.BaseAddress + "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test2\":\"testing\",\"@Core.ContentID\":3,\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Delete\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"The method or operation is not implemented.\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
             {

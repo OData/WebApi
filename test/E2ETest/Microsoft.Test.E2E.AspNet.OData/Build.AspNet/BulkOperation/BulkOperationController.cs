@@ -209,6 +209,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             Assert.NotNull(coll);
             return Ok(coll);
         }
+
+        [ODataRoute("Employees")]
+        [HttpPost]
+        [EnableQuery]
+        public ITestActionResult Post([FromBody] Employee employee)
+        {
+            Assert.NotNull(employee);
+            return Created(employee);
+        }
     }
 
     public class CompanyController : TestODataController

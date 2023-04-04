@@ -249,15 +249,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         [ODataRoute("Employees")]
         [HttpPost]
+        [EnableQuery]
         public ITestActionResult Post([FromBody] Employee employee)
         {
-            InitEmployees();
-
-            var handler = new EmployeeAPIHandler();
-
-            handler.UpdateLinkedObjects(employee, Request.GetModel());
-
-            return Ok(employee);
+            return Created(employee);
         }
 
         [ODataRoute("Employees({key})/Friends")]

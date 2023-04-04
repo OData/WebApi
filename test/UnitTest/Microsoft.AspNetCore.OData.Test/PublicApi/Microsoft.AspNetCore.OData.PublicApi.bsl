@@ -3158,7 +3158,7 @@ public class Microsoft.AspNet.OData.Results.BadRequestODataResult : Microsoft.As
 	public virtual System.Threading.Tasks.Task ExecuteResultAsync (Microsoft.AspNetCore.Mvc.ActionContext context)
 }
 
-public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IActionResult {
+public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : Microsoft.AspNetCore.Mvc.ObjectResult, IActionResult {
 	public CreatedODataResult`1 (T entity)
 
 	T Entity  { public virtual get; }

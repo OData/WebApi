@@ -2953,6 +2953,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Unable to get property values from the skiptoken value..
+        /// </summary>
+        internal static string SkipTokenProcessingError
+        {
+            get
+            {
+                return ResourceManager.GetString("SkipTokenProcessingError", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The limit of &apos;{0}&apos; for {1} query has been exceeded. The value from the incoming request is &apos;{2}&apos;..
         /// </summary>
         internal static string SkipTopLimitExceeded

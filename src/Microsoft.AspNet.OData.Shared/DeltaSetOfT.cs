@@ -216,7 +216,7 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Update;
 
-                            ODataAPIResponseStatus linkResponseStatus = handler.TryAddRelatedObject(original, out errorMessage);
+                            ODataAPIResponseStatus linkResponseStatus = apiHandlerOfT.TryAddRelatedObject(original, out errorMessage);
 
                             if (linkResponseStatus == ODataAPIResponseStatus.Failure)
                             {

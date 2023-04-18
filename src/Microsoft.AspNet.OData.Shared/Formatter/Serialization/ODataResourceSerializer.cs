@@ -1743,9 +1743,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     if (changedProperties == null || changedProperties.Contains(complexProperty.Key.Name))
                     {
-                        IEdmTypeReference type = complexProperty.Key == null ? null : complexProperty.Key.Type;
+                        IEdmTypeReference type = complexProperty.Key?.Type;
 
-                        if (type != null && resourceContext.EdmModel != null)
+                        if (type != null && type.IsStructured() && resourceContext.EdmModel != null)
                         {
                             Type clrType = EdmLibHelpers.GetClrType(type.AsStructured(), resourceContext.EdmModel);
 

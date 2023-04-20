@@ -15,6 +15,11 @@ namespace Microsoft.AspNet.OData
     public class ODataOptions
     {
         /// <summary>
+        /// The default instance of <see cref="ODataOptions"/>.
+        /// </summary>
+        public static ODataOptions Default { get; } = new ODataOptions();
+
+        /// <summary>
         /// Gets or sets a value indicating if <see cref="ODataQueryOptions"/> should be reused between
         /// <see cref="ODataQueryParameterBindingAttribute"/> and <see cref="EnableQueryAttribute"/>.
         /// </summary>

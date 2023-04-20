@@ -247,7 +247,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>The <see cref="ODataOptions"/> instance.</returns>
         public static ODataOptions GetODataOptions(this HttpRequestMessage request)
         {
-            return request.GetRequestContainer().GetRequiredService<ODataOptions>();
+            return request.GetRequestContainer().GetService<ODataOptions>() ?? ODataOptions.Default;
         }
 
         /// <summary>

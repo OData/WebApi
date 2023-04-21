@@ -605,6 +605,7 @@ public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Ht
 public class Microsoft.AspNet.OData.ODataOptions {
 	public ODataOptions ()
 
+	ODataOptions Default  { public static get; }
 	bool ParseODataQueryOptionsOnce  { public get; public set; }
 }
 

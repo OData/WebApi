@@ -965,11 +965,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
 
             requestUri = this.BaseAddress + "/convention/Companies(1)/OverdueOrders";
+            var expected2 = "value\":[{\"Id\":2,\"Price\":20,\"Quantity\":2},{\"Id\":1,\"Price\":101,\"Quantity\":9}]}";
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                //Assert.Contains(expected, json.ToString());
+                Assert.Contains(expected2, json.ToString());
             }
         }
 

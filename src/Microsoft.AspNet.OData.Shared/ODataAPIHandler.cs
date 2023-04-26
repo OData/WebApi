@@ -8,7 +8,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
@@ -277,27 +276,6 @@ namespace Microsoft.AspNet.OData
                     }
                 }
             }
-        }
-
-        private static dynamic CreateDynamicObject(object originalObject, List<string> navPropNames)
-        {
-            IDictionary<string, Object> dynamicObject = new ExpandoObject() as IDictionary<string, Object>;
-
-            foreach (PropertyInfo prop in originalObject.GetType().GetProperties())
-            {
-                // Don't copy Navigation Properties. They will be handled in the next level nesting.
-                if (!navPropNames.Contains(prop.Name))
-                {
-                    object resVal = prop.GetValue(originalObject);
-
-                    if (resVal != null)
-                    {
-                        dynamicObject.Add(prop.Name, resVal);
-                    }
-                }
-            }
-
-            return dynamicObject;
         }
 
         private static IDictionary<string, object> GetKeys(IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)

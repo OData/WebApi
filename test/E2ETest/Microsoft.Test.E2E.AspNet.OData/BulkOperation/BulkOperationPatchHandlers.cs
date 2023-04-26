@@ -378,6 +378,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             try
             {
+                var id = keyValues["Id"].ToString();
+
+                // For testing failed operations
+                if (Int32.Parse(id) == 99)
+                {
+                    errorMessage = "Unable to create NewOrder with Id 99";
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+
                 createdObject = new NewOrder();
 
                 if (parent.OverdueOrders == null)
@@ -385,7 +395,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     parent.OverdueOrders = new List<NewOrder>();
                 }
 
-                var id = keyValues["Id"].ToString();
                 var originalObject = parent.OverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
                 if (originalObject == null)
@@ -472,6 +481,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             try
             {
+                // For testing failed operations
+                if (resource.Id == 3)
+                {
+                    errorMessage = "Unable to link NewOrder with Id 3";
+
+                    return ODataAPIResponseStatus.Failure;
+                }
+
                 if (parent.OverdueOrders == null)
                 {
                     parent.OverdueOrders = new List<NewOrder>();

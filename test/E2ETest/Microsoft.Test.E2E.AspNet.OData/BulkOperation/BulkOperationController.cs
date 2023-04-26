@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age = 33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
 
-            NewFriends = new List<NewFriend>() { new NewFriend { Id = 1, Name = "NewFriendTest1", Age = 33, NewOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 101 } } }, new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444, Quantity = 2 } } } };
+            NewFriends = new List<NewFriend>() { new NewFriend { Id = 1, Name = "NewFriendTest1", Age = 33, NewOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 101 }, new NewOrder { Id = 3, Price = 999, Quantity = 2 } } }, new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444, Quantity = 2 } } } };
 
             Employees = new List<Employee>
             {

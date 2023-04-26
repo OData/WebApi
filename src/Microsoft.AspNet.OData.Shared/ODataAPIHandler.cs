@@ -8,12 +8,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
 {
@@ -119,9 +123,15 @@ namespace Microsoft.AspNet.OData
                 navPropNames.Add(navProp.Name);
             }
 
-            ApplyHandlers(apiHandler, odataIdContainerHandler, obj, keys, navPropNames);
+            bool failedOperation;
 
-            CopyNestedProperties(obj, type, model, apiHandler, apiHandlerFactory, navPropNames);
+            ApplyHandlers(apiHandler, odataIdContainerHandler, obj, keys, navPropNames, out failedOperation);
+
+            // If operation fails, we shouldn't continue with the nested properties.
+            if (!failedOperation)
+            {
+                CopyNestedProperties(obj, type, model, apiHandler, apiHandlerFactory, navPropNames);
+            }
         }
 
         internal static void CopyNestedProperties(object obj, Type type, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory, List<string> navPropNames)
@@ -161,37 +171,73 @@ namespace Microsoft.AspNet.OData
         }
 
         // TODO: Error handling
-        internal static void ApplyHandlers(IODataAPIHandler odataApiHandler, IODataAPIHandler odataIdContainerHandler, object resource, IDictionary<string, object> keys, List<string> navigationProperties)
+        internal static void ApplyHandlers(IODataAPIHandler odataApiHandler, IODataAPIHandler odataIdContainerHandler, object resource, IDictionary<string, object> keys, List<string> navigationProperties, out bool failedOperation)
         {
-            object[] handlerParams = new object[] { keys, null, null };
+            failedOperation = false;
+            DataModificationOperationKind operation = DataModificationOperationKind.Insert;
 
-            IODataAPIHandler handlerForGet = odataApiHandler;
-            ODataAPIResponseStatus getResponse = ODataAPIResponseStatus.NotFound;
-            object getObject = null;
-
-            if (odataIdContainerHandler != null)
+            try
             {
-                handlerForGet = odataIdContainerHandler;
-                getResponse = (ODataAPIResponseStatus)handlerForGet.GetType().GetMethod(nameof(TryGet)).Invoke(handlerForGet, handlerParams);
-                getObject = handlerParams[1];
-            }
+                object[] handlerParams = new object[] { keys, null, null };
 
-            if (getResponse == ODataAPIResponseStatus.Success)
-            {
-                CopyProperties(getObject, resource, navigationProperties);
+                IODataAPIHandler handlerForGet = odataApiHandler;
+                ODataAPIResponseStatus getResponse = ODataAPIResponseStatus.NotFound;
+                object getObject = null;
 
-                object[] addRelatedObjectParams = new object[] { getObject, null };
-
-                if (odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams).Equals(ODataAPIResponseStatus.Success))
+                if (odataIdContainerHandler != null)
                 {
+                    handlerForGet = odataIdContainerHandler;
+                    getResponse = (ODataAPIResponseStatus)handlerForGet.GetType().GetMethod(nameof(TryGet)).Invoke(handlerForGet, handlerParams);
+                    getObject = handlerParams[1];
+                }
+
+                if (getResponse == ODataAPIResponseStatus.Success)
+                {
+                    operation = DataModificationOperationKind.Link;
+
+                    CopyProperties(getObject, resource, navigationProperties);
+
+                    object[] addRelatedObjectParams = new object[] { getObject, null };
+
+                    ODataAPIResponseStatus addRelatedObjectResponse = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams);
+
+                    if (addRelatedObjectResponse == ODataAPIResponseStatus.Failure)
+                    {
+                        HandleFailedOperation(resource, operation, addRelatedObjectParams[1].ToString(), navigationProperties);
+                        failedOperation = true;
+                    }
+                }
+                else
+                {
+                    ODataAPIResponseStatus createObjectResponse = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams);
+
+                    if (createObjectResponse == ODataAPIResponseStatus.Failure)
+                    {
+                        HandleFailedOperation(resource, operation, handlerParams[2].ToString(), navigationProperties);
+                        failedOperation = true;
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                if (odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams).Equals(ODataAPIResponseStatus.Success))
-                {
-                    CopyProperties(resource, handlerParams[1], navigationProperties);
-                }
+                HandleFailedOperation(resource, operation, ex.Message, navigationProperties);
+            }
+        }
+
+        private static void HandleFailedOperation(object originalObject, DataModificationOperationKind operation, string errorMessage, List<string> navigationProperties)
+        {
+            Type type = originalObject.GetType();
+            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo oDataInstanceAnnotationContainerPropertyInfo = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataInstanceAnnotationContainer) || s.PropertyType == typeof(IODataInstanceAnnotationContainer));
+
+            if (oDataInstanceAnnotationContainerPropertyInfo != null)
+            {
+                DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                dataModificationExceptionType.MessageType = new Org.OData.Core.V1.MessageType { Message = errorMessage };
+
+                IODataInstanceAnnotationContainer odataInstanceAnnotationContainer = oDataInstanceAnnotationContainerPropertyInfo.GetValue(originalObject) as IODataInstanceAnnotationContainer;
+
+                odataInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
             }
         }
 
@@ -216,14 +262,14 @@ namespace Microsoft.AspNet.OData
             return newObject;
         }
 
-        private static void CopyProperties(object fromPayload, object newObject, List<string> navPropNames)
+        private static void CopyProperties(object originalObject, object newObject, List<string> navPropNames)
         {
-            foreach (PropertyInfo prop in fromPayload.GetType().GetProperties())
+            foreach (PropertyInfo prop in originalObject.GetType().GetProperties())
             {
                 // Don't copy Navigation Properties. They will be handled in the next level nesting.
                 if (!navPropNames.Contains(prop.Name))
                 {
-                    object resVal = prop.GetValue(fromPayload);
+                    object resVal = prop.GetValue(originalObject);
 
                     if (resVal != null)
                     {
@@ -231,6 +277,27 @@ namespace Microsoft.AspNet.OData
                     }
                 }
             }
+        }
+
+        private static dynamic CreateDynamicObject(object originalObject, List<string> navPropNames)
+        {
+            IDictionary<string, Object> dynamicObject = new ExpandoObject() as IDictionary<string, Object>;
+
+            foreach (PropertyInfo prop in originalObject.GetType().GetProperties())
+            {
+                // Don't copy Navigation Properties. They will be handled in the next level nesting.
+                if (!navPropNames.Contains(prop.Name))
+                {
+                    object resVal = prop.GetValue(originalObject);
+
+                    if (resVal != null)
+                    {
+                        dynamicObject.Add(prop.Name, resVal);
+                    }
+                }
+            }
+
+            return dynamicObject;
         }
 
         private static IDictionary<string, object> GetKeys(IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)

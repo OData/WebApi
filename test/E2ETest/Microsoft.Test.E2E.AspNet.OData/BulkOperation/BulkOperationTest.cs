@@ -1268,6 +1268,66 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithFailedODataId_AndWithout(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(3)', '@NS.Test':1},{'Id': 5, 'Price': 30, 'Quantity': 5}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "OverdueOrders\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":{\"@odata.type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Link\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"Unable to link NewOrder with Id 3\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":3,\"Price\":999,\"Quantity\":2},{\"Id\":5,\"Price\":30,\"Quantity\":5}]}";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithFailedCreateOverdueOrder(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'Id': 99, 'Price': 30, 'Quantity': 5}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "OverdueOrders\":[{\"@Core.DataModificationException\":{\"@odata.type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Insert\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"Unable to create NewOrder with Id 99\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":99,\"Price\":30,\"Quantity\":5}]}";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Theory]
         [InlineData("/convention/Employees")]
         [InlineData("/convention/Employees?$expand=Friends")]
         public async Task PostEmployee_WithCreateFriends(string uri)

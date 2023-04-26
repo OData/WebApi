@@ -45,6 +45,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             modelBuilder.Entity<Friend>().HasKey(c => c.Id);
 
             modelBuilder.Entity<NewOrder>().Ignore(c => c.Container);
+            modelBuilder.Entity<NewOrder>().Ignore(c => c.InstanceAnnotations);
             modelBuilder.Entity<MyNewOrder>().Ignore(c => c.Container);
         }
     }

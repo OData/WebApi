@@ -169,7 +169,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        // TODO: Error handling
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't have a specific exception to catch.")]
         internal static void ApplyHandlers(IODataAPIHandler odataApiHandler, IODataAPIHandler odataIdContainerHandler, object resource, IDictionary<string, object> keys, List<string> navigationProperties, out bool failedOperation)
         {
             failedOperation = false;
@@ -202,7 +202,7 @@ namespace Microsoft.AspNet.OData
 
                     if (addRelatedObjectResponse == ODataAPIResponseStatus.Failure)
                     {
-                        HandleFailedOperation(resource, operation, addRelatedObjectParams[1].ToString(), navigationProperties);
+                        HandleFailedOperation(resource, operation, addRelatedObjectParams[1].ToString());
                         failedOperation = true;
                     }
                 }
@@ -212,18 +212,18 @@ namespace Microsoft.AspNet.OData
 
                     if (createObjectResponse == ODataAPIResponseStatus.Failure)
                     {
-                        HandleFailedOperation(resource, operation, handlerParams[2].ToString(), navigationProperties);
+                        HandleFailedOperation(resource, operation, handlerParams[2].ToString());
                         failedOperation = true;
                     }
                 }
             }
             catch (Exception ex)
             {
-                HandleFailedOperation(resource, operation, ex.Message, navigationProperties);
+                HandleFailedOperation(resource, operation, ex.Message);
             }
         }
 
-        private static void HandleFailedOperation(object originalObject, DataModificationOperationKind operation, string errorMessage, List<string> navigationProperties)
+        private static void HandleFailedOperation(object originalObject, DataModificationOperationKind operation, string errorMessage)
         {
             Type type = originalObject.GetType();
             PropertyInfo[] properties = type.GetProperties();

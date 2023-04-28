@@ -298,12 +298,18 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             HashSet<string> declaredPropertyNameSet = new HashSet<string>(resource.Properties.Select(p => p.Name));
             List<ODataProperty> dynamicProperties = new List<ODataProperty>();
 
-            // To test SelectedDynamicProperties == null is enough to filter the dynamic properties.
-            // Because if SelectAllDynamicProperties == true, SelectedDynamicProperties should be null always.
-            // So `selectExpandNode.SelectedDynamicProperties == null` covers `SelectAllDynamicProperties == true` scenario.
-            // If `selectExpandNode.SelectedDynamicProperties != null`, then we should test whether the property is selected or not using "Contains(...)".
+            // Due to the early return condition at the start of this method we know that either:
+            //  1. SelectAllDynamicProperties == true
+            //  2. SelectedDynamicProperties != null
+            //  3. SelectAllDynamicProperties == true AND SelectedDynamicProperties != null
+            //
+            // Previous code simply checked the nullity of SelectedDynamicProperties here, but that ignored case 3 since which is possible
+            // since SelectExpandNode.BuildSelectExpand will set SelectAllDynamicProperties to true even if SelectedDynamicProperties is
+            // not-null. Instead we need to check both properties in order to determine if a dynamic property should be selected.
             IEnumerable<KeyValuePair<string, object>> dynamicPropertiesToSelect =
-                dynamicPropertyDictionary.Where(x => selectExpandNode.SelectedDynamicProperties == null || selectExpandNode.SelectedDynamicProperties.Contains(x.Key));
+                dynamicPropertyDictionary.Where(
+                    x => selectExpandNode.SelectAllDynamicProperties || 
+                         selectExpandNode.SelectedDynamicProperties.Contains(x.Key));
             foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
             {
                 if (String.IsNullOrEmpty(dynamicProperty.Key))

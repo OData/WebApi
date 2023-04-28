@@ -73,7 +73,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="resource">Resource to execute.</param>
         /// <param name="model">The model.</param>
-        /// <param name="apiHandlerFactory">API Handler Factory.</param>
+        /// <param name="apiHandlerFactory">API handler factory.</param>
         public virtual void DeepInsert(TStructuralType resource, IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
         {
             if (resource != null && model != null)
@@ -82,9 +82,16 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        internal static void CopyObjectProperties(object obj, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
+        /// <summary>
+        /// Apply handlers to an object.
+        /// </summary>
+        /// <param name="resource">The resource to apply the API handlers</param>
+        /// <param name="model">The model.</param>
+        /// <param name="apiHandler">The API handler for the resource.</param>
+        /// <param name="apiHandlerFactory">API handler factory.</param>
+        internal static void CopyObjectProperties(object resource, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            Type type = obj.GetType();
+            Type type = resource.GetType();
             PropertyInfo[] properties = type.GetProperties();
             PropertyInfo odataIdContainerProperty = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
 
@@ -94,11 +101,11 @@ namespace Microsoft.AspNet.OData
 
             IEnumerable<IEdmStructuralProperty> entityKey = edmEntityType.Key();
 
-            IDictionary<string, object> keys = GetKeys(entityKey, obj, type);
+            IDictionary<string, object> keys = GetKeys(entityKey, resource, type);
 
             IODataAPIHandler odataIdContainerHandler = null;
 
-            if (odataIdContainerProperty != null && odataIdContainerProperty.GetValue(obj) is ODataIdContainer container && container != null && apiHandlerFactory != null)
+            if (odataIdContainerProperty != null && odataIdContainerProperty.GetValue(resource) is ODataIdContainer container && container != null && apiHandlerFactory != null)
             {
                 ODataPath odataPath = GetODataPath(container.ODataId, model);
 
@@ -124,28 +131,37 @@ namespace Microsoft.AspNet.OData
 
             bool failedOperation;
 
-            ApplyHandlers(apiHandler, odataIdContainerHandler, obj, keys, navPropNames, out failedOperation);
+            ApplyHandlers(apiHandler, odataIdContainerHandler, resource, keys, navPropNames, out failedOperation);
 
             // If operation fails, we shouldn't continue with the nested properties.
             if (!failedOperation)
             {
-                CopyNestedProperties(obj, type, model, apiHandler, apiHandlerFactory, navPropNames);
+                CopyNestedProperties(resource, type, model, apiHandler, apiHandlerFactory, navPropNames);
             }
         }
 
-        internal static void CopyNestedProperties(object obj, Type type, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory, List<string> navPropNames)
+        /// <summary>
+        /// Loop through the nested properties of the object and call ApplyHandlers on each object.
+        /// </summary>
+        /// <param name="resource">The resource with the nested properties.</param>
+        /// <param name="type">The clr type of the object.</param>
+        /// <param name="model">The model.</param>
+        /// <param name="apiHandler">The API handler for the object.</param>
+        /// <param name="apiHandlerFactory">They API handler factory.</param>
+        /// <param name="navPropNames">The property names of all navigation properties in the resource.</param>
+        internal static void CopyNestedProperties(object resource, Type type, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory, List<string> navPropNames)
         {
             foreach (string navPropertName in navPropNames)
             {
                 PropertyInfo prop = type.GetProperty(navPropertName);
-                var navPropVal = prop.GetValue(obj);
+                var navPropVal = prop.GetValue(resource);
 
                 if (navPropVal == null)
                 {
                     continue;
                 }
 
-                object parentObj = GetObjectWithoutNavigationProperties(obj, navPropNames);
+                object parentObj = GetObjectWithoutNavigationPropertyValues(resource, navPropNames);
 
                 object[] nestedHandlerParams = new object[] { parentObj, navPropertName };
                 IODataAPIHandler nestedHandler = (IODataAPIHandler)apiHandler.GetType().GetMethod(nameof(GetNestedHandler)).Invoke(apiHandler, nestedHandlerParams);
@@ -169,6 +185,15 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        /// <summary>
+        /// Apply handlers to an object in the payload.
+        /// </summary>
+        /// <param name="odataApiHandler">The top level handler or the nested handler related to the object.</param>
+        /// <param name="odataIdContainerHandler">The handler from the <see cref="ODataIdContainer"/>.</param>
+        /// <param name="resource">The object to apply the handlers.</param>
+        /// <param name="keys">Keys in the object.</param>
+        /// <param name="navigationProperties">Navigation properties in the object.</param>
+        /// <param name="failedOperation">Boolean indicating if the operation fails.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't have a specific exception to catch.")]
         internal static void ApplyHandlers(IODataAPIHandler odataApiHandler, IODataAPIHandler odataIdContainerHandler, object resource, IDictionary<string, object> keys, List<string> navigationProperties, out bool failedOperation)
         {
@@ -179,28 +204,26 @@ namespace Microsoft.AspNet.OData
             {
                 object[] handlerParams = new object[] { keys, null, null };
 
-                IODataAPIHandler handlerForGet = odataApiHandler;
-                ODataAPIResponseStatus getResponse = ODataAPIResponseStatus.NotFound;
-                object getObject = null;
+                ODataAPIResponseStatus responseFromGetRequest = ODataAPIResponseStatus.NotFound;
+                object returnedObject = null;
 
                 if (odataIdContainerHandler != null)
                 {
-                    handlerForGet = odataIdContainerHandler;
-                    getResponse = (ODataAPIResponseStatus)handlerForGet.GetType().GetMethod(nameof(TryGet)).Invoke(handlerForGet, handlerParams);
-                    getObject = handlerParams[1];
+                    responseFromGetRequest = (ODataAPIResponseStatus)odataIdContainerHandler.GetType().GetMethod(nameof(TryGet)).Invoke(odataIdContainerHandler, handlerParams);
+                    returnedObject = handlerParams[1];
                 }
 
-                if (getResponse == ODataAPIResponseStatus.Success)
+                if (responseFromGetRequest == ODataAPIResponseStatus.Success)
                 {
                     operation = DataModificationOperationKind.Link;
 
-                    CopyProperties(getObject, resource, navigationProperties);
+                    CopyProperties(returnedObject, resource, navigationProperties);
 
-                    object[] addRelatedObjectParams = new object[] { getObject, null };
+                    object[] addRelatedObjectParams = new object[] { returnedObject, null };
 
-                    ODataAPIResponseStatus addRelatedObjectResponse = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams);
+                    ODataAPIResponseStatus responseFromAddRelatedObject = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams);
 
-                    if (addRelatedObjectResponse == ODataAPIResponseStatus.Failure)
+                    if (responseFromAddRelatedObject == ODataAPIResponseStatus.Failure)
                     {
                         HandleFailedOperation(resource, operation, addRelatedObjectParams[1].ToString());
                         failedOperation = true;
@@ -208,9 +231,14 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    ODataAPIResponseStatus createObjectResponse = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams);
+                    ODataAPIResponseStatus responseFromCreateObject = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams);
+                    returnedObject = handlerParams[1];
 
-                    if (createObjectResponse == ODataAPIResponseStatus.Failure)
+                    if (responseFromCreateObject == ODataAPIResponseStatus.Success)
+                    {
+                        CopyProperties(resource, returnedObject, navigationProperties);
+                    }
+                    else if (responseFromCreateObject == ODataAPIResponseStatus.Failure)
                     {
                         HandleFailedOperation(resource, operation, handlerParams[2].ToString());
                         failedOperation = true;
@@ -223,6 +251,12 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        /// <summary>
+        /// Handler a failed operation by creating a <see cref="DataModificationExceptionType"/> and adding it to the object as instance annotation.
+        /// </summary>
+        /// <param name="originalObject">The object from a failed operation.</param>
+        /// <param name="operation">A <see cref="DataModificationOperationKind"/>.</param>
+        /// <param name="errorMessage">The error message.</param>
         private static void HandleFailedOperation(object originalObject, DataModificationOperationKind operation, string errorMessage)
         {
             Type type = originalObject.GetType();
@@ -240,7 +274,13 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private static object GetObjectWithoutNavigationProperties(object originalObj, List<string> navPropNames)
+        /// <summary>
+        /// Create a new object from the original object without navigation property values.
+        /// </summary>
+        /// <param name="originalObj">The original object.</param>
+        /// <param name="navPropNames">Navigation property names.</param>
+        /// <returns></returns>
+        private static object GetObjectWithoutNavigationPropertyValues(object originalObj, List<string> navPropNames)
         {
             object newObject = Activator.CreateInstance(originalObj.GetType());
 

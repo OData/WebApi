@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="type">The clr type of the object.</param>
         /// <param name="model">The model.</param>
         /// <param name="apiHandler">The API handler for the object.</param>
-        /// <param name="apiHandlerFactory">They API handler factory.</param>
+        /// <param name="apiHandlerFactory">The API handler factory.</param>
         /// <param name="navPropNames">The property names of all navigation properties in the resource.</param>
         internal static void CopyNestedProperties(object resource, Type type, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory, List<string> navPropNames)
         {
@@ -248,6 +248,7 @@ namespace Microsoft.AspNet.OData
             catch (Exception ex)
             {
                 HandleFailedOperation(resource, operation, ex.Message);
+                failedOperation = true;
             }
         }
 
@@ -279,7 +280,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="originalObj">The original object.</param>
         /// <param name="navPropNames">Navigation property names.</param>
-        /// <returns></returns>
+        /// <returns>An object without navigation property values.</returns>
         private static object GetObjectWithoutNavigationPropertyValues(object originalObj, List<string> navPropNames)
         {
             object newObject = Activator.CreateInstance(originalObj.GetType());

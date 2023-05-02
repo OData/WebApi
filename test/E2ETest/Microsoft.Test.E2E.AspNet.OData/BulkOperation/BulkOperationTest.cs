@@ -1107,6 +1107,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         [Theory]
         [InlineData("/convention/Employees")]
         [InlineData("/convention/Employees?$expand=Friends,NewFriends($expand=NewOrders)")]
+        [InlineData("/convention/Employees?$EXPAND=Friends,NewFriends($EXPAND=NewOrders)")]
+        [InlineData("/convention/Employees?expand=Friends,NewFriends(expand=NewOrders)")]
         public async Task PostEmployee_WithNavigationProperties_OneMultiLevelNesting(string uri)
         {
             //Arrange
@@ -1140,8 +1142,44 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         [Theory]
+        [InlineData("/convention/Employees?$select=ID")]
+        public async Task PostEmployee_WithNavigationProperties_OneMultiLevelNestingAndSelectQuery(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{
+                    'ID':11,
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}],
+                    'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            var expectedFriends = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+            var expectedNewFriends = "NewFriends\":[{\"Id\":2001,\"Name\":\"NewFriend 2001\",\"Age\":21,\"NewOrders\":[]},{\"Id\":2002,\"Name\":\"NewFriend 2002\",\"Age\":22,\"NewOrders\":[{\"Id\":101,\"Price\":45,\"Quantity\":10}]}]";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.DoesNotContain("SqlUD", json);
+                Assert.Contains(expectedFriends, json);
+                Assert.Contains(expectedNewFriends, json);
+            }
+        }
+
+        [Theory]
         [InlineData("/convention/Employees")]
         [InlineData("/convention/Employees?$expand=Friends($expand=Orders),NewFriends($expand=NewOrders)")]
+        [InlineData("/convention/Employees?$EXPAND=Friends($EXPAND=Orders),NewFriends($EXPAND=NewOrders)")]
+        [InlineData("/convention/Employees?expand=Friends(expand=Orders),NewFriends(expand=NewOrders)")]
         public async Task PostEmployee_WithNavigationProperties_TwoMultiLevelNesting(string uri)
         {
             //Arrange

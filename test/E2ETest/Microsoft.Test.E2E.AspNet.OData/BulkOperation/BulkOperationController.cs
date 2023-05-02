@@ -54,8 +54,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
                     FavoriteSports = new FavoriteSports{Sport ="Football"},
-                    NewFriends = NewFriends.Where(x=>x.Id ==1).ToList(),
-                    Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
+                    NewFriends = NewFriends.Where(x=>x.Id == 1).ToList(),
+                    Friends = this.Friends.Where(x=>x.Id == 1 || x.Id == 2).ToList()
                 },
                 new Employee()
                 {
@@ -63,8 +63,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     SkillSet=new List<Skill>(),
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
-                    NewFriends = NewFriends.Where(x=>x.Id ==2).ToList(),
-                    Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
+                    NewFriends = NewFriends.Where(x=>x.Id == 2).ToList(),
+                    Friends =  this.Friends.Where(x=>x.Id == 3 || x.Id==4).ToList()
                 },
                 new Employee(){
                     ID=3,Name="Name3",
@@ -253,7 +253,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         [ODataRoute("Employees")]
         [HttpPost]
-        [EnableQuery(MaxExpansionDepth =5)]
+        [EnableQuery(MaxExpansionDepth = 5)]
         public ITestActionResult Post([FromBody] Employee employee)
         {
             InitEmployees();

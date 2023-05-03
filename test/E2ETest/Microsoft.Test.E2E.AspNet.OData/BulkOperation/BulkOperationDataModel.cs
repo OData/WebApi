@@ -123,7 +123,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public int Price { get; set; }
         public int Quantity { get; set; }
         public ODataIdContainer Container {get;set;}
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
 

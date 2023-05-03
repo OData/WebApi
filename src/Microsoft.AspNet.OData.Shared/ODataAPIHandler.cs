@@ -76,10 +76,12 @@ namespace Microsoft.AspNet.OData
         /// <param name="apiHandlerFactory">API handler factory.</param>
         public virtual void DeepInsert(TStructuralType resource, IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            if (resource != null && model != null)
+            if (resource == null || model == null)
             {
-                CopyObjectProperties(resource, model, this, apiHandlerFactory);
+                return;
             }
+
+            CopyObjectProperties(resource, model, this, apiHandlerFactory);
         }
 
         /// <summary>
@@ -96,10 +98,26 @@ namespace Microsoft.AspNet.OData
             PropertyInfo odataIdContainerProperty = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
 
             string edmFullName = type.EdmFullName();
-            IEdmSchemaType schemaType = model.FindType(edmFullName);
-            IEdmEntityType edmEntityType = schemaType as IEdmEntityType;
+            IEdmSchemaType schemaType = null;
+            IEdmEntityType edmEntityType = null;
+            IEnumerable<IEdmStructuralProperty> entityKey = null;
+            IEnumerable<IEdmNavigationProperty> navigationProperties = null;
 
-            IEnumerable<IEdmStructuralProperty> entityKey = edmEntityType.Key();
+            if (!string.IsNullOrEmpty(edmFullName))
+            {
+                schemaType = model.FindType(edmFullName);
+            }
+
+            if (schemaType != null)
+            {
+                edmEntityType = schemaType as IEdmEntityType;
+            }
+
+            if (edmEntityType != null)
+            {
+                entityKey = edmEntityType.Key();
+                navigationProperties = edmEntityType.NavigationProperties();
+            }
 
             IDictionary<string, object> keys = GetKeys(entityKey, resource, type);
 
@@ -120,13 +138,14 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            List<IEdmNavigationProperty> navigationProperties = edmEntityType.NavigationProperties().ToList();
-
             List<string> navPropNames = new List<string>();
 
-            foreach (IEdmNavigationProperty navProp in navigationProperties)
+            if (navigationProperties != null)
             {
-                navPropNames.Add(navProp.Name);
+                foreach (IEdmNavigationProperty navProp in navigationProperties)
+                {
+                    navPropNames.Add(navProp.Name);
+                }
             }
 
             bool failedOperation;
@@ -141,7 +160,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Loop through the nested properties of the object and call ApplyHandlers on each object.
+        /// ApplyHandlers on each nested object.
         /// </summary>
         /// <param name="resource">The resource with the nested properties.</param>
         /// <param name="type">The clr type of the object.</param>
@@ -161,7 +180,7 @@ namespace Microsoft.AspNet.OData
                     continue;
                 }
 
-                object parentObj = GetObjectWithoutNavigationPropertyValues(resource, navPropNames);
+                object parentObj = GetObjectWithoutNavigationPropertyValues(resource, type, navPropNames);
 
                 object[] nestedHandlerParams = new object[] { parentObj, navPropertName };
                 IODataAPIHandler nestedHandler = (IODataAPIHandler)apiHandler.GetType().GetMethod(nameof(GetNestedHandler)).Invoke(apiHandler, nestedHandlerParams);
@@ -170,11 +189,6 @@ namespace Microsoft.AspNet.OData
                 {
                     foreach (var item in lst)
                     {
-                        if (item.GetType().IsPrimitive)
-                        {
-                            break;
-                        }
-
                         CopyObjectProperties(item, model, nestedHandler, apiHandlerFactory);
                     }
                 }
@@ -186,11 +200,12 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Apply handlers to an object in the payload.
+        /// Apply handlers to an object in the payload. Copy properties from the object payload to the object create by the handler.
+        /// For TryGet (@odata.id object), copy the properties of the object return from the handler to the object from the payload.
         /// </summary>
         /// <param name="odataApiHandler">The top level handler or the nested handler related to the object.</param>
         /// <param name="odataIdContainerHandler">The handler from the <see cref="ODataIdContainer"/>.</param>
-        /// <param name="resource">The object to apply the handlers.</param>
+        /// <param name="resource">The object to apply the handlers to.</param>
         /// <param name="keys">Keys in the object.</param>
         /// <param name="navigationProperties">Navigation properties in the object.</param>
         /// <param name="failedOperation">Boolean indicating if the operation fails.</param>
@@ -262,7 +277,7 @@ namespace Microsoft.AspNet.OData
         {
             Type type = originalObject.GetType();
             PropertyInfo[] properties = type.GetProperties();
-            PropertyInfo oDataInstanceAnnotationContainerPropertyInfo = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataInstanceAnnotationContainer) || s.PropertyType == typeof(IODataInstanceAnnotationContainer));
+            PropertyInfo oDataInstanceAnnotationContainerPropertyInfo = properties.FirstOrDefault(s => typeof(IODataInstanceAnnotationContainer).IsAssignableFrom(s.PropertyType));
 
             if (oDataInstanceAnnotationContainerPropertyInfo != null)
             {
@@ -279,13 +294,14 @@ namespace Microsoft.AspNet.OData
         /// Create a new object from the original object without navigation property values.
         /// </summary>
         /// <param name="originalObj">The original object.</param>
+        /// <param name="type">The CLR type of the original object.</param>
         /// <param name="navPropNames">Navigation property names.</param>
         /// <returns>An object without navigation property values.</returns>
-        private static object GetObjectWithoutNavigationPropertyValues(object originalObj, List<string> navPropNames)
+        private static object GetObjectWithoutNavigationPropertyValues(object originalObj, Type type, List<string> navPropNames)
         {
-            object newObject = Activator.CreateInstance(originalObj.GetType());
+            object newObject = Activator.CreateInstance(type);
 
-            foreach (PropertyInfo prop in originalObj.GetType().GetProperties())
+            foreach (PropertyInfo prop in type.GetProperties())
             {
                 // Don't copy Navigation Properties. They will be handled in the next level nesting.
                 if (!navPropNames.Contains(prop.Name))
@@ -322,6 +338,11 @@ namespace Microsoft.AspNet.OData
         private static IDictionary<string, object> GetKeys(IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)
         {
             IDictionary<string, object> keys = new Dictionary<string, object>();
+
+            if (properties == null)
+            {
+                return keys;
+            }
 
             foreach (IEdmStructuralProperty property in properties)
             {

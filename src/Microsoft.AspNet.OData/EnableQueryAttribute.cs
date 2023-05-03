@@ -89,7 +89,7 @@ namespace Microsoft.AspNet.OData
             }
 
             // Create a $expand query string if 1) It's a POST request 2) if there is no expand query string.
-            if (String.Equals(actionExecutedContext.Request.Method, HttpMethod.Post) && !hasExpandQueryParameter)
+            if (string.Equals(actionExecutedContext.Request.Method, HttpMethod.Post) && !hasExpandQueryParameter)
             {
                 string expand = GenerateExpandQueryFromPayload(actionExecutedContext.ActionContext);
 

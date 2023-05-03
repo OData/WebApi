@@ -42,11 +42,11 @@ namespace Microsoft.AspNet.OData.Query
         {
             Type type = value.GetType();
             bool isCollection = TypeHelper.IsCollection(type, out Type elementType);
-            IList objList = null;
+            IEnumerable collection = null;
             if (isCollection)
             {
                 type = elementType;
-                objList = value as IList;
+                collection = value as IEnumerable;
             }
 
             string edmFullName = type.EdmFullName();
@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData.Query
 
                 if (isCollection)
                 {
-                    foreach (object obj in objList)
+                    foreach (object obj in collection)
                     {
                         object navPropValue = prop.GetValue(obj);
 

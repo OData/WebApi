@@ -260,6 +260,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var handler = new EmployeeAPIHandler();
             handler.DeepInsert(employee, Request.GetModel(), new APIHandlerFactory(Request.GetModel()));
 
+            var serviceProvider = Request.GetRequestContainer();
+
             return Created(employee);
         }
 

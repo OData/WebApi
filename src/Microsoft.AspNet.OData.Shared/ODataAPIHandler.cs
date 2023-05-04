@@ -93,6 +93,11 @@ namespace Microsoft.AspNet.OData
         /// <param name="apiHandlerFactory">API handler factory.</param>
         internal static void CopyObjectProperties(object resource, IEdmModel model, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {
+            if (resource == null || model == null || apiHandler == null)
+            {
+                return;
+            }
+
             Type type = resource.GetType();
             PropertyInfo[] properties = type.GetProperties();
             PropertyInfo odataIdContainerProperty = properties.FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
@@ -119,7 +124,7 @@ namespace Microsoft.AspNet.OData
                 navigationProperties = edmEntityType.NavigationProperties();
             }
 
-            IDictionary<string, object> keys = GetKeys(entityKey, resource, type);
+            IDictionary<string, object> keys = GetKeys(entityKey, resource, type); // Refactored ApplyHandler. Consider removing this.
 
             IODataAPIHandler odataIdContainerHandler = null;
 
@@ -183,7 +188,15 @@ namespace Microsoft.AspNet.OData
                 object parentObj = GetObjectWithoutNavigationPropertyValues(resource, type, navPropNames);
 
                 object[] nestedHandlerParams = new object[] { parentObj, navPropertName };
-                IODataAPIHandler nestedHandler = (IODataAPIHandler)apiHandler.GetType().GetMethod(nameof(GetNestedHandler)).Invoke(apiHandler, nestedHandlerParams);
+
+                MethodInfo nestedHandlerMethodInfo = apiHandler.GetType().GetMethod(nameof(GetNestedHandler));
+
+                if (nestedHandlerMethodInfo == null)
+                {
+                    return;
+                }
+
+                IODataAPIHandler nestedHandler = (IODataAPIHandler)nestedHandlerMethodInfo.Invoke(apiHandler, nestedHandlerParams);
 
                 if (navPropVal is IEnumerable lst)
                 {
@@ -224,7 +237,14 @@ namespace Microsoft.AspNet.OData
 
                 if (odataIdContainerHandler != null)
                 {
-                    responseFromGetRequest = (ODataAPIResponseStatus)odataIdContainerHandler.GetType().GetMethod(nameof(TryGet)).Invoke(odataIdContainerHandler, handlerParams);
+                    MethodInfo getMethodinfo = odataIdContainerHandler.GetType().GetMethod(nameof(TryGet));
+
+                    if (getMethodinfo == null)
+                    {
+                        return;
+                    }
+
+                    responseFromGetRequest = (ODataAPIResponseStatus)getMethodinfo.Invoke(odataIdContainerHandler, handlerParams);
                     returnedObject = handlerParams[1];
                 }
 
@@ -236,9 +256,16 @@ namespace Microsoft.AspNet.OData
 
                     object[] addRelatedObjectParams = new object[] { returnedObject, null };
 
-                    ODataAPIResponseStatus responseFromAddRelatedObject = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject)).Invoke(odataApiHandler, addRelatedObjectParams);
+                    MethodInfo tryAddRelatedObjectMethodinfo = odataApiHandler.GetType().GetMethod(nameof(TryAddRelatedObject));
 
-                    if (responseFromAddRelatedObject == ODataAPIResponseStatus.Failure)
+                    if (tryAddRelatedObjectMethodinfo == null)
+                    {
+                        return;
+                    }
+
+                    ODataAPIResponseStatus responseFromAddRelatedObject = (ODataAPIResponseStatus)tryAddRelatedObjectMethodinfo.Invoke(odataApiHandler, addRelatedObjectParams);
+
+                    if (responseFromAddRelatedObject != ODataAPIResponseStatus.Success)
                     {
                         HandleFailedOperation(resource, operation, addRelatedObjectParams[1].ToString());
                         failedOperation = true;
@@ -246,15 +273,21 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    ODataAPIResponseStatus responseFromCreateObject = (ODataAPIResponseStatus)odataApiHandler.GetType().GetMethod(nameof(TryCreate)).Invoke(odataApiHandler, handlerParams);
+                    MethodInfo tryCreateMethodinfo = odataApiHandler.GetType().GetMethod(nameof(TryCreate));
+
+                    if (tryCreateMethodinfo == null)
+                    {
+                        return;
+                    }
+
+                    ODataAPIResponseStatus responseFromCreateObject = (ODataAPIResponseStatus)tryCreateMethodinfo.Invoke(odataApiHandler, handlerParams);
                     returnedObject = handlerParams[1];
 
                     if (responseFromCreateObject == ODataAPIResponseStatus.Success)
                     {
                         CopyProperties(resource, returnedObject, navigationProperties);
                     }
-                    else if (responseFromCreateObject == ODataAPIResponseStatus.Failure)
-                    {
+                    else {
                         HandleFailedOperation(resource, operation, handlerParams[2].ToString());
                         failedOperation = true;
                     }

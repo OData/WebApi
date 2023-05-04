@@ -95,6 +95,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIResponseStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataIdContainer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ExpandQueryBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\IExpandQueryBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransientAnnotations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />

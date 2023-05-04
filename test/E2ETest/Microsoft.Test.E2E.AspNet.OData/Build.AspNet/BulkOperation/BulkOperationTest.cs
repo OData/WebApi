@@ -100,12 +100,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-        [Fact]
-        public async Task PostEmployee_ExpandNavigationProperties()
+        [Theory]
+        [InlineData("/convention/Employees")]
+        [InlineData("/convention/Employees?$expand=Friends,NewFriends($expand=NewOrders)")]
+        public async Task PostEmployee_ExpandNavigationProperties(string uri)
         {
             //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees?$expand=Friends,NewFriends($expand=NewOrders)";
+            string requestUri = this.BaseAddress + uri;
 
             var content = @"{
                     'Name':'SqlUD',

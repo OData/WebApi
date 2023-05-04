@@ -92,6 +92,9 @@ namespace Microsoft.AspNet.OData.Extensions
             // HttpRequestScope.
             builder.AddService<HttpRequestScope>(ServiceLifetime.Scoped);
             builder.AddService(ServiceLifetime.Scoped, sp => sp.GetRequiredService<HttpRequestScope>().HttpRequest);
+
+            // QueryBuilders.
+            builder.AddService<IExpandQueryBuilder, ExpandQueryBuilder>(ServiceLifetime.Singleton);
             return builder;
         }
     }

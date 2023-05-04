@@ -1103,16 +1103,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         #endregion
 
-        //#region Post
+        #region Post
 
-        [Fact]
-        public async Task PostEmployee_ExpandNavigationProperties()
+        [Theory]
+        [InlineData("/convention/Employees")]
+        [InlineData("/convention/Employees?$expand=Friends,NewFriends($expand=NewOrders)")]
+        [InlineData("/convention/Employees?$EXPAND=Friends,NewFriends($EXPAND=NewOrders)")]
+        [InlineData("/convention/Employees?expand=Friends,NewFriends(expand=NewOrders)")]
+        public async Task PostEmployee_WithNavigationProperties_OneMultiLevelNesting(string uri)
         {
             //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees?$expand=Friends,NewFriends($expand=NewOrders)";
+            string requestUri = this.BaseAddress + uri;
 
             var content = @"{
+                    'ID':11,
                     'Name':'SqlUD',
                     'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}],
                     'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
@@ -1137,153 +1142,331 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-        // Commented until we redesign the Bulk Insert
-        //[Fact]
-        //public async Task PostCompany_WithODataId()
-        //{
-        //    //Arrange
+        [Theory]
+        [InlineData("/convention/Employees?$select=ID")]
+        public async Task PostEmployee_WithNavigationProperties_OneMultiLevelNestingAndSelectQuery(string uri)
+        {
+            //Arrange
 
-        //    string requestUri = this.BaseAddress + "/convention/Companies";
+            string requestUri = this.BaseAddress + uri;
 
-        //    var content = @"{'Id':3,'Name':'Company03',
-        //                    'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
-        //             }";
+            var content = @"{
+                    'ID':11,
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}],
+                    'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
+                     }";
 
-        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPost.Content = stringContent;
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
 
-        //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-        //    {
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //    }
-        //}
+            var expectedFriends = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+            var expectedNewFriends = "NewFriends\":[{\"Id\":2001,\"Name\":\"NewFriend 2001\",\"Age\":21,\"NewOrders\":[]},{\"Id\":2002,\"Name\":\"NewFriend 2002\",\"Age\":22,\"NewOrders\":[{\"Id\":101,\"Price\":45,\"Quantity\":10}]}]";
 
-        //[Fact]
-        //public async Task PostCompany_WithODataId_AndWithout()
-        //{
-        //    //Arrange
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.DoesNotContain("SqlUD", json);
+                Assert.Contains(expectedFriends, json);
+                Assert.Contains(expectedNewFriends, json);
+            }
+        }
 
-        //    string requestUri = this.BaseAddress + "/convention/Companies";
+        [Theory]
+        [InlineData("/convention/Employees")]
+        [InlineData("/convention/Employees?$expand=Friends($expand=Orders),NewFriends($expand=NewOrders)")]
+        [InlineData("/convention/Employees?$EXPAND=Friends($EXPAND=Orders),NewFriends($EXPAND=NewOrders)")]
+        [InlineData("/convention/Employees?expand=Friends(expand=Orders),NewFriends(expand=NewOrders)")]
+        public async Task PostEmployee_WithNavigationProperties_TwoMultiLevelNesting(string uri)
+        {
+            //Arrange
 
-        //    var content = @"{'Id':4,'Name':'Company04',
-        //                    'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{Price:30}]
-        //             }";
+            string requestUri = this.BaseAddress + uri;
 
-        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            var content = @"{
+                    'ID':11,
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33, 'Orders':[{'Id': 101, 'Price': 45}]}],
+                    'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
+                     }";
 
-        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPost.Content = stringContent;
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-        //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-        //    {
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //    }
-        //}
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
 
-        //[Fact]
-        //public async Task PostEmployee_WithCreateFriends()
-        //{
-        //    //Arrange
+            var expectedFriends = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31,\"Orders\":[]},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32,\"Orders\":[]},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33,\"Orders\":[{\"Id\":101,\"Price\":45}]}]";
+            var expectedNewFriends = "NewFriends\":[{\"Id\":2001,\"Name\":\"NewFriend 2001\",\"Age\":21,\"NewOrders\":[]},{\"Id\":2002,\"Name\":\"NewFriend 2002\",\"Age\":22,\"NewOrders\":[{\"Id\":101,\"Price\":45,\"Quantity\":10}]}]";
 
-        //    string requestUri = this.BaseAddress + "/convention/Employees";
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expectedFriends, json);
+                Assert.Contains(expectedNewFriends, json);
+            }
+        }
 
-        //    var content = @"{
-        //            'Name':'SqlUD',
-        //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
-        //             }";
+        [Theory]
+        [InlineData("/convention/Employees")]
+        [InlineData("/convention/Employees?$expand=Friends($expand=Orders($expand=OrderLines)),NewFriends($expand=NewOrders)")]
+        public async Task PostEmployee_WithNavigationProperties_TwoUnevenMultiLevelNesting(string uri)
+        {
+            //Arrange
 
-        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            string requestUri = this.BaseAddress + uri;
 
-        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPost.Content = stringContent;
+            var content = @"{
+                    'ID':11,
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32, 'Orders':[{'Id': 101, 'Price': 45}]},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33, 'Orders':[{'Id': 102, 'Price': 55, 'OrderLines':[{'Id': 1001, 'Price': 5}]}]}],
+                    'NewFriends':[{ 'Id':2001, 'Name' : 'NewFriend 2001', 'Age': 21},{ 'Id':2002, 'Name' : 'NewFriend 2002', 'Age': 22, 'NewOrders':[{'Id': 101, 'Price': 45,'Quantity': 10}]}]
+                     }";
 
-        //    var expected = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-        //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-        //    {
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        Assert.Contains("SqlUD", json);
-        //        Assert.Contains(expected, json);
-        //    }
-        //}
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
 
-        //[Fact]
-        //public async Task PostEmployee_WithCreateFriendsFullMetadata()
-        //{
-        //    //Arrange
+            var expectedFriends = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31,\"Orders\":[]},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32,\"Orders\":[{\"Id\":101,\"Price\":45,\"OrderLines\":[]}]},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33,\"Orders\":[{\"Id\":102,\"Price\":55,\"OrderLines\":[{\"Id\":1001,\"Price\":5}]}]}]";
+            var expectedNewFriends = "NewFriends\":[{\"Id\":2001,\"Name\":\"NewFriend 2001\",\"Age\":21,\"NewOrders\":[]},{\"Id\":2002,\"Name\":\"NewFriend 2002\",\"Age\":22,\"NewOrders\":[{\"Id\":101,\"Price\":45,\"Quantity\":10}]}]";
 
-        //    string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expectedFriends, json);
+                Assert.Contains(expectedNewFriends, json);
+            }
+        }
 
-        //    string content = @"{
-        //            'Name':'SqlUD',
-        //            'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
-        //             }";
+        [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithODataId(string uri)
+        {
+            //Arrange
 
-        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            string requestUri = this.BaseAddress + uri;
 
-        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPost.Content = stringContent;
+            var content = @"{'Id':3,'Name':'Company03',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+                     }";
 
-        //    string friendsNavigationLink = "Friends@odata.navigationLink";
-        //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
-        //    string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-        //    string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
 
-        //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-        //    {
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        Assert.Contains("SqlUD", json);
-        //        Assert.Contains(expected, json);
-        //        Assert.Contains(friendsNavigationLink, json);
-        //        Assert.Contains(newFriendsNavigationLink, json);
-        //        Assert.Contains(untypedFriendsNavigationLink, json);
-        //    }
-        //}
+            var expected = "OverdueOrders\":[{\"Id\":1,\"Price\":101,\"Quantity\":0}]";
 
-        //[Fact]
-        //public async Task PostEmployee_WithFullMetadata()
-        //{
-        //    //Arrange
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
 
-        //    string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+        [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithODataId_AndWithout(string uri)
+        {
+            //Arrange
 
-        //    var content = @"{
-        //            'Name':'SqlUD'
-        //             }";
+            string requestUri = this.BaseAddress + uri;
 
-        //    var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{'Id': 5, 'Price': 30, 'Quantity': 5}]
+                     }";
 
-        //    StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-        //    requestForPost.Content = stringContent;
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
 
-        //    string friendsNavigationLink = "Friends@odata.navigationLink";
-        //    string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
-        //    string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
 
-        //    //Act & Assert
-        //    using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-        //    {
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        Assert.Contains("SqlUD", json);
-        //        Assert.Contains(friendsNavigationLink, json);
-        //        Assert.Contains(newFriendsNavigationLink, json);
-        //        Assert.Contains(untypedFriendsNavigationLink, json);
-        //    }
-        //}
+            var expected = "OverdueOrders\":[{\"Id\":1,\"Price\":101,\"Quantity\":0},{\"Id\":5,\"Price\":30,\"Quantity\":5}]";
 
-        //#endregion
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithFailedODataId_AndWithout(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(3)', '@NS.Test':1},{'Id': 5, 'Price': 30, 'Quantity': 5}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "OverdueOrders\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":{\"@odata.type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Link\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"Unable to link NewOrder with Id 3\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":3,\"Price\":999,\"Quantity\":2},{\"Id\":5,\"Price\":30,\"Quantity\":5}]}";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Theory]
+        [InlineData("/convention/Companies")]
+        [InlineData("/convention/Companies?$expand=OverdueOrders")]
+        public async Task PostCompany_WithFailedCreateOverdueOrder(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'Id': 99, 'Price': 30, 'Quantity': 5}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "OverdueOrders\":[{\"@Core.DataModificationException\":{\"@odata.type\":\"#Org.OData.Core.V1.DataModificationExceptionType\",\"FailedOperation\":\"Insert\",\"ResponseCode\":0,\"MessageType\":{\"Code\":null,\"Message\":\"Unable to create NewOrder with Id 99\",\"Severity\":null,\"Target\":null,\"Details\":null}},\"Id\":99,\"Price\":30,\"Quantity\":5}]}";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Theory]
+        [InlineData("/convention/Employees")]
+        [InlineData("/convention/Employees?$expand=Friends")]
+        public async Task PostEmployee_WithCreateFriends(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{
+                    'ID':88,
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            var expected = "Friends\":[{\"Id\":1001,\"Name\":\"Friend 1001\",\"Age\":31},{\"Id\":1002,\"Name\":\"Friend 1002\",\"Age\":32},{\"Id\":1003,\"Name\":\"Friend 1003\",\"Age\":33}]";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expected, json);
+            }
+        }
+
+        [Fact]
+        public async Task PostEmployee_WithCreateFriendsFullMetadata()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+
+            string content = @"{
+                    'Name':'SqlUD',
+                    'Friends':[{ 'Id':1001, 'Name' : 'Friend 1001', 'Age': 31},{ 'Id':1002, 'Name' : 'Friend 1002', 'Age': 32},{ 'Id':1003, 'Name' : 'Friend 1003', 'Age': 33}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            string friendsNavigationLink = "Friends@odata.navigationLink";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+
+            string expected = "Friends\":[{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.BulkOperation.Friend\"";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(expected, json);
+                Assert.Contains(friendsNavigationLink, json);
+                Assert.Contains(newFriendsNavigationLink, json);
+                Assert.Contains(untypedFriendsNavigationLink, json);
+            }
+        }
+
+        [Fact]
+        public async Task PostEmployee_WithFullMetadata()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees?$format=application/json;odata.metadata=full";
+
+            var content = @"{
+                    'Name':'SqlUD'
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            string friendsNavigationLink = "Friends@odata.navigationLink";
+            string newFriendsNavigationLink = "NewFriends@odata.navigationLink";
+            string untypedFriendsNavigationLink = "UnTypedFriends@odata.navigationLink";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
+                Assert.Contains(friendsNavigationLink, json);
+                Assert.Contains(newFriendsNavigationLink, json);
+                Assert.Contains(untypedFriendsNavigationLink, json);
+            }
+        }
+
+#endregion
 
         #region Full Metadata
 

@@ -185,7 +185,8 @@ namespace Microsoft.AspNet.OData
         {
             ODataQueryOptions queryOptions = null;
 
-            if (request.GetODataOptions().ParseODataQueryOptionsOnce)
+            CompatibilityOptions compatibilityOptions = request.GetCompatibilityOptions();
+            if (!compatibilityOptions.HasOption(CompatibilityOptions.DisableODataQueryOptionsReuse))
             {
                 queryOptions = request.GetODataQueryOptions();
             }

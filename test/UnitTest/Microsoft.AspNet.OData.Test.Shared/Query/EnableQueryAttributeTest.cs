@@ -1170,7 +1170,6 @@ namespace Microsoft.AspNet.OData.Test.Query
                 new ODataQueryContext(model.Model, typeof(Customer)),
                 actionExecutedContext.Request);
 
-            actionExecutedContext.Request.GetODataOptions().ParseODataQueryOptionsOnce = true;
             actionExecutedContext.Request.SetODataQueryOptions(expectedQueryOptions);
 
             var mockAttribute = new Mock<EnableQueryAttribute>

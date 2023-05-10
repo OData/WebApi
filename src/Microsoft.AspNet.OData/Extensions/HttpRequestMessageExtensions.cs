@@ -241,16 +241,6 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Gets the <see cref="ODataOptions"/>.
-        /// </summary>
-        /// <param name="request">The request that provides access to the <see cref="IServiceProvider"/>.</param>
-        /// <returns>The <see cref="ODataOptions"/> instance.</returns>
-        public static ODataOptions GetODataOptions(this HttpRequestMessage request)
-        {
-            return request.GetRequestContainer().GetService<ODataOptions>() ?? ODataOptions.Default;
-        }
-
-        /// <summary>
         /// Gets the ODataQueryOptions for the request.
         /// </summary>
         /// <param name="request">The request.</param>
@@ -439,6 +429,7 @@ namespace Microsoft.AspNet.OData.Extensions
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
         }
 
+        /// <summary>
         /// Gets the <see cref="IExpandQueryBuilder"/> from the request container.
         /// </summary>
         /// <param name="request">The request.</param>

@@ -4,6 +4,7 @@ FlagsAttribute(),
 public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
 	DisableCaseInsensitiveRequestPropertyBinding = 2
+	DisableODataQueryOptionsReuse = 8
 	None = 0
 	ThrowExceptionAfterLoggingModelStateError = 4
 }
@@ -216,6 +217,16 @@ public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObj
 
 	System.Type ExpectedClrType  { public abstract get; }
 	System.Type StructuredType  { public abstract get; }
+}
+
+[
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.CompatibilityOptionsExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static bool HasOption (CompatibilityOptions options, CompatibilityOptions option)
 }
 
 [
@@ -600,13 +611,6 @@ public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Ht
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-}
-
-public class Microsoft.AspNet.OData.ODataOptions {
-	public ODataOptions ()
-
-	ODataOptions Default  { public static get; }
-	bool ParseODataQueryOptionsOnce  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.ODataQueryContext {
@@ -2199,11 +2203,6 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensio
 	ExtensionAttribute(),
 	]
 	public static System.Uri GetNextPageLink (System.Net.Http.HttpRequestMessage request, int pageSize, object instance, System.Func`2[[System.Object],[System.String]] objToSkipTokenValue)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static ODataOptions GetODataOptions (System.Net.Http.HttpRequestMessage request)
 
 	[
 	ExtensionAttribute(),

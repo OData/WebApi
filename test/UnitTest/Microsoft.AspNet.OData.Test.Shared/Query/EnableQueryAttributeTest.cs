@@ -1184,6 +1184,39 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             Assert.Same(expectedQueryOptions, actualQueryOptions);
         }
+
+        [Fact]
+        public void OnActionExecuted_UseCachedODataQueryOptionsDisabled()
+        {
+            var model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+
+            Customer customer = new Customer();
+            SingleResult singleResult = new SingleResult<Customer>(new Customer[] { customer }.AsQueryable());
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext(
+                "http://localhost/",
+                singleResult,
+                CompatibilityOptions.DisableODataQueryOptionsReuse);
+
+            ODataQueryOptions actualQueryOptions = null;
+            ODataQueryOptions expectedQueryOptions = new ODataQueryOptions(
+                new ODataQueryContext(model.Model, typeof(Customer)),
+                actionExecutedContext.Request);
+
+            actionExecutedContext.Request.SetODataQueryOptions(expectedQueryOptions);
+
+            var mockAttribute = new Mock<EnableQueryAttribute>
+            {
+                CallBase = true,
+            };
+            mockAttribute
+                .Setup(x => x.ValidateQuery(It.IsAny<HttpRequestMessage>(), It.IsAny<ODataQueryOptions>()))
+                .Callback<HttpRequestMessage, ODataQueryOptions>((r, o) => { actualQueryOptions = o; });
+
+            mockAttribute.Object.OnActionExecuted(actionExecutedContext);
+
+            Assert.NotSame(expectedQueryOptions, actualQueryOptions);
+        }
 #endif
 
         [Theory]
@@ -1270,7 +1303,10 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
         }
 
-        private static HttpActionExecutedContext GetActionExecutedContext<TResponse>(string uri, TResponse result)
+        private static HttpActionExecutedContext GetActionExecutedContext<TResponse>(
+            string uri,
+            TResponse result,
+            CompatibilityOptions? compatibilityOptions = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.EnableODataDependencyInjectionSupport();
@@ -1278,6 +1314,12 @@ namespace Microsoft.AspNet.OData.Test.Query
             var response = request.CreateResponse<TResponse>(HttpStatusCode.OK, result);
             var actionExecutedContext = new HttpActionExecutedContext { ActionContext = actionContext, Response = response };
             actionContext.ActionDescriptor.Configuration = request.GetConfiguration();
+
+            if (compatibilityOptions.HasValue)
+            {
+                actionContext.ActionDescriptor.Configuration.SetCompatibilityOptions(compatibilityOptions.GetValueOrDefault());
+            }
+
             return actionExecutedContext;
         }
 #endif

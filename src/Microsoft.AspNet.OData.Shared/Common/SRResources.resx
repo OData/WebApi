@@ -1009,4 +1009,7 @@
   <data name="ObjectToDeleteNotFound" xml:space="preserve">
     <value>Object to delete not found.</value>
   </data>
+  <data name="SkipTokenProcessingError" xml:space="preserve">
+    <value>Unable to get property values from the skiptoken value.</value>
+  </data>
 </root>

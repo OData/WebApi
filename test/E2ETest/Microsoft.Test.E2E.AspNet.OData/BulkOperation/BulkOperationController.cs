@@ -32,6 +32,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         /// </summary>
         public static IList<Employee> Employees = null;
 
+        public static IList<NewFriend> NewFriends = null;
+
         public static IList<IEdmStructuredObject> EmployeesTypeless = null;
 
         private List<Friend> Friends = null;
@@ -39,6 +41,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         private void InitEmployees()
         {
             Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age = 33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
+
+            NewFriends = new List<NewFriend>() { new NewFriend { Id = 1, Name = "NewFriendTest1", Age = 33, NewOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 101 }, new NewOrder { Id = 3, Price = 999, Quantity = 2 } } }, new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444, Quantity = 2 } } } };
 
             Employees = new List<Employee>
             {
@@ -50,8 +54,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
                     FavoriteSports = new FavoriteSports{Sport ="Football"},
-                    NewFriends = new List<NewFriend>(){new NewFriend {Id =1, Name ="NewFriendTest1", Age=33, NewOrders= new List<NewOrder>() { new NewOrder {Id=1, Price =101 } } } },
-                    Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
+                    NewFriends = NewFriends.Where(x=>x.Id == 1).ToList(),
+                    Friends = this.Friends.Where(x=>x.Id == 1 || x.Id == 2).ToList()
                 },
                 new Employee()
                 {
@@ -59,8 +63,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     SkillSet=new List<Skill>(),
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
-                    NewFriends = new List<NewFriend>(){ new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444 , Quantity=2 } } } },
-                    Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
+                    NewFriends = NewFriends.Where(x=>x.Id == 2).ToList(),
+                    Friends =  this.Friends.Where(x=>x.Id == 3 || x.Id==4).ToList()
                 },
                 new Employee(){
                     ID=3,Name="Name3",
@@ -249,15 +253,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         [ODataRoute("Employees")]
         [HttpPost]
+        [EnableQuery(MaxExpansionDepth = 5)]
         public ITestActionResult Post([FromBody] Employee employee)
         {
             InitEmployees();
-
             var handler = new EmployeeAPIHandler();
+            handler.DeepInsert(employee, Request.GetModel(), new APIHandlerFactory(Request.GetModel()));
 
-            handler.UpdateLinkedObjects(employee, Request.GetModel());
+            var serviceProvider = Request.GetRequestContainer();
 
-            return Ok(employee);
+            return Created(employee);
         }
 
         [ODataRoute("Employees({key})/Friends")]
@@ -434,52 +439,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory(Request.GetModel()));
 
             var comp = coll.First() as Delta<Company>;
-            //object val;
-
-            //if (comp.TryGetPropertyValue("Name", out val))
-            //{
-            //    if (val.ToString() == "Company02")
-            //    {
-            //        ValidateOverdueOrders2(1, 2, 9);
-            //    }
-            //    else
-            //    {
-            //        ValidateOverdueOrders1(1, 1, 9);
-            //    }
-            //}
 
             return Ok(returncoll);
         }
 
         [ODataRoute("Companies")]
         [HttpPost]
+        [EnableQuery]
         public ITestActionResult Post([FromBody] Company company)
         {
 
             InitCompanies();
             InitEmployees();
 
-            if (company.Id == 4)
-            {
-                AddNewOrder(company);
-            }
-
             var handler = new CompanyAPIHandler();
 
-            handler.UpdateLinkedObjects(company, Request.GetModel());
+            handler.DeepInsert(company, Request.GetModel(), new APIHandlerFactory(Request.GetModel()));
 
-            Companies.Add(company);
-
-            if (company.Id == 4)
-            {
-                ValidateOverdueOrders1(4, 4, 0, 30);
-            }
-            else
-            {
-                ValidateOverdueOrders1(3, 1);
-            }
-
-            return Ok(company);
+            return Created(company);
         }
 
         [ODataRoute("Companies({key})/MyOverdueOrders")]
@@ -498,40 +475,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return Ok(emp.OverdueOrders);
         }
 
-        private static void AddNewOrder(Company company)
-        {
-            var newOrder = new NewOrder { Id = 4, Price = company.OverdueOrders[1].Price, Quantity = company.OverdueOrders[1].Quantity };
-            OverdueOrders.Add(newOrder);
-            company.OverdueOrders[1] = newOrder;
-        }
-
         private void InitEmployees()
         {
             var cntrl = new EmployeesController();
-        }
-
-        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0, int price = 101)
-        {
-            var comp = Companies.FirstOrDefault(x => x.Id == companyId);
-            Assert.NotNull(comp);
-
-            NewOrder order = comp.OverdueOrders.FirstOrDefault(x => x.Id == orderId);
-            Assert.NotNull(order);
-            Assert.Equal(orderId, order.Id);
-            Assert.Equal(price, order.Price);
-            Assert.Equal(quantity, order.Quantity);
-        }
-
-        private void ValidateOverdueOrders2(int companyId, int orderId, int quantity = 0)
-        {
-            var comp = Companies.FirstOrDefault(x => x.Id == companyId);
-            Assert.NotNull(comp);
-
-            MyNewOrder order = comp.MyOverdueOrders.FirstOrDefault(x => x.Id == orderId);
-            Assert.NotNull(order);
-            Assert.Equal(orderId, order.Id);
-            Assert.Equal(444, order.Price);
-            Assert.Equal(quantity, order.Quantity);
         }
     }
 }

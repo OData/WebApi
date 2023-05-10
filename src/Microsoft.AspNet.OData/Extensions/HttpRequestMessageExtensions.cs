@@ -439,6 +439,20 @@ namespace Microsoft.AspNet.OData.Extensions
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
         }
 
+        /// Gets the <see cref="IExpandQueryBuilder"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IExpandQueryBuilder"/> from the request container.</returns>
+        public static IExpandQueryBuilder GetExpandQueryBuilder(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<IExpandQueryBuilder>();
+        }
+
         /// <summary>
         /// Sets the ODataQueryOptions for the request.
         /// </summary>

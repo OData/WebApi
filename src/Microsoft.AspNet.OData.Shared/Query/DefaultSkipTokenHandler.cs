@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -213,6 +214,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
         /// <param name="skipTokenRawValue">The raw string value of the skiptoken query parameter.</param>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable.")]
         private static IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes, ODataQueryContext context, string skipTokenRawValue)
         {
             if (context.ElementClrType == null)
@@ -231,11 +233,11 @@ namespace Microsoft.AspNet.OData.Query
                 directionMap = new Dictionary<string, OrderByDirection>();
             }
 
-            IDictionary<string, object> propertyValuePairs = PopulatePropertyValuePairs(skipTokenRawValue, context);
+            IDictionary<string, Tuple<object, Type>> propertyValuePairs = PopulatePropertyValuePairs(skipTokenRawValue, context);
 
             if (propertyValuePairs.Count == 0)
             {
-                throw Error.InvalidOperation("Unable to get property values from the skiptoken value.");
+                throw Error.InvalidOperation(SRResources.SkipTokenProcessingError);
             }
 
             ExpressionBinderBase binder = new FilterBinder(context.RequestContainer);
@@ -252,32 +254,94 @@ namespace Microsoft.AspNet.OData.Query
             Expression lastEquality = null;
             bool firstProperty = true;
 
-            foreach (KeyValuePair<string, object> item in propertyValuePairs)
+            foreach (KeyValuePair<string, Tuple<object, Type>> item in propertyValuePairs)
             {
                 string key = item.Key;
                 MemberExpression property = Expression.Property(param, key);
-                object value = item.Value;
+
+                object value = item.Value.Item1;
+
+                Type propertyType = item.Value.Item2 ?? value.GetType();
+                bool propertyIsNullable = TypeHelper.IsNullable(property.Type);
 
                 Expression compare = null;
-                ODataEnumValue enumValue = value as ODataEnumValue;
-                if (enumValue != null)
+                if (value is ODataEnumValue enumValue)
                 {
                     value = enumValue.Value;
+                    propertyType = value.GetType();
+                }
+                else if (value is ODataNullValue)
+                {
+                    value = null;
+                    propertyType = property.Type;
                 }
 
-                Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
+                Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(propertyType, value) : Expression.Constant(value);
+
                 if (directionMap.ContainsKey(key) && directionMap[key] == OrderByDirection.Descending)
                 {
-                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true);
+                    // Prop < Value
+                    compare = binder.CreateBinaryExpression(
+                        binaryOperator: BinaryOperatorKind.LessThan,
+                        left: property,
+                        right: constant,
+                        liftToNull: !propertyIsNullable);
+
+                    if (propertyIsNullable && value != null)
+                    {
+                        // Prop == null
+
+                        // We only do this when value is NOT null since
+                        // ((Prop1 < null) OR (Prop1 == null)) OR ((Prop1 == null) AND (Prop2 > Value2))
+                        // doesn't make logical sense
+                        Expression condition = binder.CreateBinaryExpression(
+                            binaryOperator: BinaryOperatorKind.Equal,
+                            left: property,
+                            right: parameterizeConstant ? LinqParameterContainer.Parameterize(property.Type, null) : Expression.Constant(null),
+                            liftToNull: false);
+
+                        // (Prop < Value) OR (Prop == null)
+                        compare = Expression.OrElse(compare, condition);
+                    }
                 }
                 else
                 {
-                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
+                    if (value == null)
+                    {
+                        // Prop != null
+
+                        // When value is null in the ascending order scenario,
+                        // we are aiming for the following expression:
+                        // (Prop1 != null) OR ((Prop1 == null) AND (Prop2 > Value2)) ...
+                        compare = binder.CreateBinaryExpression(
+                            binaryOperator: BinaryOperatorKind.NotEqual,
+                            left: property,
+                            right: constant,
+                            liftToNull: false);
+                    }
+                    else
+                    {
+                        // Prop > Value
+
+                        // When value is NOT null in the ascending order scenario,
+                        // we are aiming for the following expression:
+                        // (Prop1 > Value1) OR ((Prop1 == Value1) AND (Prop2 > Value2)) ...
+
+                        compare = binder.CreateBinaryExpression(
+                            binaryOperator: BinaryOperatorKind.GreaterThan,
+                            left: property,
+                            right: constant,
+                            liftToNull: !propertyIsNullable);
+                    }
                 }
 
                 if (firstProperty)
                 {
-                    lastEquality = binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true);
+                    lastEquality = binder.CreateBinaryExpression(
+                        binaryOperator: BinaryOperatorKind.Equal,
+                        left: property,
+                        right: constant,
+                        liftToNull: !propertyIsNullable);
                     where = compare;
                     firstProperty = false;
                 }
@@ -285,7 +349,12 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     Expression condition = Expression.AndAlso(lastEquality, compare);
                     where = Expression.OrElse(where, condition);
-                    lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
+                    lastEquality = Expression.AndAlso(lastEquality,
+                        binder.CreateBinaryExpression(
+                            binaryOperator: BinaryOperatorKind.Equal,
+                            left: property,
+                            right: constant,
+                            liftToNull: !propertyIsNullable));
                 }
             }
 
@@ -299,11 +368,11 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="value">The skiptoken string value.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
         /// <returns>Dictionary with property name and property value in the skiptoken value.</returns>
-        private static IDictionary<string, object> PopulatePropertyValuePairs(string value, ODataQueryContext context)
+        private static IDictionary<string, Tuple<object, Type>> PopulatePropertyValuePairs(string value, ODataQueryContext context)
         {
             Contract.Assert(context != null);
 
-            IDictionary<string, object> propertyValuePairs = new Dictionary<string, object>();
+            IDictionary<string, Tuple<object, Type>> propertyValuePairs = new Dictionary<string, Tuple<object, Type>>();
             IList<string> keyValuesPairs = ParseValue(value, CommaDelimiter);
 
             IEdmStructuredType type = context.ElementType as IEdmStructuredType;
@@ -318,13 +387,15 @@ namespace Microsoft.AspNet.OData.Query
 
                     IEdmTypeReference propertyType = null;
                     IEdmProperty property = type.FindProperty(pieces[0]);
+                    Type propertyClrType = null;
                     if (property != null)
                     {
                         propertyType = property.Type;
+                        propertyClrType = EdmLibHelpers.GetClrType(propertyType, context.Model);
                     }
 
                     propValue = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, context.Model, propertyType);
-                    propertyValuePairs.Add(pieces[0], propValue);
+                    propertyValuePairs.Add(pieces[0], Tuple.Create(propValue, propertyClrType));
                 }
                 else
                 {

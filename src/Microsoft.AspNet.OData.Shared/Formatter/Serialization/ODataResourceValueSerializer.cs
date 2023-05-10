@@ -137,26 +137,30 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else
             {
-                HashSet<string> structuralPropertyNames = new HashSet<string>();
-
-                foreach(IEdmStructuralProperty structuralProperty in expectedType.DeclaredStructuralProperties())
+                // If a type is an org.OData.Core.V1.DataModificationExceptionType type, 
+                // then we include all it's properties and not just the structural properties.
+                if (expectedType.Definition.FullTypeName().Equals("Org.OData.Core.V1.DataModificationExceptionType"))
                 {
-                    structuralPropertyNames.Add(structuralProperty.Name);
-                }
-
-                foreach (PropertyInfo property in graph.GetType().GetProperties())
-                {
-                    if (structuralPropertyNames.Contains(property.Name))
+                    foreach (PropertyInfo property in graph.GetType().GetProperties())
                     {
-                        object propertyValue = property.GetValue(graph);
-                        IEdmStructuredTypeReference expectedPropType = null;
+                        SetPropertyValueInternal(property, graph, properties, writeContext);
+                    }
+                }
+                else
+                {
+                    HashSet<string> structuralPropertyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                        if (propertyValue == null)
+                    foreach (IEdmStructuralProperty structuralProperty in expectedType.DeclaredStructuralProperties())
+                    {
+                        structuralPropertyNames.Add(structuralProperty.Name);
+                    }
+
+                    foreach (PropertyInfo property in graph.GetType().GetProperties())
+                    {
+                        if (structuralPropertyNames.Contains(property.Name))
                         {
-                            expectedPropType = writeContext.GetEdmType(propertyValue, property.PropertyType) as IEdmStructuredTypeReference;
+                            SetPropertyValueInternal(property, graph, properties, writeContext);
                         }
-
-                        SetPropertyValue(writeContext, properties, expectedPropType, property.Name, propertyValue);
                     }
                 }
             }            
@@ -186,6 +190,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
             }
+        }
+
+        private void SetPropertyValueInternal(PropertyInfo property, object graph, List<ODataProperty> properties, ODataSerializerContext writeContext)
+        {
+            object propertyValue = property.GetValue(graph);
+            IEdmStructuredTypeReference expectedPropType = null;
+
+            if (propertyValue == null)
+            {
+                expectedPropType = writeContext.GetEdmType(propertyValue, property.PropertyType) as IEdmStructuredTypeReference;
+            }
+
+            SetPropertyValue(writeContext, properties, expectedPropType, property.Name, propertyValue);
         }
 
         private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties, IEdmStructuredTypeReference expectedType, string propertyName, object propertyValue)

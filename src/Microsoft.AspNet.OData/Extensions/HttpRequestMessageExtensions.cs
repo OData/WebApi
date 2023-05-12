@@ -36,6 +36,7 @@ namespace Microsoft.AspNet.OData.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpRequestMessageExtensions
     {
+        private const string ODataQueryOptionsKey = "Microsoft.AspNet.OData.ODataQueryOptions";
         private const string PropertiesKey = "Microsoft.AspNet.OData.Properties";
         private const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
         private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
@@ -240,6 +241,17 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Gets the ODataQueryOptions for the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The query options.</returns>
+        public static ODataQueryOptions GetODataQueryOptions(this HttpRequestMessage request)
+        {
+            request.Properties.TryGetValue(ODataQueryOptionsKey, out object untypedQueryOptions);
+            return untypedQueryOptions as ODataQueryOptions;
+        }
+
+        /// <summary>
         /// Gets the dependency injection container for the OData request.
         /// </summary>
         /// <param name="request">The request.</param>
@@ -416,6 +428,32 @@ namespace Microsoft.AspNet.OData.Extensions
 
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
         }
+
+        /// <summary>
+        /// Gets the <see cref="IExpandQueryBuilder"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IExpandQueryBuilder"/> from the request container.</returns>
+        public static IExpandQueryBuilder GetExpandQueryBuilder(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<IExpandQueryBuilder>();
+        }
+
+        /// <summary>
+        /// Sets the ODataQueryOptions for the request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="queryOptions">The query options.</param>
+        public static void SetODataQueryOptions(this HttpRequestMessage request, ODataQueryOptions queryOptions)
+        {
+            request.Properties[ODataQueryOptionsKey] = queryOptions;
+        }
+
         /// <summary>
         /// Checks whether the request is a POST targeted at a resource path ending in /$query.
         /// </summary>

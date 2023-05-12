@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.OData
                         if (Int32.TryParse(value, out top))
                         {
                             // We decrease top by the pageSize because that's the number of results we're returning in the current page. If the $top query option's value is less than or equal to the page size, there is no next page.
-                            if ((options & CompatibilityOptions.AllowNextLinkWithNonPositiveTopValue) != 0 || top > pageSize)
+                            if (options.HasOption(CompatibilityOptions.AllowNextLinkWithNonPositiveTopValue) || top > pageSize)
                             {
                                 value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                             }

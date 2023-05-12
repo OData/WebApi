@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.AspNet.OData
 {
@@ -33,6 +34,29 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Throw exception after logging ModelState error.
         /// </summary>
-        ThrowExceptionAfterLoggingModelStateError = 0x4
+        ThrowExceptionAfterLoggingModelStateError = 0x4,
+
+        /// <summary>
+        /// Disable the reuse of the ODataQueryOptions instance generated during model binding in EnableQueryAttribute.
+        /// </summary>
+        DisableODataQueryOptionsReuse = 0x8,
+    }
+
+    /// <summary>
+    /// Extension methods for <see cref="CompatibilityOptions"/>.
+    /// </summary>
+    public static class CompatibilityOptionsExtensions
+    {
+        /// <summary>
+        /// Determines whether the provided option is set.
+        /// </summary>
+        /// <param name="options">The set options.</param>
+        /// <param name="option">The option to check.</param>
+        /// <returns>True if the option is set, false otherwise.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasOption(this CompatibilityOptions options, CompatibilityOptions option)
+        {
+            return (options & option) == option;
+        }
     }
 }

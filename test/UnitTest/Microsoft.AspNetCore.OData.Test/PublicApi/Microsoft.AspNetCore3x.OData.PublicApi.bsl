@@ -4,6 +4,7 @@ FlagsAttribute(),
 public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
 	DisableCaseInsensitiveRequestPropertyBinding = 2
+	DisableODataQueryOptionsReuse = 8
 	None = 0
 	ThrowExceptionAfterLoggingModelStateError = 4
 }
@@ -149,12 +150,12 @@ public abstract class Microsoft.AspNet.OData.EdmStructuredObject : Delta, IDynam
 public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandler {
 	protected ODataAPIHandler`1 ()
 
+	public virtual void DeepInsert (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
 	public abstract IODataAPIHandler GetNestedHandler (TStructuralType parent, string navigationPropertyName)
 	public abstract ODataAPIResponseStatus TryAddRelatedObject (TStructuralType resource, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& createdObject, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
 	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
-	internal virtual void UpdateLinkedObjects (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model)
 }
 
 public abstract class Microsoft.AspNet.OData.ODataAPIHandlerFactory {
@@ -235,6 +236,16 @@ public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObj
 
 	System.Type ExpectedClrType  { public abstract get; }
 	System.Type StructuredType  { public abstract get; }
+}
+
+[
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.CompatibilityOptionsExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static bool HasOption (CompatibilityOptions options, CompatibilityOptions option)
 }
 
 [
@@ -2078,6 +2089,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static IExpandQueryBuilder GetExpandQueryBuilder (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static Microsoft.OData.Edm.IEdmModel GetModel (Microsoft.AspNetCore.Http.HttpRequest request)
 
 	[
@@ -2826,6 +2842,10 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 	Disabled = 2
 }
 
+public interface Microsoft.AspNet.OData.Query.IExpandQueryBuilder {
+	string GenerateExpandQueryParameter (object value, Microsoft.OData.Edm.IEdmModel model)
+}
+
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
 	bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
 	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
@@ -2915,6 +2935,12 @@ public class Microsoft.AspNet.OData.Query.ExpandConfiguration {
 
 	SelectExpandType ExpandType  { public get; public set; }
 	int MaxDepth  { public get; public set; }
+}
+
+public class Microsoft.AspNet.OData.Query.ExpandQueryBuilder : IExpandQueryBuilder {
+	public ExpandQueryBuilder ()
+
+	public virtual string GenerateExpandQueryParameter (object value, Microsoft.OData.Edm.IEdmModel model)
 }
 
 public class Microsoft.AspNet.OData.Query.FilterQueryOption {

@@ -90,6 +90,9 @@ namespace Microsoft.AspNet.OData
                 ODataQueryOptions parameterValue = createODataQueryOptions(entitySetContext, request);
                 SetValue(actionContext, parameterValue);
 
+                // Make sure the instance is saved on the request so it can be used later instead of reparsing.
+                request.SetODataQueryOptions(parameterValue);
+
                 return TaskHelpers.Completed();
             }
 

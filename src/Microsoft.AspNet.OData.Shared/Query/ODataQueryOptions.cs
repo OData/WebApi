@@ -531,7 +531,7 @@ namespace Microsoft.AspNet.OData.Query
         public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
         {
             _ignoreQueryOptions = ignoreQueryOptions;
-            return ApplyTo(entity, new ODataQuerySettings());
+            return ApplyTo(entity, querySettings);
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 // We add this setting via CompatibilityOptions
                 CompatibilityOptions options = webApiRequestMessage != null ? webApiRequestMessage.Configuration.GetCompatibilityOptions() : CompatibilityOptions.None;
-                DisableCaseInsensitiveRequestPropertyBinding = options.HasFlag(CompatibilityOptions.DisableCaseInsensitiveRequestPropertyBinding) ? true : false;
+                DisableCaseInsensitiveRequestPropertyBinding = options.HasOption(CompatibilityOptions.DisableCaseInsensitiveRequestPropertyBinding);
             }
         }
 

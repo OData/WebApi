@@ -4,6 +4,7 @@ FlagsAttribute(),
 public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
 	DisableCaseInsensitiveRequestPropertyBinding = 2
+	DisableODataQueryOptionsReuse = 8
 	None = 0
 	ThrowExceptionAfterLoggingModelStateError = 4
 }
@@ -231,6 +232,16 @@ public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObj
 
 	System.Type ExpectedClrType  { public abstract get; }
 	System.Type StructuredType  { public abstract get; }
+}
+
+[
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.CompatibilityOptionsExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static bool HasOption (CompatibilityOptions options, CompatibilityOptions option)
 }
 
 [

@@ -50,6 +50,9 @@ namespace Microsoft.AspNet.OData.Builder
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
+            // Add navigation property link builders
+            AddNavigationPropertyLinkBuilders(builder, edmMap, navigationSources);
+
             // Add the core and validation vocabulary annotations
             model.AddCoreAndValidationVocabularyAnnotations(navigationSources, edmMap);
 
@@ -133,30 +136,31 @@ namespace Microsoft.AspNet.OData.Builder
                 model.SetAnnotationValue(navigationSource, navigationSourceAndAnnotation.Url);
                 model.SetNavigationSourceLinkBuilder(navigationSource, navigationSourceAndAnnotation.LinkBuilder);
 
-                AddNavigationBindings(edmMap, navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
-                    edmNavigationSourceMap);
+                AddNavigationBindings(edmMap, navigationSourceAndAnnotation.Configuration, navigationSource, edmNavigationSourceMap);
             }
 
             return edmNavigationSourceMap;
         }
 
-        private static void AddNavigationBindings(EdmTypeMap edmMap,
+        private static void AddNavigationBindings(
+            EdmTypeMap edmMap,
             NavigationSourceConfiguration navigationSourceConfiguration,
             EdmNavigationSource navigationSource,
-            NavigationSourceLinkBuilderAnnotation linkBuilder,
             Dictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
-            foreach (var binding in navigationSourceConfiguration.Bindings)
+            foreach (NavigationPropertyBindingConfiguration binding in navigationSourceConfiguration.Bindings)
             {
                 NavigationPropertyConfiguration navigationProperty = binding.NavigationProperty;
                 bool isContained = navigationProperty.ContainsTarget;
 
                 IEdmType edmType = edmMap.EdmTypes[navigationProperty.DeclaringType.ClrType];
-                IEdmStructuredType structuraType = edmType as IEdmStructuredType;
-                IEdmNavigationProperty edmNavigationProperty = structuraType.NavigationProperties()
+                IEdmStructuredType structuralType = edmType as IEdmStructuredType;
+                IEdmNavigationProperty edmNavigationProperty = structuralType.NavigationProperties()
                     .Single(np => np.Name == navigationProperty.Name);
 
                 string bindingPath = ConvertBindingPath(edmMap, binding);
+                // This check for whether navigation property is contained is possibly redundant
+                // Unless contained navigation properties can have navigation property bindings...
                 if (!isContained)
                 {
                     // calculate the binding path
@@ -165,11 +169,42 @@ namespace Microsoft.AspNet.OData.Builder
                         edmNavigationSourceMap[binding.TargetNavigationSource.Name],
                         new EdmPathExpression(bindingPath));
                 }
+            }
+        }
 
-                NavigationLinkBuilder linkBuilderFunc = navigationSourceConfiguration.GetNavigationPropertyLink(navigationProperty);
-                if (linkBuilderFunc != null)
+        /// <summary>
+        /// Adds navigation property link builders
+        /// </summary>
+        /// <param name="modelBuilder">The model builder.</param>
+        /// <param name="edmMap">Edm type mappings.</param>
+        /// <param name="navigationSourceAndAnnotations">The navigation source annotations.</param>
+        private static void AddNavigationPropertyLinkBuilders(
+            ODataModelBuilder modelBuilder,
+            EdmTypeMap edmMap,
+            IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
+        {
+            foreach (NavigationSourceAndAnnotations navigationSourceAndAnnotation in navigationSourceAndAnnotations)
+            {
+                NavigationSourceConfiguration navigationSourceConfiguration = navigationSourceAndAnnotation.Configuration;
+                NavigationSourceLinkBuilderAnnotation linkBuilder = navigationSourceAndAnnotation.LinkBuilder;
+
+                IEnumerable<EntityTypeConfiguration> derivedEntityTypeConfigurations = modelBuilder.DerivedTypes(navigationSourceConfiguration.EntityType);
+
+                foreach (EntityTypeConfiguration entityTypeConfiguration in new[] { navigationSourceConfiguration.EntityType }.Concat(derivedEntityTypeConfigurations))
                 {
-                    linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
+                    foreach (NavigationPropertyConfiguration navigationProperty in entityTypeConfiguration.NavigationProperties)
+                    {
+                        IEdmType edmType = edmMap.EdmTypes[navigationProperty.DeclaringType.ClrType];
+                        IEdmStructuredType structuralType = edmType as IEdmStructuredType;
+                        IEdmNavigationProperty edmNavigationProperty = structuralType.NavigationProperties()
+                            .First(np => np.Name == navigationProperty.Name);
+
+                        NavigationLinkBuilder linkBuilderFunc = navigationSourceConfiguration.GetNavigationPropertyLink(navigationProperty);
+                        if (linkBuilderFunc != null)
+                        {
+                            linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
+                        }
+                    }
                 }
             }
         }

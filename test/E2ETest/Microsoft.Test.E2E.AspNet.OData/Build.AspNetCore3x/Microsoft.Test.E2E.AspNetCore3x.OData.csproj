@@ -1559,6 +1559,9 @@
     <Compile Include="..\ServerSidePaging\ServerSidePagingDataModel.cs">
       <Link>ServerSidePaging\ServerSidePagingDataModel.cs</Link>
     </Compile>
+    <Compile Include="..\ServerSidePaging\ServerSidePagingDataSource.cs">
+      <Link>ServerSidePaging\ServerSidePagingDataSource.cs</Link>
+    </Compile>
     <Compile Include="..\ServerSidePaging\ServerSidePagingTests.cs">
       <Link>ServerSidePaging\ServerSidePagingTests.cs</Link>
     </Compile>

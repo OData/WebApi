@@ -10,8 +10,8 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
-    /// This class is used in internal as a helper class to build the Edm model.
-    /// This class wrappers a relationship between Edm type and the CLR type configuration.
+    /// This class is used internally as a helper class to build the Edm model.
+    /// This class wraps a relationship between Edm type and the CLR type configuration.
     /// This relationship is used to builder the navigation property and the corresponding links.
     /// </summary>
     internal class NavigationSourceAndAnnotations

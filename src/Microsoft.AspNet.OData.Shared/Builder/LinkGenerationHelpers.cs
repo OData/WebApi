@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder.Conventions;
@@ -81,7 +82,16 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.Argument("resourceContext", SRResources.UrlHelperNull, typeof(ResourceContext).Name);
             }
 
-            IList<ODataPathSegment> navigationPathSegments = resourceContext.GenerateBaseODataPathSegments();
+            IList<ODataPathSegment> navigationPathSegments;
+            if (resourceContext.NavigationSource is IEdmContainedEntitySet &&
+                resourceContext.NavigationSource != resourceContext.SerializerContext.Path.NavigationSource)
+            {
+                navigationPathSegments = resourceContext.GenerateContainmentODataPathSegments();
+            }
+            else
+            {
+                navigationPathSegments = resourceContext.GenerateBaseODataPathSegments();
+            }
 
             if (includeCast)
             {
@@ -514,8 +524,7 @@ namespace Microsoft.AspNet.OData.Builder
                 // the case.
                 odataPath.Clear();
 
-                IEdmContainedEntitySet containmnent = navigationSource as IEdmContainedEntitySet;
-                if (containmnent != null)
+                if (navigationSource is IEdmContainedEntitySet)
                 {
                     EdmEntityContainer container = new EdmEntityContainer("NS", "Default");
                     IEdmEntitySet entitySet = new EdmEntitySet(container, navigationSource.Name,
@@ -549,6 +558,108 @@ namespace Microsoft.AspNet.OData.Builder
             GenerateBaseODataPathSegments(feedContext.InternalRequest.Context.Path,
                 feedContext.EntitySetBase,
                 odataPath);
+        }
+
+        private static IList<ODataPathSegment> GenerateContainmentODataPathSegments(this ResourceContext resourceContext)
+        {
+            List<ODataPathSegment> navigationPathSegments = new List<ODataPathSegment>();
+            ResourceContext currentResourceContext = resourceContext;
+
+            // We loop till the base of the $expand expression then use GenerateBaseODataPathSegments to generate the base path segments
+            // For instance, given $expand=Tabs($expand=Items($expand=Notes($expand=Tips))), we loop until we get to Tabs at the base
+            while (currentResourceContext != null && currentResourceContext.NavigationSource != resourceContext.InternalRequest.Context.Path.NavigationSource)
+            {
+                if (currentResourceContext.NavigationSource is IEdmContainedEntitySet containedEntitySet)
+                {
+                    // Type-cast segment for the expanded resource that is passed into the method is added by the caller
+                    if (currentResourceContext != resourceContext && currentResourceContext.StructuredType != containedEntitySet.EntityType())
+                    {
+                        navigationPathSegments.Add(new TypeSegment(currentResourceContext.StructuredType, currentResourceContext.NavigationSource));
+                    }
+
+                    KeySegment keySegment = new KeySegment(
+                        ConventionsHelpers.GetEntityKey(currentResourceContext),
+                        currentResourceContext.StructuredType as IEdmEntityType,
+                        navigationSource: currentResourceContext.NavigationSource);
+                    navigationPathSegments.Add(keySegment);
+
+                    NavigationPropertySegment navPropertySegment = new NavigationPropertySegment(
+                        containedEntitySet.NavigationProperty,
+                        containedEntitySet.ParentNavigationSource);
+                    navigationPathSegments.Add(navPropertySegment);
+                }
+                else if (currentResourceContext.NavigationSource is IEdmEntitySet entitySet)
+                {
+                    // We will get here if there's a non-contained entity set on the $expand expression
+                    if (currentResourceContext.StructuredType != entitySet.EntityType())
+                    {
+                        navigationPathSegments.Add(new TypeSegment(currentResourceContext.StructuredType, currentResourceContext.NavigationSource));
+                    }
+
+                    KeySegment keySegment = new KeySegment(
+                        ConventionsHelpers.GetEntityKey(currentResourceContext),
+                        currentResourceContext.StructuredType as IEdmEntityType,
+                        currentResourceContext.NavigationSource);
+                    navigationPathSegments.Add(keySegment);
+
+                    EntitySetSegment entitySetSegment = new EntitySetSegment(entitySet);
+                    navigationPathSegments.Add(entitySetSegment);
+
+                    // Reverse the list such that the segments are in the right order
+                    navigationPathSegments.Reverse();
+                    return navigationPathSegments;
+                }
+                else if (currentResourceContext.NavigationSource is IEdmSingleton singleton)
+                {
+                    // We will get here if there's a singleton on the $expand expression
+                    if (currentResourceContext.StructuredType != singleton.EntityType())
+                    {
+                        navigationPathSegments.Add(new TypeSegment(currentResourceContext.StructuredType, currentResourceContext.NavigationSource));
+                    }
+
+                    SingletonSegment singletonSegment = new SingletonSegment(singleton);
+                    navigationPathSegments.Add(singletonSegment);
+
+                    // Reverse the list such that the segments are in the right order
+                    navigationPathSegments.Reverse();
+                    return navigationPathSegments;
+                }
+
+                currentResourceContext = currentResourceContext.SerializerContext.ExpandedResource;
+            }
+
+            Debug.Assert(currentResourceContext != null, "currentResourceContext != null");
+            // Once we are at the base of the $expand expression, we call GenerateBaseODataPathSegments to generate the base path segments
+            IList<ODataPathSegment> pathSegments = currentResourceContext.GenerateBaseODataPathSegments();
+
+            Debug.Assert(pathSegments.Count > 0, "pathSegments.Count > 0");
+
+            ODataPathSegment lastNonKeySegment;
+
+            if (pathSegments.Count == 1)
+            {
+                lastNonKeySegment = pathSegments[0];
+                Debug.Assert(lastNonKeySegment is SingletonSegment, "lastNonKeySegment is SingletonSegment");
+            }
+            else
+            {
+                Debug.Assert(pathSegments[pathSegments.Count - 1] is KeySegment, "pathSegments[pathSegments.Count - 1] is KeySegment");
+                // 2nd last segment would be NavigationPathSegment or EntitySetSegment
+                lastNonKeySegment = pathSegments[pathSegments.Count - 2];
+            }
+
+            if (currentResourceContext.StructuredType != lastNonKeySegment.EdmType.AsElementType())
+            {
+                pathSegments.Add(new TypeSegment(currentResourceContext.StructuredType, currentResourceContext.NavigationSource));
+            }
+
+            // Add the segments from the $expand expression in reverse order
+            for (int i = navigationPathSegments.Count - 1; i >= 0; i--)
+            {
+                pathSegments.Add(navigationPathSegments[i]);
+            }
+
+            return pathSegments;
         }
     }
 }

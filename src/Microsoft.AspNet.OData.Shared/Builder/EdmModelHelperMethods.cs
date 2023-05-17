@@ -50,9 +50,6 @@ namespace Microsoft.AspNet.OData.Builder
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
-            // Add navigation property link builders
-            AddNavigationPropertyLinkBuilders(builder, edmMap, navigationSources);
-
             // Add the core and validation vocabulary annotations
             model.AddCoreAndValidationVocabularyAnnotations(navigationSources, edmMap);
 
@@ -100,7 +97,6 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 NavigationSource = e.Item1,
                 Configuration = e.Item2,
-                LinkBuilder = new NavigationSourceLinkBuilderAnnotation(e.Item2),
                 Url = new NavigationSourceUrlAnnotation { Url = e.Item2.GetUrl() }
             }).ToArray();
         }
@@ -118,7 +114,6 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 NavigationSource = e.Item1,
                 Configuration = e.Item2,
-                LinkBuilder = new NavigationSourceLinkBuilderAnnotation(e.Item2),
                 Url = new NavigationSourceUrlAnnotation { Url = e.Item2.GetUrl() }
             }).ToArray();
         }
@@ -134,7 +129,6 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 EdmNavigationSource navigationSource = navigationSourceAndAnnotation.NavigationSource;
                 model.SetAnnotationValue(navigationSource, navigationSourceAndAnnotation.Url);
-                model.SetNavigationSourceLinkBuilder(navigationSource, navigationSourceAndAnnotation.LinkBuilder);
 
                 AddNavigationBindings(edmMap, navigationSourceAndAnnotation.Configuration, navigationSource, edmNavigationSourceMap);
             }
@@ -168,43 +162,6 @@ namespace Microsoft.AspNet.OData.Builder
                         edmNavigationProperty,
                         edmNavigationSourceMap[binding.TargetNavigationSource.Name],
                         new EdmPathExpression(bindingPath));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds navigation property link builders
-        /// </summary>
-        /// <param name="modelBuilder">The model builder.</param>
-        /// <param name="edmMap">Edm type mappings.</param>
-        /// <param name="navigationSourceAndAnnotations">The navigation source annotations.</param>
-        private static void AddNavigationPropertyLinkBuilders(
-            ODataModelBuilder modelBuilder,
-            EdmTypeMap edmMap,
-            IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
-        {
-            foreach (NavigationSourceAndAnnotations navigationSourceAndAnnotation in navigationSourceAndAnnotations)
-            {
-                NavigationSourceConfiguration navigationSourceConfiguration = navigationSourceAndAnnotation.Configuration;
-                NavigationSourceLinkBuilderAnnotation linkBuilder = navigationSourceAndAnnotation.LinkBuilder;
-
-                IEnumerable<EntityTypeConfiguration> derivedEntityTypeConfigurations = modelBuilder.DerivedTypes(navigationSourceConfiguration.EntityType);
-
-                foreach (EntityTypeConfiguration entityTypeConfiguration in new[] { navigationSourceConfiguration.EntityType }.Concat(derivedEntityTypeConfigurations))
-                {
-                    foreach (NavigationPropertyConfiguration navigationProperty in entityTypeConfiguration.NavigationProperties)
-                    {
-                        IEdmType edmType = edmMap.EdmTypes[navigationProperty.DeclaringType.ClrType];
-                        IEdmStructuredType structuralType = edmType as IEdmStructuredType;
-                        IEdmNavigationProperty edmNavigationProperty = structuralType.NavigationProperties()
-                            .First(np => np.Name == navigationProperty.Name);
-
-                        NavigationLinkBuilder linkBuilderFunc = navigationSourceConfiguration.GetNavigationPropertyLink(navigationProperty);
-                        if (linkBuilderFunc != null)
-                        {
-                            linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
-                        }
-                    }
                 }
             }
         }

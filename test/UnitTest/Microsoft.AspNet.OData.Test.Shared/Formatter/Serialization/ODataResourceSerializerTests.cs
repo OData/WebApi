@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 #if NETFX // Only AspNet version has UrlHelper
@@ -2047,6 +2048,193 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.Null(annotation.TypeName);
         }
 
+        [Fact]
+        public void AppendDynamicProperties_Explicit()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            IEdmEntityType customer = (IEdmEntityType)model.FindDeclaredType("Default.Customer").AsActualType();
+            model.SetAnnotationValue(customer, new DynamicPropertyDictionaryAnnotation(typeof(Customer).GetProperty("DynamicProperties")));
+
+            ODataResource entry = new ODataResource
+            {
+                Properties = new List<ODataProperty>(),
+                TypeName = customer.FullTypeName(),
+            };
+
+            var selectExpandNode = new SelectExpandNode
+            {
+                SelectAllDynamicProperties = false,
+                SelectedDynamicProperties = new HashSet<string>
+                {
+                    "dyn2",
+                },
+            };
+
+            var instance = new Customer
+            {
+                DynamicProperties =
+                {
+                    { "dyn1", "value1" },
+                    { "dyn2", "value2" },
+                },
+            };
+
+            var resourceContext = new ResourceContext
+            {
+                EdmModel = model,
+                EdmObject = new TypedEdmEntityObject(instance, (IEdmEntityTypeReference)customer.ToEdmTypeReference(isNullable: false), model),
+                StructuredType = customer,
+            };
+
+            // Act
+            _serializer.AppendDynamicProperties(entry, selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.NotNull(entry.Properties);
+            Assert.Single(entry.Properties);
+            Assert.Contains(entry.Properties, p => p.Name == "dyn2");
+        }
+
+        [Fact]
+        public void AppendDynamicProperties_None()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            IEdmEntityType customer = (IEdmEntityType)model.FindDeclaredType("Default.Customer").AsActualType();
+            model.SetAnnotationValue(customer, new DynamicPropertyDictionaryAnnotation(typeof(Customer).GetProperty("DynamicProperties")));
+
+            ODataResource entry = new ODataResource
+            {
+                Properties = new List<ODataProperty>(),
+                TypeName = customer.FullTypeName(),
+            };
+
+            var selectExpandNode = new SelectExpandNode
+            {
+                SelectAllDynamicProperties = false,
+                SelectedDynamicProperties = null,
+            };
+
+            var instance = new Customer
+            {
+                DynamicProperties =
+                {
+                    { "dyn1", "value1" },
+                    { "dyn2", "value2" },
+                },
+            };
+
+            var resourceContext = new ResourceContext
+            {
+                EdmModel = model,
+                EdmObject = new TypedEdmEntityObject(instance, (IEdmEntityTypeReference)customer.ToEdmTypeReference(isNullable: false), model),
+                StructuredType = customer,
+            };
+
+            // Act
+            _serializer.AppendDynamicProperties(entry, selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.NotNull(entry.Properties);
+            Assert.Empty(entry.Properties);
+        }
+
+        [Fact]
+        public void AppendDynamicProperties_Wildcard()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            IEdmEntityType customer = (IEdmEntityType)model.FindDeclaredType("Default.Customer").AsActualType();
+            model.SetAnnotationValue(customer, new DynamicPropertyDictionaryAnnotation(typeof(Customer).GetProperty("DynamicProperties")));
+
+            ODataResource entry = new ODataResource
+            {
+                Properties = new List<ODataProperty>(),
+                TypeName = customer.FullTypeName(),
+            };
+
+            var selectExpandNode = new SelectExpandNode
+            {
+                SelectAllDynamicProperties = true,
+                SelectedDynamicProperties = null,
+            };
+
+            var instance = new Customer
+            {
+                DynamicProperties =
+                {
+                    { "dyn1", "value1" },
+                    { "dyn2", "value2" },
+                },
+            };
+
+            var resourceContext = new ResourceContext
+            {
+                EdmModel = model,
+                EdmObject = new TypedEdmEntityObject(instance, (IEdmEntityTypeReference)customer.ToEdmTypeReference(isNullable: false), model),
+                StructuredType = customer,
+            };
+
+            // Act
+            _serializer.AppendDynamicProperties(entry, selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.NotNull(entry.Properties);
+            Assert.Equal(2, entry.Properties.Count());
+            Assert.Contains(entry.Properties, p => p.Name == "dyn1");
+            Assert.Contains(entry.Properties, p => p.Name == "dyn2");
+        }
+
+        [Fact]
+        public void AppendDynamicProperties_WildcardAndExplicit()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+            IEdmEntityType customer = (IEdmEntityType)model.FindDeclaredType("Default.Customer").AsActualType();
+            model.SetAnnotationValue(customer, new DynamicPropertyDictionaryAnnotation(typeof(Customer).GetProperty("DynamicProperties")));
+
+            ODataResource entry = new ODataResource
+            {
+                Properties = new List<ODataProperty>(),
+                TypeName = customer.FullTypeName(),
+            };
+
+            var selectExpandNode = new SelectExpandNode
+            {
+                SelectAllDynamicProperties = true,
+                SelectedDynamicProperties = new HashSet<string>
+                {
+                    "dyn2",
+                },
+            };
+
+            var instance = new Customer
+            {
+                DynamicProperties =
+                {
+                    { "dyn1", "value1" },
+                    { "dyn2", "value2" },
+                },
+            };
+
+            var resourceContext = new ResourceContext
+            {
+                EdmModel = model,
+                EdmObject = new TypedEdmEntityObject(instance, (IEdmEntityTypeReference)customer.ToEdmTypeReference(isNullable: false), model),
+                StructuredType = customer,
+            };
+
+            // Act
+            _serializer.AppendDynamicProperties(entry, selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.NotNull(entry.Properties);
+            Assert.Equal(2, entry.Properties.Count());
+            Assert.Contains(entry.Properties, p => p.Name == "dyn1");
+            Assert.Contains(entry.Properties, p => p.Name == "dyn2");
+        }
+
         [Theory]
         [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.FullMetadata, false)]
         [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.FullMetadata, false)]
@@ -2768,9 +2956,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         {
             public Customer()
             {
+                DynamicProperties = new Dictionary<string, object>();
                 this.Orders = new List<Order>();
                 InstanceAnnotations = new ODataInstanceAnnotationContainer();
             }
+            public Dictionary<string, object> DynamicProperties { get; }
             public int ID { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }

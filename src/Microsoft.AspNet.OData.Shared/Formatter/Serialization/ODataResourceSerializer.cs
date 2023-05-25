@@ -296,17 +296,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // Build a HashSet to store the declared property names.
             // It is used to make sure the dynamic property name is different from all declared property names.
             HashSet<string> declaredPropertyNameSet = new HashSet<string>(resource.Properties.Select(p => p.Name));
-            List<ODataProperty> dynamicProperties = new List<ODataProperty>();
 
-            // To test SelectedDynamicProperties == null is enough to filter the dynamic properties.
-            // Because if SelectAllDynamicProperties == true, SelectedDynamicProperties should be null always.
-            // So `selectExpandNode.SelectedDynamicProperties == null` covers `SelectAllDynamicProperties == true` scenario.
-            // If `selectExpandNode.SelectedDynamicProperties != null`, then we should test whether the property is selected or not using "Contains(...)".
-            IEnumerable<KeyValuePair<string, object>> dynamicPropertiesToSelect =
-                dynamicPropertyDictionary.Where(x => selectExpandNode.SelectedDynamicProperties == null || selectExpandNode.SelectedDynamicProperties.Contains(x.Key));
-            foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
+            List<ODataProperty> dynamicProperties = new List<ODataProperty>();
+            foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertyDictionary)
             {
                 if (String.IsNullOrEmpty(dynamicProperty.Key))
+                {
+                    continue;
+                }
+
+                // Due to the early return condition at the start of this method we know that either:
+                //  1. SelectAllDynamicProperties == true
+                //  2. SelectedDynamicProperties != null
+                //  3. SelectAllDynamicProperties == true AND SelectedDynamicProperties != null
+                //
+                // Previous code simply checked the nullity of SelectedDynamicProperties here, but that ignored case 3 since which is
+                // possible since SelectExpandNode.BuildSelectExpand will set SelectAllDynamicProperties to true even if
+                // SelectedDynamicProperties is not-null. Instead we need to check both properties in order to determine if a dynamic
+                // property should be selected.
+                if (!selectExpandNode.SelectAllDynamicProperties &&
+                    !selectExpandNode.SelectedDynamicProperties.Contains(dynamicProperty.Key))
                 {
                     continue;
                 }

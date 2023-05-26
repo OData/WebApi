@@ -134,4 +134,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
         [Contained]
         public List<ContainedPagingItem> Items { get; set; }
     }
+
+    public enum CollectionPagingCategory
+    {
+        Retailer,
+        Wholesaler,
+        Distributor
+    }
+
+    public class CollectionPagingLocation
+    {
+        public string Street { get; set; }
+    }
+
+    public class CollectionPagingCustomer
+    {
+        public int Id { get; set; }
+        public List<string> Tags { get; set; }
+        public List<CollectionPagingCategory> Categories { get; set; }
+        public List<CollectionPagingLocation> Locations { get; set; }
+    }
 }

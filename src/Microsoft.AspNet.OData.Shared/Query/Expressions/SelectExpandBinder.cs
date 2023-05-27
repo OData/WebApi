@@ -352,7 +352,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             wrapperType = wrapperGenericType.MakeGenericType(elementType);
             Expression propertyValue = Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
 
-            if (_settings.HandleNullPropagation == HandleNullPropagationOption.True && !source.Type.IsValueType)
+            if (_settings.HandleNullPropagation == HandleNullPropagationOption.True &&
+                (!source.Type.IsValueType || Nullable.GetUnderlyingType(source.Type) != null))
             {
                 propertyValue = Expression.Condition(
                     test: Expression.Equal(source, Expression.Constant(null)),

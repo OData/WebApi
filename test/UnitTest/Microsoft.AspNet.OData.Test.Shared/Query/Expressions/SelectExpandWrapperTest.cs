@@ -76,10 +76,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             MockPropertyContainer container = new MockPropertyContainer();
             container.Properties.Add("SampleProperty", expectedPropertyValue);
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>
-                {
-                    ModelID = _modelID,
-                    Container = container
-                };
+            {
+                ModelID = _modelID,
+                Container = container
+            };
             wrapper.Instance = new TestEntity();
 
             object value;
@@ -95,10 +95,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             object expectedPropertyValue = new object();
             MockPropertyContainer container = new MockPropertyContainer();
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>
-                {
-                    ModelID = _modelID,
-                    Container = container
-                };
+            {
+                ModelID = _modelID,
+                Container = container
+            };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
             wrapper.UseInstanceForProperties = true;
 
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 _model.CustomerName,
                 new ClrPropertyInfoAnnotation(typeof(TestEntityWithAlias).GetProperty("SampleProperty")));
             object expectedPropertyValue = new object();
-            SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias> { ModelID = _modelID };
+            SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias>() { ModelID = _modelID };
             wrapper.Instance = new TestEntityWithAlias { SampleProperty = expectedPropertyValue };
             wrapper.UseInstanceForProperties = true;
 
@@ -248,7 +248,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 (IEdmModel m, IEdmStructuredType t) => null;
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => 
+            ExceptionAssert.Throws<InvalidOperationException>(() =>
                 wrapper.ToDictionary(mapperProvider: mapperProvider),
                 "The mapper provider must return a valid 'Microsoft.AspNet.OData.Query.IPropertyMapper' instance for the given 'NS.Name' IEdmType.");
         }
@@ -261,12 +261,12 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
-            
+
             EdmModel model = new EdmModel();
             model.AddElement(entityType);
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
-            
+
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
@@ -281,7 +281,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() =>
-                testWrapper.ToDictionary(mapperProvider), 
+                testWrapper.ToDictionary(mapperProvider),
                 "The key mapping for the property 'SampleProperty' can't be null or empty.");
         }
 
@@ -291,19 +291,19 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
-            
+
             EdmModel model = new EdmModel();
             model.AddElement(entityType);
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
-            
+
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
                 ModelID = ModelContainer.GetModelID(model),
                 UseInstanceForProperties = true,
             };
-            
+
             Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
             mapperMock.Setup(m => m.MapProperty("SampleProperty")).Returns("Sample");
             Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider =

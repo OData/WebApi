@@ -347,10 +347,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     }
                 }
             }
+            if (isInstancePropertySet)
+            {
+                Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
+                wrapperType = wrapperGenericType.MakeGenericType(elementType);
+                return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+            }
+            ConstructorInfo constructorWithInstanse = wrapperType.GetConstructors().Single(c => c.GetParameters().Length == 1);
+            return Expression.MemberInit(Expression.New(constructorWithInstanse, source), wrapperTypeMemberAssignments);
 
-            Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
-            wrapperType = wrapperGenericType.MakeGenericType(elementType);
-            return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+
         }
 
         /// <summary>

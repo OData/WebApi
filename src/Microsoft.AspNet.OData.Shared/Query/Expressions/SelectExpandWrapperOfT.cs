@@ -17,6 +17,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
     internal class SelectExpandWrapper<TElement> : SelectExpandWrapper
     {
+        public SelectExpandWrapper(TElement element)
+        {
+            Instance = element;
+        }
+
+        public SelectExpandWrapper()
+        {
+
+        }
+
         /// <summary>
         /// Gets or sets the instance of the element being selected and expanded.
         /// </summary>

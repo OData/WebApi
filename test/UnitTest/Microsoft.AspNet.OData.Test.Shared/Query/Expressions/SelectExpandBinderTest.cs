@@ -109,10 +109,12 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Assert
             IEnumerator enumerator = queryable.GetEnumerator();
+            IEnumerator _querableEnumerator = _queryable.GetEnumerator();
             Assert.True(enumerator.MoveNext());
+            Assert.True(_querableEnumerator.MoveNext());
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<QueryCustomer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
-            Assert.Null(partialCustomer.Instance);
+            Assert.Equal(_querableEnumerator.Current, partialCustomer.Instance);
             Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", partialCustomer.InstanceType);
             IEnumerable<SelectExpandWrapper<QueryOrder>> innerOrders = partialCustomer.Container
                 .ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
@@ -464,7 +466,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
-        public void ProjectAsWrapper_Element_ProjectedValueDoesNotContainInstance_IfSelectionIsPartial()
+        public void ProjectAsWrapper_Element_ProjectedValueShouldContainInstance_IfSelectionIsPartial()
         {
             // Arrange
             string select = "Id,Orders";
@@ -486,7 +488,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
             Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
             SelectExpandWrapper<QueryCustomer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
-            Assert.Null(customerWrapper.Instance);
+            Assert.Equal(aCustomer, customerWrapper.Instance);
             Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", customerWrapper.InstanceType);
         }
 

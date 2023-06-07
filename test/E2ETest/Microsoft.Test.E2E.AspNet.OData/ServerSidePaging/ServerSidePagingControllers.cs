@@ -289,4 +289,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             return Ok((ribbon as ContainmentPagingExtendedMenu).Tabs);
         }
     }
+
+    public class CollectionPagingCustomersController : TestODataController
+    {
+        private const int TargetSize = 3;
+        private static readonly List<CollectionPagingCustomer> customers = new List<CollectionPagingCustomer>(
+            Enumerable.Range(1, TargetSize).Select(idx => new CollectionPagingCustomer
+            {
+                Id = idx,
+                Tags = new List<string> { "Tier 1", "Gen-Z", "HNW" },
+                Categories = new List<CollectionPagingCategory>
+                {
+                    CollectionPagingCategory.Retailer,
+                    CollectionPagingCategory.Wholesaler,
+                    CollectionPagingCategory.Distributor
+                },
+                Locations = new List<CollectionPagingLocation>(
+                    Enumerable.Range(1, TargetSize).Select(dx => new CollectionPagingLocation
+                    {
+                        Street = $"Street {idx}{dx}"
+                    }))
+            }));
+
+        [EnableQuery(PageSize = 2)]
+        public ITestActionResult Get()
+        {
+            return Ok(customers);
+        }
+    }
 }

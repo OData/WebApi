@@ -539,15 +539,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // for $select=NS.SubType/Property, we don't care about the leading type segment, because with or without the type segment
             // the "Property" property value expression should be built into the property container.
 
-            PropertySegment firstSturucturalPropertySegment = firstNonTypeSegment as PropertySegment;
-            if (firstSturucturalPropertySegment != null)
+            PropertySegment firstStructuralPropertySegment = firstNonTypeSegment as PropertySegment;
+            if (firstStructuralPropertySegment != null)
             {
                 // $select=abc/..../xyz
                 SelectExpandIncludedProperty newPropertySelectItem;
-                if (!currentLevelPropertiesInclude.TryGetValue(firstSturucturalPropertySegment.Property, out newPropertySelectItem))
+                if (!currentLevelPropertiesInclude.TryGetValue(firstStructuralPropertySegment.Property, out newPropertySelectItem))
                 {
-                    newPropertySelectItem = new SelectExpandIncludedProperty(firstSturucturalPropertySegment, navigationSource);
-                    currentLevelPropertiesInclude[firstSturucturalPropertySegment.Property] = newPropertySelectItem;
+                    newPropertySelectItem = new SelectExpandIncludedProperty(firstStructuralPropertySegment, navigationSource);
+                    currentLevelPropertiesInclude[firstStructuralPropertySegment.Property] = newPropertySelectItem;
                 }
 
                 newPropertySelectItem.AddSubSelectItem(remainingSegments, pathSelectItem);
@@ -818,7 +818,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             int? modelBoundPageSize = querySettings == null ? null : querySettings.PageSize;
-            propertyValue = ProjectAsWrapper(propertyValue, subSelectExpandClause, structuralProperty.Type.ToStructuredType(), pathSelectItem.NavigationSource,
+            propertyValue = ProjectAsWrapper(propertyValue, subSelectExpandClause, propertyStructuredType, pathSelectItem.NavigationSource,
                 pathSelectItem.OrderByOption, // $orderby=...
                 pathSelectItem.TopOption, // $top=...
                 pathSelectItem.SkipOption, // $skip=...
@@ -830,17 +830,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (!structuralProperty.Type.IsCollection())
                 {
                     propertyExpression.NullCheck = nullCheck;
-                }
-                else if (_settings.PageSize.HasValue)
-                {
-                    propertyExpression.PageSize = _settings.PageSize.Value;
-                }
-                else
-                {
-                    if (querySettings != null && querySettings.PageSize.HasValue)
-                    {
-                        propertyExpression.PageSize = querySettings.PageSize.Value;
-                    }
                 }
 
                 propertyExpression.TotalCount = countExpression;
@@ -1013,8 +1002,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             bool hasTopValue = topOption != null && topOption.HasValue;
             bool hasSkipvalue = skipOption != null && skipOption.HasValue;
 
-            IEdmEntityType entityType = structuredType as IEdmEntityType;
-            if (entityType != null)
+            if (structuredType is IEdmEntityType entityType)
             {
                 if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || hasTopValue || hasSkipvalue)
                 {
@@ -1057,23 +1045,26 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     _settings.EnableConstantParameterization);
             }
 
-            if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || hasTopValue || hasSkipvalue)
+            if (structuredType is IEdmEntityType)
             {
-                // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
-                if (!_settings.EnableCorrelatedSubqueryBuffering)
+                if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue)
                 {
-                    if (_settings.PageSize.HasValue)
+                    // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
+                    if (!_settings.EnableCorrelatedSubqueryBuffering)
                     {
-                        source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
-                            _settings.EnableConstantParameterization);
-                    }
-                    else if (_settings.ModelBoundPageSize.HasValue)
-                    {
-                        source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
-                            _settings.EnableConstantParameterization);
+                        if (_settings.PageSize.HasValue)
+                        {
+                            source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
+                                _settings.EnableConstantParameterization);
+                        }
+                        else if (_settings.ModelBoundPageSize.HasValue)
+                        {
+                            source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                                _settings.EnableConstantParameterization);
+                        }
                     }
                 }
-            }
+            }                
 
             // expression
             //      source.Select((ElementType element) => new Wrapper { })

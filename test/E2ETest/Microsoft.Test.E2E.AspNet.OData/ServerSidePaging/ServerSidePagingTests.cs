@@ -58,6 +58,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             builder.EntitySet<ContainmentPagingMenu>("ContainmentPagingMenus");
             builder.EntitySet<ContainmentPagingPanel>("ContainmentPagingPanels");
             builder.Singleton<ContainmentPagingMenu>("ContainmentPagingRibbon");
+            builder.EntitySet<CollectionPagingCustomer>("CollectionPagingCustomers");
 
             var getEmployeesHiredInPeriodFunction = builder.EntitySet<ServerSidePagingEmployee>(
                 "ServerSidePagingEmployees").EntityType.Collection.Function("GetEmployeesHiredInPeriod");
@@ -397,6 +398,82 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
             Assert.Contains($"/prefix/ContainmentPagingPanels(2)/{extendedPanelTypeName}/Items(5)/{extendedItemTypeName}/Notes?$skip=2", content);
             Assert.Contains($"/prefix/ContainmentPagingPanels(2)/{extendedPanelTypeName}/Items?$expand={extendedItemTypeName}%2FNotes&$skip=2", content);
             Assert.Contains($"{menu1ResourcePath}/Panels?$expand={extendedPanelTypeName}%2FItems%28%24expand%3D{extendedItemTypeName}%2FNotes%29&$skip=2", content);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("?$select=Tags,Categories,Locations")]
+        public async Task VerifyServerSidePagingNotAppliedToNonEntityCollections(string url)
+        {
+            // Arrange
+            var requestUri = this.BaseAddress + $"/prefix/CollectionPagingCustomers{url}";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsObject<JObject>();
+
+            // Assert
+            var pageResult = content.GetValue("value") as JArray;
+            Assert.NotNull(pageResult);
+            Assert.Equal(2, pageResult.Count);
+
+            foreach (JObject item in pageResult)
+            {
+                var tags = item.GetValue("Tags") as JArray;
+                Assert.NotNull(tags);
+                Assert.Equal(3, tags.Count);
+
+                var categories = item.GetValue("Categories") as JArray;
+                Assert.NotNull(categories);
+                Assert.Equal(3, categories.Count);
+
+                var locations = item.GetValue("Locations") as JArray;
+                Assert.NotNull(locations);
+                Assert.Equal(3, locations.Count);
+            }
+        }
+
+        [Fact]
+        public async Task VerifyClientSidePagingAppliedToNonEntityCollections()
+        {
+            // Arrange
+            var requestUri = this.BaseAddress + "/prefix/CollectionPagingCustomers?$select=Tags($skip=1;$top=1),Categories($skip=1;$top=1),Locations($skip=1;$top=1)";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsObject<JObject>();
+
+            // Assert
+            var pageResult = content.GetValue("value") as JArray;
+            Assert.NotNull(pageResult);
+            Assert.Equal(2, pageResult.Count);
+
+            JObject page;
+            string tag;
+            CollectionPagingCategory? category;
+            CollectionPagingLocation location;
+
+            page = pageResult[0] as JObject;
+            tag = Assert.Single(page.GetValue("Tags")).ToObject<string>();
+            category = Assert.Single(page.GetValue("Categories")).ToObject<CollectionPagingCategory?>();
+            location = Assert.Single(page.GetValue("Locations")).ToObject<CollectionPagingLocation>();
+
+            Assert.Equal("Gen-Z", tag);
+            Assert.Equal(CollectionPagingCategory.Wholesaler, category);
+            Assert.NotNull(location);
+            Assert.Equal("Street 12", location.Street);
+
+            page = pageResult[1] as JObject;
+            tag = Assert.Single(page.GetValue("Tags")).ToObject<string>();
+            category = Assert.Single(page.GetValue("Categories")).ToObject<CollectionPagingCategory?>();
+            location = Assert.Single(page.GetValue("Locations")).ToObject<CollectionPagingLocation>();
+
+            Assert.Equal("Gen-Z", tag);
+            Assert.Equal(CollectionPagingCategory.Wholesaler, category);
+            Assert.NotNull(location);
+            Assert.Equal("Street 22", location.Street);
         }
     }
 

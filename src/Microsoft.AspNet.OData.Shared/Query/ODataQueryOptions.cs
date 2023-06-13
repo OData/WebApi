@@ -75,11 +75,25 @@ namespace Microsoft.AspNet.OData.Query
             RawValues = new ODataRawQueryOptions();
             IDictionary<string, string> normalizedQueryParameters = GetODataQueryParameters();
 
-            _queryOptionParser = new ODataQueryOptionParser(
-                context.Model,
-                context.ElementType,
-                context.NavigationSource,
-                normalizedQueryParameters);
+            // For non-OData based controllers, path will be null
+            // The TargetEdmNavigationSource property of the OperationSegment is not set
+            // other than in those cases where the operation is configured by calling
+            // ReturnsCollectionViaEntitySetPath. In addition the operation may be unbound
+            if (context.Path == null || context.Path.Path.LastSegment is OperationSegment)
+            {
+                _queryOptionParser = new ODataQueryOptionParser(
+                    context.Model,
+                    context.ElementType,
+                    context.NavigationSource,
+                    normalizedQueryParameters);
+            }
+            else
+            {
+                _queryOptionParser = new ODataQueryOptionParser(
+                    context.Model,
+                    context.Path.Path,
+                    normalizedQueryParameters);
+            }
 
             // Note: the context.RequestContainer must be set by the ODataQueryOptions constructor.
             Contract.Assert(context.RequestContainer != null);

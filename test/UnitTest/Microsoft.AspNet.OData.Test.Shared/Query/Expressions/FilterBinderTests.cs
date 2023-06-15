@@ -1047,6 +1047,25 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void StringMatchesPattern()
+        {
+            // Arrange & Act & Assert
+            var filters = VerifyQueryDeserialization(
+                "matchesPattern(ProductName, 'A\\wc')",
+                "$it => $it.ProductName.IsMatch(\"A\\wc\", ECMAScript)",
+                NotTesting);
+
+            // Arrange & Act & Assert
+            RunFilters(filters, new Product { ProductName = null }, new { WithNullPropagation = false, WithoutNullPropagation = typeof(ArgumentNullException) });
+
+            RunFilters(filters, new Product { ProductName = "Abcd" }, new { WithNullPropagation = true, WithoutNullPropagation = true });
+
+            RunFilters(filters, new Product { ProductName = "Abd" }, new { WithNullPropagation = false, WithoutNullPropagation = false });
+            
+            RunFilters(filters, new Product { ProductName = "Aθd" }, new { WithNullPropagation = false, WithoutNullPropagation = false }); // ECMAScript has strict matching of \w
+        }
+
+        [Fact]
         public void RecursiveMethodCall()
         {
             var filters = VerifyQueryDeserialization(

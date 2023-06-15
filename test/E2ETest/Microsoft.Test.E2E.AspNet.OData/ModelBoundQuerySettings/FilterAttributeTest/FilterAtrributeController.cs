@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
@@ -162,6 +163,27 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
                     _cars.Add(car);
                 }
             }
+        }
+    }
+
+    public class AuthorsController : TestODataController
+    {
+        private const int TargetSize = 3;
+        private static readonly List<Author> authors = new List<Author>(
+            Enumerable.Range(1, TargetSize).Select(idx => new Author
+            {
+                AuthorId = idx,
+                Books = new List<Book>(
+                    Enumerable.Range(1, 3).Select(dx => new Book
+                    {
+                        BookId = (idx - 1) * TargetSize + dx
+                    }))
+            }));
+
+        [EnableQuery]
+        public List<Author> Get()
+        {
+            return authors;
         }
     }
 }

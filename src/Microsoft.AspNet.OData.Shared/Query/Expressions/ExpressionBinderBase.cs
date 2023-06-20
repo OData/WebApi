@@ -1774,7 +1774,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             //add argument that must be ECMAScript compatible regex
             arguments = new[] { arguments[0], arguments[1], Expression.Constant(RegexOptions.ECMAScript) };
 
-            return MakeFunctionCall(ClrCanonicalFunctions.MatchesMattern, arguments);
+            return MakeFunctionCall(ClrCanonicalFunctions.MatchesPattern, arguments);
         }
 
         private Expression BindTrim(SingleValueFunctionCallNode node)

@@ -71,6 +71,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
         public string Street { get; set; }
     }
 
+    [Filter("Books")]
+    public class Author
+    {
+        public long AuthorId { get; set; }
+        public List<Book> Books { get; set; }
+    }
+
+    [Filter("BookId")]
+    public class Book
+    {
+        public long BookId { get; set; }
+    }
+
     public class FilterAttributeEdmModel
     {
         public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -79,6 +92,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             builder.EntitySet<Car>("Cars");
+            builder.EntitySet<Author>("Authors");
+            builder.EntitySet<Book>("Books");
             IEdmModel model = builder.GetEdmModel();
             return model;
         }
@@ -102,6 +117,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
                 .Filter()
                 .Filter(QueryOptionSetting.Disabled, "Id")
                 .Filter(QueryOptionSetting.Disabled, "Name");
+
+            builder.EntitySet<Author>("Authors").EntityType.Filter("Books");
+            builder.EntitySet<Book>("Books").EntityType.Filter("BookId");
+
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

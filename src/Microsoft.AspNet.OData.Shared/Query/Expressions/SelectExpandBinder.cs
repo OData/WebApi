@@ -1002,7 +1002,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             bool hasTopValue = topOption != null && topOption.HasValue;
             bool hasSkipvalue = skipOption != null && skipOption.HasValue;
 
-            if (structuredType is IEdmEntityType entityType)
+            IEdmEntityType entityType = structuredType as IEdmEntityType;
+            if (entityType != null)
             {
                 if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || hasTopValue || hasSkipvalue)
                 {
@@ -1045,7 +1046,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     _settings.EnableConstantParameterization);
             }
 
-            if (structuredType is IEdmEntityType)
+            if (entityType != null)
             {
                 if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue)
                 {

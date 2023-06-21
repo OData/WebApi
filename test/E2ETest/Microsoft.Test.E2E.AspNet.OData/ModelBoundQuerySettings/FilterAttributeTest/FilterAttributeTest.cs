@@ -11,6 +11,8 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttributeTest
@@ -20,9 +22,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
         private const string CustomerBaseUrl = "{0}/enablequery/Customers";
         private const string OrderBaseUrl = "{0}/enablequery/Orders";
         private const string CarBaseUrl = "{0}/enablequery/Cars";
+        private const string AuthorBaseUrl = "{0}/enablequery/Authors";
         private const string ModelBoundCustomerBaseUrl = "{0}/modelboundapi/Customers";
         private const string ModelBoundOrderBaseUrl = "{0}/modelboundapi/Orders";
         private const string ModelBoundCarBaseUrl = "{0}/modelboundapi/Cars";
+        private const string ModelBoundAuthorBaseUrl = "{0}/modelboundapi/Authors";
 
         public FilterAttributeTest(WebHostTestFixture fixture)
             :base(fixture)
@@ -31,8 +35,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController),
-                    typeof(CarsController));
+            configuration.AddControllers(
+                typeof(CustomersController),
+                typeof(OrdersController),
+                typeof(CarsController),
+                typeof(AuthorsController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Expand();
@@ -185,6 +192,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
             {
                 Assert.Contains("cannot be used in the $filter query option.", result);
             }
+        }
+
+        [Theory]
+        [InlineData(AuthorBaseUrl + "?$filter=Books/any(d: d/BookId eq 7)")]
+        [InlineData(ModelBoundAuthorBaseUrl + "?$filter=Books/any(d: d/BookId eq 7)")]
+        public async Task FilterOnNestedCollection(string entitySetUrl)
+        {
+            var requestUrl = string.Format(entitySetUrl, BaseAddress);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+            var client = new HttpClient();
+
+            var response = await client.SendAsync(request);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var content = await response.Content.ReadAsObject<JObject>();
+
+            var authors = content.GetValue("value") as JArray;
+            Assert.NotNull(authors);
+
+            var author = Assert.Single(authors) as JObject;
+            Assert.Equal(3, author.GetValue("AuthorId"));
         }
     }
 }

@@ -7,6 +7,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
@@ -460,6 +461,16 @@ namespace Microsoft.AspNet.OData.Query.Validators
                     SingleComplexNode singleComplexNode = propertyAccessNode.Source as SingleComplexNode;
                     notFilterable = EdmLibHelpers.IsNotFilterable(property, singleComplexNode.Property,
                         property.DeclaringType, _model, _defaultQuerySettings.EnableFilter);
+                }
+                else if (propertyAccessNode.Source.Kind == QueryNodeKind.ResourceRangeVariableReference)
+                {
+                    ResourceRangeVariableReferenceNode resourceRangeVariableReferenceNode = propertyAccessNode.Source as ResourceRangeVariableReferenceNode;
+                    notFilterable = EdmLibHelpers.IsNotFilterable(
+                        property,
+                        _property,
+                        resourceRangeVariableReferenceNode.RangeVariable.StructuredTypeReference.StructuredDefinition(),
+                        _model,
+                        _defaultQuerySettings.EnableFilter);
                 }
                 else
                 {

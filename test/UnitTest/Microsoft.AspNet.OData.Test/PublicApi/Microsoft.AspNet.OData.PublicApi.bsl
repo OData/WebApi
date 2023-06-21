@@ -151,6 +151,11 @@ public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandle
 	protected ODataAPIHandler`1 ()
 
 	public virtual void DeepInsert (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task DeepInsertAsync (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
+
 	public abstract IODataAPIHandler GetNestedHandler (TStructuralType parent, string navigationPropertyName)
 	public abstract IODataAPIHandler GetNestedHandlerAsync (TStructuralType parent, string navigationPropertyName)
 	public abstract ODataAPIResponseStatus TryAddRelatedObject (TStructuralType resource, out System.String& errorMessage)

@@ -128,6 +128,17 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Apply handlers asynchronously to the top level resource and the nested resources.
+        /// </summary>
+        /// <param name="resource">Resource to execute.</param>
+        /// <param name="model">The model.</param>
+        /// <param name="apiHandlerFactory">API handler factory.</param>
+        public virtual async Task DeepInsertAsync(TStructuralType resource, IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            await Task.Run(() => DeepInsert(resource, model, apiHandlerFactory));
+        }
+
+        /// <summary>
         /// Apply handlers to an object.
         /// </summary>
         /// <param name="resource">The resource to apply the API handlers</param>

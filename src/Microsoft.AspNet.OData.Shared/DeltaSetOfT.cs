@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
         /// <param name="apiHandlerOfT">API Handler for the entity.</param>
-        /// <returns>DeltaSet response.</returns>
+        /// <returns>A task representing a DeltaSet response.</returns>
         public async Task<DeltaSet<TStructuralType>> PatchAsync(ODataAPIHandler<TStructuralType> apiHandlerOfT)
         {
             return await PatchAsync(apiHandlerOfT, null);

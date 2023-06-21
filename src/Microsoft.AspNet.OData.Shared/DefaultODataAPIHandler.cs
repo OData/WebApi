@@ -178,31 +178,31 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TryCreate(keyValues, out createdObject, out errorMessage));
         }
 
         /// <inheritdoc/>
         public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TryGet(keyValues, out originalObject, out errorMessage));
         }
 
         /// <inheritdoc/>
         public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TryDelete(keyValues, out errorMessage));
         }
 
         /// <inheritdoc/>
         public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(TStructuralType resource, out string errorMessage)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TryAddRelatedObject(resource, out errorMessage));
         }
 
         /// <inheritdoc/>
         public override IODataAPIHandler GetNestedHandlerAsync(TStructuralType parent, string navigationPropertyName)
         {
-            throw new NotImplementedException();
+            return (IODataAPIHandler)Task.FromResult(GetNestedHandler(parent, navigationPropertyName));
         }
     }
 }

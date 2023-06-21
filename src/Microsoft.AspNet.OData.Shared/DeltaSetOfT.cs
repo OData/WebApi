@@ -332,7 +332,7 @@ namespace Microsoft.AspNet.OData
                         if (value != null && !string.IsNullOrEmpty(value.ToString()))
                         {
                             containsKeyValue = true;
-                            continue;
+                            break;
                         }
                     }
 

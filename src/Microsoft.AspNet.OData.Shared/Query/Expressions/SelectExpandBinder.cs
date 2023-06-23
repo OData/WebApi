@@ -350,7 +350,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
             wrapperType = wrapperGenericType.MakeGenericType(elementType);
-            return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+            Expression propertyValue = Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+
+            if (_settings.HandleNullPropagation == HandleNullPropagationOption.True &&
+                (!source.Type.IsValueType || Nullable.GetUnderlyingType(source.Type) != null))
+            {
+                propertyValue = Expression.Condition(
+                    test: Expression.Equal(source, Expression.Constant(null)),
+                    ifTrue: Expression.Constant(null, propertyValue.Type),
+                    ifFalse: propertyValue);
+            }
+
+            return propertyValue;
         }
 
         /// <summary>

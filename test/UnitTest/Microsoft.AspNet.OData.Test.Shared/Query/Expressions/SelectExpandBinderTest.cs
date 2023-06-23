@@ -177,12 +177,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Assert
             SelectExpandWrapper<QueryOrder> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryOrder>;
-            Assert.NotNull(projectedOrder);
-            Assert.Null(projectedOrder.Instance);
-
-            SelectExpandWrapper<QueryCustomer> projectCustomer = projectedOrder.Container.ToDictionary(PropertyMapper)["Customer"] as SelectExpandWrapper<QueryCustomer>;
-            Assert.NotNull(projectCustomer);
-            Assert.Null(projectCustomer.Instance);
+            Assert.Null(projectedOrder);
         }
 
         [Fact]

@@ -395,7 +395,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             string value = "\"value\":[" +
                 "{\"HomeLocation\":{\"Street\":\"110th\"}}," +
                 "{\"HomeLocation\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation\",\"Street\":\"110th\"}}," +
-                "{\"HomeLocation\":{\"Street\":null}}," +
+                "{\"HomeLocation\":null}," +
                 "{\"HomeLocation\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation\",\"Street\":\"120th\"}}," +
                 "{\"HomeLocation\":{\"Street\":\"130th\"}}," +
                 "{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.VipPerson\",\"HomeLocation\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeometryLocation\",\"Street\":\"130th\"}}]";
@@ -489,7 +489,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                     "\"HomeLocation\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation\",\"Latitude\":\"12.211\"}" +
                 "}," +
                 "{" +
-                    "\"HomeLocation\":{}" +
+                    "\"HomeLocation\":null" +
                 "}," +
                 "{" +
                     "\"HomeLocation\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation\",\"Latitude\":\"12.8\"}" +

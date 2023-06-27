@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -36,6 +37,13 @@ namespace Microsoft.AspNet.OData
         /// <param name="odataPath">OData path corresponding to an @odata.id.</param>
         /// <returns>ODataAPIHandler for the specified OData path.</returns>
         public abstract IODataAPIHandler GetHandler(ODataPath odataPath);
+
+        /// <summary>
+        /// Get the handler depending on OData path asynchronously.
+        /// </summary>
+        /// <param name="odataPath">OData path corresponding to an @odata.id.</param>
+        /// <returns>A task representing the ODataAPIHandler for the specified OData path.</returns>
+        public abstract Task<IODataAPIHandler> GetHandlerAsync(ODataPath odataPath);
 
         /// <summary>
         /// Get the handler based on the OData path uri string.

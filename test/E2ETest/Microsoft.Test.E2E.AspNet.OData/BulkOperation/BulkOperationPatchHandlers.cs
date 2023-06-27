@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -242,6 +243,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
             return null;
         }
+
+        public override Task<IODataAPIHandler> GetHandlerAsync(ODataPath odataPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class TypelessAPIHandlerFactory : EdmODataAPIHandlerFactory
@@ -359,6 +365,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             errorMessage = string.Empty;
 
             return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Company createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Company originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Company resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Company parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -513,6 +544,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 return ODataAPIResponseStatus.Failure;
             }
         }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out NewOrder createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out NewOrder originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(NewOrder resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(NewOrder parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class MyOverdueOrderAPIHandler : ODataAPIHandler<MyNewOrder>
@@ -636,6 +692,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 return ODataAPIResponseStatus.Failure;
             }
         }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out MyNewOrder createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out MyNewOrder originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(MyNewOrder resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(MyNewOrder parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class EmployeeAPIHandler : ODataAPIHandler<Employee>
@@ -723,6 +804,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             errorMessage = string.Empty;
             return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Employee resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Employee parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -838,6 +944,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 return ODataAPIResponseStatus.Failure;
             }
         }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Friend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Friend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class NewOrderAPIHandler : ODataAPIHandler<NewOrder>
@@ -948,6 +1079,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 return ODataAPIResponseStatus.Failure;
             }
         }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out NewOrder createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out NewOrder originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(NewOrder resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(NewOrder parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class MyNewOrderAPIHandler : ODataAPIHandler<MyNewOrder>
@@ -1057,6 +1213,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 return ODataAPIResponseStatus.Failure;
             }
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out MyNewOrder createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out MyNewOrder originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(MyNewOrder resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(MyNewOrder parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -1174,6 +1355,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 return ODataAPIResponseStatus.Failure;
             }
         }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Order createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Order originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Order resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Order parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class OrderLineAPIHandler : ODataAPIHandler<OrderLine>
@@ -1283,6 +1489,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 return ODataAPIResponseStatus.Failure;
             }
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out OrderLine createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out OrderLine originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(OrderLine resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(OrderLine parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -1411,6 +1642,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 return ODataAPIResponseStatus.Failure;
             }
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(NewFriend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(NewFriend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 

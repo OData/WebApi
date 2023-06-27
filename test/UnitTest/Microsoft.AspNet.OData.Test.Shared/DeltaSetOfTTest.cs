@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData.Edm;
@@ -326,6 +327,11 @@ namespace Microsoft.AspNet.OData.Test
 
             return null;
         }
+
+        public override Task<IODataAPIHandler> GetHandlerAsync(ODataPath odataPath)
+        {
+            throw new NotImplementedException();
+        }
     }
     internal class FriendPatchHandler : ODataAPIHandler<Friend>
     {
@@ -366,6 +372,31 @@ namespace Microsoft.AspNet.OData.Test
             errorMessage = string.Empty;
 
             return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Friend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Friend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -427,6 +458,31 @@ namespace Microsoft.AspNet.OData.Test
             errorMessage = string.Empty;
 
             return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(NewFriend resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(NewFriend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
         }
     }
 }

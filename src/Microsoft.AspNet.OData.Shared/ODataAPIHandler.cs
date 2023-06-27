@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -36,6 +37,15 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage);
 
         /// <summary>
+        /// Create a new object asynchronously.
+        /// </summary>        
+        /// <param name="keyValues">The key-value pair of the object to be created. Optional.</param>
+        /// <param name="createdObject">The created object.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>A task representing the status of the TryCreateAsync method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage);
+
+        /// <summary>
         /// Get the original object based on key-values.
         /// </summary>
         /// <param name="keyValues">Key-value pair for the entity keys.</param>
@@ -43,6 +53,15 @@ namespace Microsoft.AspNet.OData
         /// <param name="errorMessage">Any error message in case of an exception.</param>
         /// <returns>The status of the TryGet method <see cref="ODataAPIResponseStatus"/>.</returns>
         public abstract ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage);
+
+        /// <summary>
+        /// Get the original object based on key-values asynchronously.
+        /// </summary>
+        /// <param name="keyValues">Key-value pair for the entity keys.</param>
+        /// <param name="originalObject">Object to return.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>A task representing the status of the TryGetAsync method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage);
 
         /// <summary>
         /// Delete the object based on key-value pairs.
@@ -53,6 +72,14 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage);
 
         /// <summary>
+        /// Delete the object based on key-value pairs asynchronously.
+        /// </summary>
+        /// <param name="keyValues">Key-value pair for the entity keys.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>A task representing the status of the TryDeleteAsync method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage);
+
+        /// <summary>
         /// Add related object.
         /// </summary>
         /// <param name="resource">The object to be added.</param>
@@ -61,12 +88,28 @@ namespace Microsoft.AspNet.OData
         public abstract ODataAPIResponseStatus TryAddRelatedObject(TStructuralType resource, out string errorMessage);
 
         /// <summary>
+        /// Add related object asynchronously.
+        /// </summary>
+        /// <param name="resource">The object to be added.</param>
+        /// <param name="errorMessage">Any error message in case of an exception.</param>
+        /// <returns>A task representing the status of the TryAddRelatedObjectAsync method <see cref="ODataAPIResponseStatus"/>.</returns>
+        public abstract Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(TStructuralType resource, out string errorMessage);
+        
+        /// <summary>
         /// Get the ODataAPIHandler for the nested type.
         /// </summary>
         /// <param name="parent">Parent instance.</param>
         /// <param name="navigationPropertyName">The name of the navigation property for the handler.</param>
         /// <returns>The type of Nested ODataAPIHandler.</returns>
         public abstract IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName);
+
+        /// <summary>
+        /// Get the ODataAPIHandler for the nested type asynchronously.
+        /// </summary>
+        /// <param name="parent">Parent instance.</param>
+        /// <param name="navigationPropertyName">The name of the navigation property for the handler.</param>
+        /// <returns>A task representing the type of the nested ODataAPIHandler.</returns>
+        public abstract IODataAPIHandler GetNestedHandlerAsync(TStructuralType parent, string navigationPropertyName);
 
         /// <summary>
         /// Apply handlers to the top level resource and the nested resources.
@@ -82,6 +125,17 @@ namespace Microsoft.AspNet.OData
             }
 
             CopyObjectProperties(resource, model, this, apiHandlerFactory);
+        }
+
+        /// <summary>
+        /// Apply handlers asynchronously to the top level resource and the nested resources.
+        /// </summary>
+        /// <param name="resource">Resource to execute.</param>
+        /// <param name="model">The model.</param>
+        /// <param name="apiHandlerFactory">API handler factory.</param>
+        public virtual async Task DeepInsertAsync(TStructuralType resource, IEdmModel model, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            await Task.Run(() => DeepInsert(resource, model, apiHandlerFactory));
         }
 
         /// <summary>

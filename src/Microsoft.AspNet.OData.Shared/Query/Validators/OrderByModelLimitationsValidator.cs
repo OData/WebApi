@@ -131,9 +131,21 @@ namespace Microsoft.AspNet.OData.Query.Validators
             return null;
         }
 
-        // do not validate/allow Cast expressions in orderby, e.g. $orderby=Stamp/CreatedByUser/Model.UserInfo/Name
         public override SingleValueNode Visit(SingleResourceCastNode nodeIn)
         {
+            if (nodeIn.Source != null)
+            {
+                if (nodeIn.Source.Kind == QueryNodeKind.SingleComplexNode)
+                {
+                    SingleComplexNode singleComplexNode = nodeIn.Source as SingleComplexNode;
+
+                    if (singleComplexNode != null)
+                    {
+                        return Visit(singleComplexNode);
+                    }
+                }
+            }
+
             return null;
         }
 

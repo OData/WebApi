@@ -107,6 +107,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                             previousElement.WorkAddress.CountryOrRegion.Name.CompareTo(currentElement.WorkAddress.CountryOrRegion.Name) < 1);
             }
         }
+
+
+        [Fact]
+        public async Task CanOrderByDerivedComplexTypeProperties()
+        {
+            string query =
+                "/odata/OrderByCustomers?$orderby=Address/Microsoft.Test.E2E.AspNet.OData.QueryComposition.CustomOrderByAddress/CustomFirstLine asc";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dynamic parsedContent = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(parsedContent.value);
+        }
     }
 
     public class OrderByCustomersController : TestODataController
@@ -186,6 +200,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public string SecondLine { get; set; }
         public string ZipCode { get; set; }
         public OrderByCountryOrRegion CountryOrRegion { get; set; }
+    }
+
+    public class CustomOrderByAddress : OrderByAddress
+    {
+        public string CustomFirstLine { get; set; }
+        public string CustomSecondLine { get; set; }
     }
 
     public class OrderByCountryOrRegion

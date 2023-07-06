@@ -137,12 +137,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
             {
                 if (nodeIn.Source.Kind == QueryNodeKind.SingleComplexNode)
                 {
-                    SingleComplexNode singleComplexNode = nodeIn.Source as SingleComplexNode;
-
-                    if (singleComplexNode != null)
-                    {
-                        return Visit(singleComplexNode);
-                    }
+                    return Visit((SingleComplexNode)nodeIn.Source);
                 }
             }
 

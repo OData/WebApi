@@ -1012,4 +1012,7 @@
   <data name="SkipTokenProcessingError" xml:space="preserve">
     <value>Unable to get property values from the skiptoken value.</value>
   </data>
+  <data name="JsonConverterDoesNotSupportRead" xml:space="preserve">
+    <value>'{0}' is internal and should never be deserialized into.</value>
+  </data>
 </root>

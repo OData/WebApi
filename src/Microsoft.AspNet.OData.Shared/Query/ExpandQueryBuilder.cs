@@ -40,9 +40,17 @@ namespace Microsoft.AspNet.OData.Query
 
         private string GenerateExpandQueryStringInternal(object value, IEdmModel model, bool isNestedExpand)
         {
+            string expandString = "";
+
+            if (value == null || model == null)
+            {
+                return expandString;
+            }
+
             Type type = value.GetType();
             bool isCollection = TypeHelper.IsCollection(type, out Type elementType);
             IEnumerable collection = null;
+
             if (isCollection)
             {
                 type = elementType;
@@ -50,11 +58,27 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             string edmFullName = type.EdmFullName();
+
+            if (string.IsNullOrEmpty(edmFullName))
+            {
+                return expandString;
+            }
+
             IEdmSchemaType schemaType = model.FindType(edmFullName);
+
+            if (schemaType == null)
+            {
+                return expandString;
+            }
+
             IEdmStructuredType edmStructuredType = schemaType as IEdmStructuredType;
 
+            if (edmStructuredType == null)
+            {
+                return expandString;
+            }
+
             IEnumerable<IEdmNavigationProperty> navigationProperties = edmStructuredType.NavigationProperties();
-            string expandString = "";
 
             int count = 0;
 

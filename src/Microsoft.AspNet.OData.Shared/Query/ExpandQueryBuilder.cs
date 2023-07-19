@@ -59,19 +59,7 @@ namespace Microsoft.AspNet.OData.Query
 
             string edmFullName = type.EdmFullName();
 
-            if (string.IsNullOrEmpty(edmFullName))
-            {
-                return expandString;
-            }
-
-            IEdmSchemaType schemaType = model.FindType(edmFullName);
-
-            if (schemaType == null)
-            {
-                return expandString;
-            }
-
-            IEdmStructuredType edmStructuredType = schemaType as IEdmStructuredType;
+            IEdmStructuredType edmStructuredType = model.FindType(edmFullName) as IEdmStructuredType;
 
             if (edmStructuredType == null)
             {

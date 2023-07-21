@@ -265,6 +265,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return Created(employee);
         }
 
+        [ODataRoute("UnTypedEmployees")]
+        [HttpPost]
+        [EnableQuery]
+        public ITestActionResult PostUnTypedEmployees([FromBody] string emp)
+        {
+            return Ok(emp);
+        }
+
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
         public ITestActionResult PatchFriends(int key, [FromBody] DeltaSet<Friend> friendColl)

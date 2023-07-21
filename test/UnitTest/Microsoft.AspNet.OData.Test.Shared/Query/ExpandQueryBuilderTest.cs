@@ -96,6 +96,52 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public void NoNavigationPropertyReturnsEmptyString()
+        {
+            Employee employee = new Employee()
+            {
+                ID = 1,
+                Name= "Employee 1"
+            };
+
+            string expected = "";
+            string actual = expandQueryBuilder.GenerateExpandQueryParameter(employee, null);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NullEdmModelReturnsEmptyString()
+        {
+            Employee employee = new Employee()
+            {
+                ID = 1,
+                Friends = new List<Friend> { new Friend() { Id = 1001, Orders = new List<Order> { new Order { Id = 10001 } } }, new Friend() { Id = 1002, Orders = new List<Order> { new Order { Id = 10002, OrderLines = new List<OrderLine> { new OrderLine { Id = 222 } } }, new Order { Id = 10003 } } } },
+                NewFriends = new List<NewFriend> { new NewFriend() { Id = 1001, NewOrders = new List<NewOrder> { new NewOrder { Id = 10001 } } } }
+            };
+
+            string expected = "";
+            string actual = expandQueryBuilder.GenerateExpandQueryParameter(employee, null);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void UnknownEdmTypeReturnsEmptyString()
+        {
+            NonEdmType nonEdmType = new NonEdmType()
+            {
+                Id = 1,
+                Name = "Unknown Type"
+            };
+
+            string expected = "";
+            string actual = expandQueryBuilder.GenerateExpandQueryParameter(nonEdmType, model);
+
+            Assert.Equal(expected, actual);
+        }
+
         private class Employee
         {
             [Key]
@@ -146,6 +192,13 @@ namespace Microsoft.AspNet.OData.Test.Query
             public int Price { get; set; }
             public int Quantity { get; set; }
             public ODataIdContainer Container { get; set; }
+        }
+
+        private class NonEdmType
+        {
+            [Key]
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 }

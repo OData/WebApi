@@ -1466,7 +1466,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-#endregion
+        [Fact]
+        public async Task PostUntypedEmployeeAsString()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/UntypedEmployees";
+
+            var content = @"{
+                    'value': 'OData'
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        #endregion
 
         #region Full Metadata
 

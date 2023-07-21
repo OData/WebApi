@@ -30,11 +30,6 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(value));
             }
 
-            if (model == null)
-            {
-                throw Error.ArgumentNull(nameof(model));
-            }
-
             return GenerateExpandQueryStringInternal(value, model, false);
         }
 

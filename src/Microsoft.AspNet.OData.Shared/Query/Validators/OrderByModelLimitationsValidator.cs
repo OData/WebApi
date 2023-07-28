@@ -131,6 +131,19 @@ namespace Microsoft.AspNet.OData.Query.Validators
             return null;
         }
 
+        public override SingleValueNode Visit(SingleResourceCastNode nodeIn)
+        {
+            if (nodeIn.Source != null)
+            {
+                if (nodeIn.Source.Kind == QueryNodeKind.SingleComplexNode)
+                {
+                    return Visit((SingleComplexNode)nodeIn.Source);
+                }
+            }
+
+            return null;
+        }
+
         private static string GetPropertyName(SingleValueNode node)
         {
             if (node.Kind == QueryNodeKind.SingleNavigationNode)

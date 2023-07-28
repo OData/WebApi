@@ -41,6 +41,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<OrderByCustomer> customers = builder.EntitySet<OrderByCustomer>("OrderByCustomers");
+            EntitySetConfiguration<OrderByCustomer> customers2 = builder.EntitySet<OrderByCustomer>("OrderByCustomers2");
             EntitySetConfiguration<OrderByOrder> orders = builder.EntitySet<OrderByOrder>("OrderByOrders");
             return builder.GetEdmModel();
         }
@@ -107,6 +108,47 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                             previousElement.WorkAddress.CountryOrRegion.Name.CompareTo(currentElement.WorkAddress.CountryOrRegion.Name) < 1);
             }
         }
+
+
+        [Fact]
+        public async Task CanOrderByDerivedComplexTypePropertiesAsc()
+        {
+            string query =
+                "/odata/OrderByCustomers2?$orderby=Address/Microsoft.Test.E2E.AspNet.OData.QueryComposition.CustomOrderByAddress/CustomFirstLine asc";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dynamic parsedContent = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(parsedContent.value);
+
+            for (int i = 1; i < parsedContent.value.Count; i++)
+            {
+                dynamic previousElement = parsedContent.value[i - 1];
+                dynamic currentElement = parsedContent.value[i];
+                Assert.True(previousElement.Address.CustomFirstLine.CompareTo(currentElement.Address.CustomFirstLine) < 1); // CustomFirstLine in ascending order
+            }
+        }
+
+        [Fact]
+        public async Task CanOrderByDerivedComplexTypePropertiesDesc()
+        {
+            string query =
+                "/odata/OrderByCustomers2?$orderby=Address/Microsoft.Test.E2E.AspNet.OData.QueryComposition.CustomOrderByAddress/CustomSecondLine desc";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dynamic parsedContent = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(parsedContent.value);
+
+            for (int i = 1; i < parsedContent.value.Count; i++)
+            {
+                dynamic previousElement = parsedContent.value[i - 1];
+                dynamic currentElement = parsedContent.value[i];
+                Assert.True(previousElement.Address.CustomSecondLine.CompareTo(currentElement.Address.CustomSecondLine) > -1); // CustomSecondLine in descending order
+            }
+        }
     }
 
     public class OrderByCustomersController : TestODataController
@@ -170,6 +212,67 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
+    public class OrderByCustomers2Controller : TestODataController
+    {
+        [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
+        public ITestActionResult Get()
+        {
+            int max = 10;
+            return Ok(from int i in Enumerable.Range(0, max)
+                      let j = max - i
+                      select new OrderByCustomer
+                      {
+                          Id = j,
+                          Name = "Customer " + i,
+                          CountryOrRegion = new OrderByCountryOrRegion
+                          {
+                              Name = "CountryOrRegion " + j % 3,
+                              State = "State " + j
+                          },
+                          Address = new CustomOrderByAddress
+                          {
+                              CustomFirstLine = "FirstLine " + j,
+                              CustomSecondLine = "SecondLine " + i,
+                              ZipCode = (13 * 7 * j).ToString(),
+                              CountryOrRegion = new OrderByCountryOrRegion
+                              {
+                                  Name = "CountryOrRegion " + j % 2,
+                                  State = "State " + j
+                              }
+                          },
+                          WorkAddress = new OrderByAddress
+                          {
+                              FirstLine = "FirstLine " + j,
+                              SecondLine = "SecondLine " + i,
+                              ZipCode = (13 * 7 * j).ToString(),
+                              CountryOrRegion = new OrderByCountryOrRegion
+                              {
+                                  Name = "CountryOrRegion " + j,
+                                  State = "State " + j
+                              }
+                          },
+                          Orders = (from int k in Enumerable.Range(0, j)
+                                    select new OrderByOrder
+                                    {
+                                        Id = k,
+                                        PurchaseDate = DateTime.Now.Subtract(TimeSpan.FromDays(k)),
+                                        ShippingAddress = new OrderByAddress
+                                        {
+                                            FirstLine = "FirstLine " + k,
+                                            SecondLine = "SecondLine " + k,
+                                            ZipCode = (13 * 7 * 5 * k).ToString(),
+                                            CountryOrRegion = new OrderByCountryOrRegion
+                                            {
+                                                Name = "CountryOrRegion " + k,
+                                                State = "State " + k
+                                            }
+                                        },
+                                        IsAGift = k % 2 == 0
+                                    }).ToList()
+                      });
+        }
+    }
+
     public class OrderByCustomer
     {
         public int Id { get; set; }
@@ -186,6 +289,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public string SecondLine { get; set; }
         public string ZipCode { get; set; }
         public OrderByCountryOrRegion CountryOrRegion { get; set; }
+    }
+
+    public class CustomOrderByAddress : OrderByAddress
+    {
+        public string CustomFirstLine { get; set; }
+        public string CustomSecondLine { get; set; }
     }
 
     public class OrderByCountryOrRegion

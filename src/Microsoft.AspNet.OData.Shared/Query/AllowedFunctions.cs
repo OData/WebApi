@@ -151,9 +151,14 @@ namespace Microsoft.AspNet.OData.Query
         All = 0x10000000,
 
         /// <summary>
+        /// A value that corresponds to allowing 'MatchesPattern' function in $filter.
+        /// </summary>
+        MatchesPattern = 0x20000000,
+
+        /// <summary>
         /// A value that corresponds to allowing all string related functions in $filter.
         /// </summary>
-        AllStringFunctions = StartsWith | EndsWith | Contains | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
+        AllStringFunctions = StartsWith | EndsWith | Contains | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim | MatchesPattern,
 
         /// <summary>
         /// A value that corresponds to allowing all datetime related functions in $filter.

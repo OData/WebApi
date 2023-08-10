@@ -2439,9 +2439,9 @@ FlagsAttribute(),
 public enum Microsoft.AspNet.OData.Query.AllowedFunctions : int {
 	All = 268435456
 	AllDateTimeFunctions = 7010304
-	AllFunctions = 535494655
+	AllFunctions = 1072365567
 	AllMathFunctions = 58720256
-	AllStringFunctions = 1023
+	AllStringFunctions = 536871935
 	Any = 134217728
 	Cast = 1024
 	Ceiling = 33554432
@@ -2456,6 +2456,7 @@ public enum Microsoft.AspNet.OData.Query.AllowedFunctions : int {
 	IndexOf = 16
 	IsOf = 67108864
 	Length = 8
+	MatchesPattern = 536870912
 	Minute = 524288
 	Month = 8192
 	None = 0

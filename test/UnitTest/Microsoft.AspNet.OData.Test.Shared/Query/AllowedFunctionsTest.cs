@@ -32,6 +32,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     AllowedFunctions.ToLower,
                     AllowedFunctions.ToUpper,
                     AllowedFunctions.Trim,
+                    AllowedFunctions.MatchesPattern,
                 };
             }
         }

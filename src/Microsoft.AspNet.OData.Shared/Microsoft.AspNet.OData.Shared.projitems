@@ -279,6 +279,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ModelContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperJsonConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ITruncatedCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\TruncatedCollectionOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\SelectExpandQueryOption.cs" />

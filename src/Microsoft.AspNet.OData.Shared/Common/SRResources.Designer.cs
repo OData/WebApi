@@ -3347,5 +3347,16 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("QueryOptionsNotInExpectedFormat", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' is internal and should never be deserialized into..
+        /// </summary>
+        internal static string JsonConverterDoesNotSupportRead
+        {
+            get
+            {
+                return ResourceManager.GetString("JsonConverterDoesNotSupportRead", resourceCulture);
+            }
+        }
     }
 }

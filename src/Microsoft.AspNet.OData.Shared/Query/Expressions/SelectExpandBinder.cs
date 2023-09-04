@@ -1234,7 +1234,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        /* Entityframework requires that the two different type initializers for a given type in the same query have the
+        /* EntityFramework requires that the two different type initializers for a given type in the same query have the
         same set of properties in the same order.
 
         A ~/People?$select=Name&$expand=Friend results in a select expression that has two SelectExpandWrapper<Person>
@@ -1242,22 +1242,34 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         The first wrapper has the Container property set (contains Name and Friend values) where as the second wrapper
         has the Instance property set as it contains all the properties of the expanded person.
 
-        The below four classes workaround that entity framework limitation by defining a seperate type for each
+        The below four classes workaround that EntityFramework limitation by defining a separate type for each
         property selection combination possible. */
 
-        private class SelectAllAndExpand<TEntity> : SelectExpandWrapper<TEntity>
+#if NETCOREAPP3_1_OR_GREATER
+    [System.Text.Json.Serialization.JsonConverter(typeof(SelectExpandWrapperJsonConverter))]
+#endif
+        internal class SelectAllAndExpand<TEntity> : SelectExpandWrapper<TEntity>
         {
         }
 
-        private class SelectAll<TEntity> : SelectExpandWrapper<TEntity>
+#if NETCOREAPP3_1_OR_GREATER
+    [System.Text.Json.Serialization.JsonConverter(typeof(SelectExpandWrapperJsonConverter))]
+#endif
+        internal class SelectAll<TEntity> : SelectExpandWrapper<TEntity>
         {
         }
 
-        private class SelectSomeAndInheritance<TEntity> : SelectExpandWrapper<TEntity>
+#if NETCOREAPP3_1_OR_GREATER
+    [System.Text.Json.Serialization.JsonConverter(typeof(SelectExpandWrapperJsonConverter))]
+#endif
+        internal class SelectSomeAndInheritance<TEntity> : SelectExpandWrapper<TEntity>
         {
         }
 
-        private class SelectSome<TEntity> : SelectAllAndExpand<TEntity>
+#if NETCOREAPP3_1_OR_GREATER
+    [System.Text.Json.Serialization.JsonConverter(typeof(SelectExpandWrapperJsonConverter))]
+#endif
+        internal class SelectSome<TEntity> : SelectAllAndExpand<TEntity>
         {
         }
     }

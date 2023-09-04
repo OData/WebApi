@@ -15,6 +15,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// </summary>
     /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
+#if NETCOREAPP3_1_OR_GREATER
+    [System.Text.Json.Serialization.JsonConverter(typeof(SelectExpandWrapperJsonConverter))]
+#endif
     internal class SelectExpandWrapper<TElement> : SelectExpandWrapper
     {
         /// <summary>

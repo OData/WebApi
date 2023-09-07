@@ -82,6 +82,15 @@ namespace Microsoft.AspNet.OData.Formatter
                 oDataReaderSettings.Version = version;
                 oDataReaderSettings.MaxProtocolVersion = version;
 
+                ODataPath path = internalRequest.Context.Path;
+                ODataDeserializerContext readContext = getODataDeserializerContext();
+                readContext.Path = path;
+                readContext.Model = model;
+                readContext.ResourceType = type;
+                readContext.ResourceEdmType = expectedPayloadType;
+
+                oDataReaderSettings.EnablePropertyNameCaseInsensitive = !readContext.DisableCaseInsensitiveRequestPropertyBinding;
+
                 IODataRequestMessage oDataRequestMessage = getODataRequestMessage();
 
                 string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(internalRequest.Headers);
@@ -99,13 +108,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
                 registerForDisposeAction(oDataMessageReader);
-
-                ODataPath path = internalRequest.Context.Path;
-                ODataDeserializerContext readContext = getODataDeserializerContext();
-                readContext.Path = path;
-                readContext.Model = model;
-                readContext.ResourceType = type;
-                readContext.ResourceEdmType = expectedPayloadType;
 
 #if NETCORE
                 result = await deserializer.ReadAsync(oDataMessageReader, type, readContext);

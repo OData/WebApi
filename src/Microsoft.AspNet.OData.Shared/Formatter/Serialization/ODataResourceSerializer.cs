@@ -2087,6 +2087,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     writer.WriteStart(resource);
                     WriteDeltaComplexProperties(selectExpandNode, resourceContext, writer);
+                    WriteDynamicComplexProperties(resourceContext, writer);
                     WriteDeltaNavigationProperties(selectExpandNode, resourceContext, writer);
                     writer.WriteEnd();
                 }
@@ -2105,6 +2106,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     await writer.WriteStartAsync(resource);
                     await WriteDeltaComplexPropertiesAsync(selectExpandNode, resourceContext, writer);
+                    await WriteDynamicComplexPropertiesAsync(resourceContext, writer);
                     await WriteDeltaNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                     await writer.WriteEndAsync();
                 }

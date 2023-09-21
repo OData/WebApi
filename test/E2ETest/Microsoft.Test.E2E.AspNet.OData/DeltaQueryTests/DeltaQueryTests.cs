@@ -126,11 +126,43 @@ namespace Microsoft.Test.E2E.AspNet.OData
             Assert.True(addedLink.target.Value == "http://localhost/odata/DeltaOrders(27)", "The target of the added link should be 'http://localhost/odata/DeltaOrders(27)'");
             Assert.True(addedLink.relationship.Value == "Orders", "The relationship of the added link should be 'Orders'");
         }
+
+        [Fact]
+        public async Task DeltaVerifyReslt_ContainsDynamicComplexProperties()
+        {
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/TestOrders?$deltaToken=abc");
+            get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
+            get.Headers.Add("OData-Version", "4.01");
+            HttpResponseMessage response = await Client.SendAsync(get);
+            Assert.True(response.IsSuccessStatusCode);
+
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Contains("odata/$metadata#TestOrders/$delta\"," +
+            "\"value\":[" +
+              "{" +
+                "\"Id\":1," +
+                "\"Amount\":42," +
+                "\"Location\":" +
+                "{" +
+                  "\"State\":\"State\"," +
+                  "\"ZipCode\":null," +
+                  "\"OpenProperty\":10," +
+                  "\"key-samplelist\":{" +
+                    "\"@type\":\"#Microsoft.Test.E2E.AspNet.OData.TestAddress\"," +
+                    "\"State\":\"sample state\"," +
+                    "\"ZipCode\":9," +
+                    "\"title\":\"sample title\"" +
+                  "}" +
+                "}" +
+              "}" +
+            "]" +
+          "}",
+                result);
+        }
     }
 
     public class TestCustomersController : TestODataController
     {
-
         public ITestActionResult Get()
         {
             IEdmEntityType customerType = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.TestCustomer") as IEdmEntityType;
@@ -202,6 +234,37 @@ namespace Microsoft.Test.E2E.AspNet.OData
         }
     }
 
+    public class TestOrdersController : TestODataController
+    {
+        public ITestActionResult Get()
+        {
+            IEdmModel model = Request.GetModel();
+            IEdmComplexType addressType = model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.TestAddress") as IEdmComplexType;
+            IEdmEntityType orderType = model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.TestOrder") as IEdmEntityType;
+            IEdmEntitySet ordersSet = model.FindDeclaredEntitySet("TestOrders") as IEdmEntitySet;
+            EdmChangedObjectCollection changedObjects = new EdmChangedObjectCollection(orderType);
+
+            EdmDeltaComplexObject sampleList = new EdmDeltaComplexObject(addressType);
+            sampleList.TrySetPropertyValue("State", "sample state");
+            sampleList.TrySetPropertyValue("ZipCode", 9);
+            sampleList.TrySetPropertyValue("title", "sample title"); // primitive dynamic
+
+            EdmDeltaComplexObject location = new EdmDeltaComplexObject(addressType);
+            location.TrySetPropertyValue("State", "State");
+            location.TrySetPropertyValue("ZipCode", null);
+            location.TrySetPropertyValue("OpenProperty", 10); // primitive dynamic
+            location.TrySetPropertyValue("key-samplelist", sampleList); // complex dynamic
+
+            EdmDeltaEntityObject changedOrder = new EdmDeltaEntityObject(orderType);
+            changedOrder.TrySetPropertyValue("Id", 1);
+            changedOrder.TrySetPropertyValue("Amount", 42);
+            changedOrder.TrySetPropertyValue("Location", location);
+            changedObjects.Add(changedOrder);
+
+            return Ok(changedObjects);
+        }
+    }
+
     public class TestCustomer
     {
         public int Id { get; set; }
@@ -222,6 +285,8 @@ namespace Microsoft.Test.E2E.AspNet.OData
     {
         public int Id { get; set; }
         public int Amount { get; set; }
+
+        public TestAddress Location { get; set; }
     }
 
     public class TestAddress

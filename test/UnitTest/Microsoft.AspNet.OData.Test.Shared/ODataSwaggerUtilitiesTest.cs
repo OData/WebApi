@@ -54,6 +54,8 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.NotNull(obj);
             Assert.Contains("\"Get EntitySet Customers\"", obj.ToString());
+            Assert.Contains("\"$select\"", obj.ToString());
+            Assert.Contains("\"$filter\"", obj.ToString());
         }
 
         [Fact]

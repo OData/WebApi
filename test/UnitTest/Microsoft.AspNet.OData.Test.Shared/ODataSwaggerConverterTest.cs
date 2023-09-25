@@ -68,6 +68,12 @@ namespace Microsoft.AspNet.OData.Test
         ],
         ""parameters"": [
           {
+            ""name"": ""$filter"",
+            ""in"": ""query"",
+            ""description"": ""Filter by some expression"",
+            ""type"": ""string""
+          },
+          {
             ""name"": ""$expand"",
             ""in"": ""query"",
             ""description"": ""Expand navigation property"",
@@ -270,6 +276,12 @@ namespace Microsoft.AspNet.OData.Test
           ""Orders""
         ],
         ""parameters"": [
+          {
+            ""name"": ""$filter"",
+            ""in"": ""query"",
+            ""description"": ""Filter by some expression"",
+            ""type"": ""string""
+          },
           {
             ""name"": ""$expand"",
             ""in"": ""query"",

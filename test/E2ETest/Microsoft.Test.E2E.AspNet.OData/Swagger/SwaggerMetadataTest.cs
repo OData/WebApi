@@ -113,6 +113,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Swagger
         ],
         ""parameters"": [
           {
+            ""name"": ""$filter"",
+            ""in"": ""query"",
+            ""description"": ""Filter by some expression"",
+            ""type"": ""string""
+          },
+          {
             ""name"": ""$expand"",
             ""in"": ""query"",
             ""description"": ""Expand navigation property"",
@@ -316,6 +322,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Swagger
         ],
         ""parameters"": [
           {
+            ""name"": ""$filter"",
+            ""in"": ""query"",
+            ""description"": ""Filter by some expression"",
+            ""type"": ""string""
+          },
+          {
             ""name"": ""$expand"",
             ""in"": ""query"",
             ""description"": ""Expand navigation property"",
@@ -518,6 +530,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Swagger
            ""CompositeKeyItems""
          ],
          ""parameters"": [
+           {
+             ""name"": ""$filter"",
+             ""in"": ""query"",
+             ""description"": ""Filter by some expression"",
+             ""type"": ""string""
+           },
            {
              ""name"": ""$expand"",
              ""in"": ""query"",

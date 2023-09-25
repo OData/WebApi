@@ -40,6 +40,7 @@ namespace Microsoft.AspNet.OData
                         .Description("Returns the EntitySet " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters(new JArray()
+                            .Parameter("$filter", "query", "Filter by some expression", "string")
                             .Parameter("$expand", "query", "Expand navigation property", "string")
                             .Parameter("$select", "query", "select structural property", "string")
                             .Parameter("$orderby", "query", "order by some property", "string")

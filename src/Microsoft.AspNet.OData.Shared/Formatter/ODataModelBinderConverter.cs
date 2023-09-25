@@ -232,6 +232,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
             IWebApiRequestMessage request = readContext.InternalRequest;
             ODataMessageReaderSettings oDataReaderSettings = request.ReaderSettings;
+            oDataReaderSettings.EnablePropertyNameCaseInsensitive = !readContext.DisableCaseInsensitiveRequestPropertyBinding;
 
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
             {

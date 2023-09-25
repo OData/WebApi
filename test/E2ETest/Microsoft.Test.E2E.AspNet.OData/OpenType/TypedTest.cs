@@ -590,6 +590,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
         #region Insert
 
         [Fact]
+        public async Task InsertEntityWithOpenCaseInsensitiveProperty()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                var postUri = string.Format(this.BaseAddress + "/{0}/Accounts", routing);
+
+                var postContent = JObject.Parse(
+@"{
+    'Id':4,
+    'naMe':null
+}");
+                using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
+                {
+                    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+                    var json = await response.Content.ReadAsObject<JObject>();
+
+                    var id = (int)json["Id"];
+                    Assert.Equal(4, id);
+
+                    var name = (string)json["Name"];
+                    Assert.Null(name);
+                }
+            }
+        }
+
+        [Fact]
         public async Task InsertEntityWithOpenComplexTypeProperty()
         {
             foreach (string routing in Routings)

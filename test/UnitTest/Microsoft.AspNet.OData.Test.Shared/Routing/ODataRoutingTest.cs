@@ -420,7 +420,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [Theory]
         [InlineData("CollectionOfPrimitiveTypeFunction(intValues=@p)?@p=[1,2,4,7,8")] // missing "]"
         [InlineData("CanMoveToAddress(address=@p)?@p={\"@odata.")] // not valid complex payload
-        [InlineData("EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"id\":9,\"Name\":\"Phone\"}")] // should be "ID"
+        [InlineData("EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"id1\":9,\"Name\":\"Phone\"}")] // should be "ID"
         public async Task RoutesIncorrectly_ForBadFunctionParameters(string uri)
         {
             // Arrange & Act

@@ -483,27 +483,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             Assert.Contains("$skiptoken=id", value);
         }
 
-        [Fact]
-        public async Task AddEntity()
+        [Theory]
+        [InlineData("{\"name\":\"Name\\\\11\",\"gender\":\"Female\",\"nickName\":\"N\\\\11\",\"address\":{\"city\":\"city11\",\"street\":\"street11\"}}")]
+        [InlineData("{\"id\":11,\"name\":\"Name\\\\11\",\"gender\":\"Female\",\"nickName\":\"N\\\\11\",\"address\":{\"city\":\"city11\",\"street\":\"street11\"}}")]
+        [InlineData("{\"Id\":11,\"Name\":\"Name\\\\11\",\"Gender\":\"Female\",\"nickName\":\"N\\\\11\",\"Address\":{\"City\":\"city11\",\"Street\":\"street11\"}}")]
+        public async Task AddEntity(string payload)
         {
             var postUri = this.BaseAddress + "/odata/Employees";
+            var postContent = JObject.Parse(payload);
 
-            var postContent = JObject.Parse(@"{
-                    'name':'Name11',
-                    'gender':'Female',
-                    'address':{
-                            'city':'city11',
-                            'street':'street11'
-                    }}");
             using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
             {
-                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-
                 await ResetDatasource();
 
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
                 var employee = await response.Content.ReadAsObject<JObject>();
-                var result = employee.GetValue("id");
-                Assert.Equal(11, result.Value<int>());
+                var id = employee.GetValue("id");
+                var name = employee.GetValue("name");
+                var gender = employee.GetValue("gender");
+                var nickName = employee.GetValue("nickName");
+                var address = employee.GetValue("address") as JObject;
+                Assert.NotNull(address);
+                var city = address.GetValue("city");
+                var street = address.GetValue("street");
+
+                Assert.Equal(11, id.Value<int>());
+                Assert.Equal("Name\\11", name.Value<string>());
+                Assert.Equal("Female", gender.Value<string>());
+                Assert.Equal("N\\11", nickName.Value<string>());
+                Assert.Equal("city11", city.Value<string>());
+                Assert.Equal("street11", street.Value<string>());
             }
         }
 
@@ -518,6 +528,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
                             'city':'City20',
                             'street':'Street20'
                     }}");
+
             using (HttpResponseMessage response = await Client.PutAsJsonAsync(putUri, putContent))
             {
                 await ResetDatasource();

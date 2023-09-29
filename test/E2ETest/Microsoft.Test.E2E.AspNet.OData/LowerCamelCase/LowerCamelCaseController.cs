@@ -162,7 +162,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             return Ok(_employees.Single(e => e.ID == key).Manager);
         }
 
-        public ITestActionResult Post(Employee employee)
+        public ITestActionResult Post([FromBody] Employee employee)
         {
             employee.ID = _employees.Count + 1;
             _employees.Add(employee);

@@ -30,6 +30,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 
         [DataMember]
         public Manager Manager { get; set; }
+
+        public Dictionary<string, object> ExtendedProperties { get; set; }
     }
 
     [DataContract]

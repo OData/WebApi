@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.OData.Builder
                 isNested: false);
             Contract.Assert(elementType != null);
 
-            IEdmTypeReference typeReference = model.FindDeclaredType(elementType).ToEdmTypeReference(true);
+            IEdmTypeReference typeReference = model.FindBindingType(elementType).ToEdmTypeReference(true);
             IEdmTypeReference collection = new EdmCollectionTypeReference(new EdmCollectionType(typeReference));
 
             IEdmOperation operation = model.FindDeclaredOperations(actionName).First();
@@ -278,7 +278,7 @@ namespace Microsoft.AspNet.OData.Builder
                 isNested: false);
             Contract.Assert(elementType != null);
 
-            IEdmTypeReference typeReference = model.FindDeclaredType(elementType).ToEdmTypeReference(true);
+            IEdmTypeReference typeReference = model.FindBindingType(elementType).ToEdmTypeReference(true);
             IEdmTypeReference collection = new EdmCollectionTypeReference(new EdmCollectionType(typeReference));
             IEdmOperation operation = model.FindDeclaredOperations(functionName).First();
             return feedContext.GenerateFunctionLink(collection, operation, parameterNames);
@@ -351,7 +351,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             IEdmModel model = resourceContext.EdmModel;
-            IEdmTypeReference typeReference = model.FindDeclaredType(bindingParameterType).ToEdmTypeReference(true);
+            IEdmTypeReference typeReference = model.FindBindingType(bindingParameterType).ToEdmTypeReference(true);
             IEdmOperation operation = model.FindDeclaredOperations(actionName).First();
             return resourceContext.GenerateActionLink(typeReference, operation);
         }
@@ -422,7 +422,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             IEdmModel model = resourceContext.EdmModel;
-            IEdmTypeReference typeReference = model.FindDeclaredType(bindingParameterType).ToEdmTypeReference(true);
+            IEdmTypeReference typeReference = model.FindBindingType(bindingParameterType).ToEdmTypeReference(true);
             IEdmOperation operation = model.FindDeclaredOperations(functionName).First();
             return resourceContext.GenerateFunctionLink(typeReference, operation, parameterNames);
         }
@@ -660,6 +660,22 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             return pathSegments;
+        }
+
+        private static IEdmSchemaType FindBindingType(this IEdmModel model, string bindingParameterType)
+        {
+            IEdmSchemaType type = model.FindDeclaredType(bindingParameterType);
+            if (type != null)
+            {
+                return type;
+            }
+
+            // When the customer uses 'OnModelCreating' to change the type name case,
+            // the bindingParameterType could mis-match the type defined in the model.
+            // So, let's loose the logic to use 'ignore case' lookup.
+            return model.SchemaElements.OfType<IEdmSchemaType>()
+                .Where(e => string.Equals(bindingParameterType, e.FullName(), StringComparison.OrdinalIgnoreCase))
+                .SingleOrDefault();
         }
     }
 }

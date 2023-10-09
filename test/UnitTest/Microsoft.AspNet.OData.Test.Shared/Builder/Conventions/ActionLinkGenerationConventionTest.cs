@@ -75,6 +75,57 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
+        public void Convention_GeneratesUri_ForActionBoundToEntity_UsingCamelCase()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.OnModelCreating += ApplyLowerCamelCase;
+            builder.EntitySet<Customer>("Customers");
+            var action = builder.EntityType<Customer>().Action("simpleAction");
+            action.Parameter<string>("param");
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act
+            var configuration = RoutingConfigurationFactory.Create();
+            configuration.MapODataServiceRoute("odata", "odata", model);
+
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost:123", configuration, "odata");
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+            var edmType = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "Customer");
+            Assert.Null(edmType); // guard, since it's lower camel case, it should be null.
+            edmType = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "customer");
+            Assert.NotNull(edmType);
+
+            var serializerContext = ODataSerializerContextFactory.Create(model, customers, request);
+            var resourceContext = new ResourceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
+
+            // Assert
+            var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "simpleAction");
+            Assert.NotNull(edmAction);
+
+            OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
+            Uri link = actionLinkBuilder.BuildLink(resourceContext);
+
+            Assert.Equal("http://localhost:123/odata/Customers(109)/Default.simpleAction", link.AbsoluteUri);
+        }
+
+        internal static void ApplyLowerCamelCase(ODataConventionModelBuilder builder)
+        {
+            LowerCamelCaser lowerCamelCaser = new LowerCamelCaser();
+
+            // handle structural types & their properties
+            foreach (StructuralTypeConfiguration type in builder.StructuralTypes)
+            {
+                type.Name = lowerCamelCaser.ToLowerCamelCase(type.Name);
+                foreach (PropertyConfiguration property in type.Properties)
+                {
+                    property.Name = lowerCamelCaser.ToLowerCamelCase(property.Name);
+                }
+            }
+        }
+
+        [Fact]
         public void Apply_WorksFor_ActionBoundToCollectionOfEntity()
         {
             // Arrange

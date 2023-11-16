@@ -25,6 +25,15 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData
 {
+    public class MyODataDeltaVersionProvider : IODataDeltaVersionProvider
+    {
+        public MyODataDeltaVersionProvider(ODataVersion version)
+        {
+            Version = version;
+        }
+
+        public ODataVersion Version { get; }
+    }
     public class DeltaQueryTests : WebHostTestBase
     {
         public DeltaQueryTests(WebHostTestFixture fixture)
@@ -34,8 +43,19 @@ namespace Microsoft.Test.E2E.AspNet.OData
 
         protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
+            IEdmModel model = GetModel(config);
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
+            IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefault();
+
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", model, pathHandler, conventions);
+
+            config.MapODataServiceRoute("odata2", "odata2",
+                builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => GetModel(config))
+                       .AddService(ServiceLifetime.Singleton, sp => pathHandler)
+                       .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp => conventions)
+                       .AddService<IODataDeltaVersionProvider>(ServiceLifetime.Singleton, sp => new MyODataDeltaVersionProvider(ODataVersion.V4)));
         }
 
         private static IEdmModel GetModel(WebRouteConfiguration config)
@@ -47,7 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
         }
 
         [Fact]
-        public async Task DeltaVerifyReslt()
+        public async Task DeltaVerifyResult()
         {
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/TestCustomers?$deltaToken=abc");
             get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
@@ -128,7 +148,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
         }
 
         [Fact]
-        public async Task DeltaVerifyReslt_ContainsDynamicComplexProperties()
+        public async Task DeltaVerifyResult_ContainsDynamicComplexProperties()
         {
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/TestOrders?$deltaToken=abc");
             get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
@@ -149,6 +169,37 @@ namespace Microsoft.Test.E2E.AspNet.OData
                   "\"OpenProperty\":10," +
                   "\"key-samplelist\":{" +
                     "\"@type\":\"#Microsoft.Test.E2E.AspNet.OData.TestAddress\"," +
+                    "\"State\":\"sample state\"," +
+                    "\"ZipCode\":9," +
+                    "\"title\":\"sample title\"" +
+                  "}" +
+                "}" +
+              "}" +
+            "]" +
+          "}",
+                result);
+        }
+
+        [Fact]
+        public async Task DeltaVerifyResult_ContainsDynamicComplexProperties_UsingDeltaVersionProvider()
+        {
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata2/TestOrders?$deltaToken=abc");
+            HttpResponseMessage response = await Client.SendAsync(get);
+            Assert.True(response.IsSuccessStatusCode);
+
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Contains("odata/$metadata#TestOrders/$delta\"," +
+            "\"value\":[" +
+              "{" +
+                "\"Id\":1," +
+                "\"Amount\":42," +
+                "\"Location\":" +
+                "{" +
+                  "\"State\":\"State\"," +
+                  "\"ZipCode\":null," +
+                  "\"OpenProperty\":10," +
+                  "\"key-samplelist\":{" +
+                    "\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.TestAddress\"," +
                     "\"State\":\"sample state\"," +
                     "\"ZipCode\":9," +
                     "\"title\":\"sample title\"" +

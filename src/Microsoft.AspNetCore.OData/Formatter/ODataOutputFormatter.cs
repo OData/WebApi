@@ -259,7 +259,8 @@ namespace Microsoft.AspNet.OData.Formatter
                 (services) => ODataMessageWrapperHelper.Create(new StreamWrapper(response.Body), response.Headers, services),
                 (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
                 (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
-                getODataSerializerContext);
+                getODataSerializerContext,
+                ResultHelpers.GetDeltaVersion(request));
         }
 
         private static async Task CopyStreamAsync(Stream source, HttpResponse response)

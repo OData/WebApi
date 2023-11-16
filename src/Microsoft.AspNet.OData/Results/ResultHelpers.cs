@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -89,6 +90,24 @@ namespace Microsoft.AspNet.OData.Results
                 properties.ODataMinServiceVersion ??
                 properties.ODataServiceVersion ??
                 ODataVersionConstraint.DefaultODataVersion;
+        }
+
+        internal static ODataVersion GetDeltaVersion(HttpRequestMessage request)
+        {
+            if (request != null)
+            {
+                IServiceProvider serviceProvider = request.GetRequestContainer();
+                if (serviceProvider != null)
+                {
+                    IODataDeltaVersionProvider provider = serviceProvider.GetService<IODataDeltaVersionProvider>();
+                    if (provider != null)
+                    {
+                        return provider.Version;
+                    }
+                }
+            }
+
+            return ODataVersion.V401;
         }
     }
 }

@@ -89,6 +89,10 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 public interface Microsoft.AspNet.OData.IODataAPIHandler {
 }
 
+public interface Microsoft.AspNet.OData.IODataDeltaVersionProvider {
+	Microsoft.OData.ODataVersion Version  { public abstract get; }
+}
+
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
 

@@ -90,6 +90,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DefaultODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandlerFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IODataDeltaVersionProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIResponseStatus.cs" />

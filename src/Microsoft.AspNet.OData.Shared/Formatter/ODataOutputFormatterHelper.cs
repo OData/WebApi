@@ -127,7 +127,8 @@ namespace Microsoft.AspNet.OData.Formatter
             Func<IServiceProvider, ODataMessageWrapper> getODataMessageWrapper,
             Func<IEdmTypeReference, ODataSerializer> getEdmTypeSerializer,
             Func<Type, ODataSerializer> getODataPayloadSerializer,
-            Func<ODataSerializerContext> getODataSerializerContext)
+            Func<ODataSerializerContext> getODataSerializerContext,
+            ODataVersion deltaVersion)
         {
             if (model == null)
             {
@@ -160,7 +161,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
             if (serializer.ODataPayloadKind == ODataPayloadKind.Delta)
             {
-                writerSettings.Version = ODataVersion.V401;
+                writerSettings.Version = deltaVersion;
             }
             else
             {

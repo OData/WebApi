@@ -339,7 +339,8 @@ namespace Microsoft.AspNet.OData.Formatter
                     (services) => ODataMessageWrapperHelper.Create(writeStream, contentHeaders, services),
                     (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
                     (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, Request),
-                    getODataSerializerContext);
+                    getODataSerializerContext,
+                    ResultHelpers.GetDeltaVersion(Request));
 
                 return TaskHelpers.Completed();
             }

@@ -70,7 +70,8 @@ namespace Microsoft.AspNet.OData.Query
             foreach (IEdmNavigationProperty navProp in navigationProperties)
             {
                 count++;
-                PropertyInfo prop = type.GetProperty(navProp.Name);
+                string clrPropertyName = EdmLibHelpers.GetClrPropertyName(navProp, model);
+                PropertyInfo prop = type.GetProperty(clrPropertyName);
 
                 if (isCollection)
                 {
@@ -86,7 +87,7 @@ namespace Microsoft.AspNet.OData.Query
                         if (!navPropNames.Contains(navProp.Name))
                         {
                             expandString += !isNestedExpand ? "" : "(";
-                            expandString += count > 1 ? "," + prop.Name : string.Concat("$expand=", prop.Name);
+                            expandString += count > 1 ? "," + navProp.Name : string.Concat("$expand=", navProp.Name);
                             navPropNames.Add(navProp.Name);
                             expandString += GenerateExpandQueryStringInternal(navPropValue, model, true);
                         }
@@ -108,7 +109,7 @@ namespace Microsoft.AspNet.OData.Query
                         if (!navPropNames.Contains(navProp.Name))
                         {
                             expandString += !isNestedExpand ? "" : "(";
-                            expandString += count > 1 ? "," + prop.Name : string.Concat("$expand=", prop.Name);
+                            expandString += count > 1 ? "," + navProp.Name : string.Concat("$expand=", navProp.Name);
                             navPropNames.Add(navProp.Name);
                             expandString += GenerateExpandQueryStringInternal(navPropValue, model, true);
                         }

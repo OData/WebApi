@@ -488,4 +488,36 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             var cntrl = new EmployeesController();
         }
     }
+
+    public class StudentController : TestODataController
+    {
+        public static IList<Student> Students = null;
+        public static IList<Course> Courses = null;
+
+        public StudentController()
+        {
+            if (null == Students)
+            {
+                InitStudents();
+            }
+        }
+
+        private void InitStudents()
+        {
+            Students = new List<Student>();
+            Courses = new List<Course>();
+        }
+
+        [ODataRoute("Students")]
+        [HttpPost]
+        [EnableQuery]
+        public ITestActionResult Post([FromBody] Student student)
+        {
+            var handler = new StudentAPIHandler();
+
+            handler.DeepInsert(student, Request.GetModel(), new APIHandlerFactory(Request.GetModel()));
+
+            return Created(student);
+        }
+    }
 }

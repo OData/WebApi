@@ -178,7 +178,7 @@ namespace Microsoft.AspNet.OData
                 navigationProperties = edmEntityType.NavigationProperties();
             }
 
-            IDictionary<string, object> keys = GetKeys(entityKey, resource, type); // Refactored ApplyHandler. Consider removing this.
+            IDictionary<string, object> keys = GetKeys(model, entityKey, resource, type); // Refactored ApplyHandler. Consider removing this.
 
             IODataAPIHandler odataIdContainerHandler = null;
 
@@ -203,7 +203,8 @@ namespace Microsoft.AspNet.OData
             {
                 foreach (IEdmNavigationProperty navProp in navigationProperties)
                 {
-                    navPropNames.Add(navProp.Name);
+                    string clrPropertyName = EdmLibHelpers.GetClrPropertyName(navProp, model);
+                    navPropNames.Add(clrPropertyName);
                 }
             }
 
@@ -422,7 +423,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private static IDictionary<string, object> GetKeys(IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)
+        private static IDictionary<string, object> GetKeys(IEdmModel model, IEnumerable<IEdmStructuralProperty> properties, object resource, Type type)
         {
             IDictionary<string, object> keys = new Dictionary<string, object>();
 
@@ -433,7 +434,8 @@ namespace Microsoft.AspNet.OData
 
             foreach (IEdmStructuralProperty property in properties)
             {
-                PropertyInfo prop = type.GetProperty(property.Name);
+                string clrPropertyName = EdmLibHelpers.GetClrPropertyName(property, model);
+                PropertyInfo prop = type.GetProperty(clrPropertyName);
                 object value = prop.GetValue(resource, null);
 
                 keys.Add(new KeyValuePair<string, object>(property.Name, value));

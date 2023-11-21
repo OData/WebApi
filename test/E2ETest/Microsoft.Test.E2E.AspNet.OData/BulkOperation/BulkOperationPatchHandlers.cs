@@ -1926,4 +1926,230 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return ODataAPIResponseStatus.Success;
         }
     }
+
+    internal class StudentAPIHandler : ODataAPIHandler<Student>
+    {
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Student createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new Student();
+                StudentController.Students.Add(createdObject);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                var id = keyValues.First().Value.ToString();
+                var student = StudentController.Students.First(x => x.Id == Int32.Parse(id));
+
+                StudentController.Students.Remove(student);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Student originalObject, out string errorMessage)
+        {
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                var id = keyValues["Id"].ToString();
+                originalObject = StudentController.Students.FirstOrDefault(x => x.Id == Int32.Parse(id));
+
+                if (originalObject == null)
+                {
+                    status = ODataAPIResponseStatus.NotFound;
+                }
+            }
+            catch (Exception ex)
+            {
+                status = ODataAPIResponseStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override IODataAPIHandler GetNestedHandler(Student parent, string navigationPropertyName)
+        {
+            switch (navigationPropertyName)
+            {
+                case "Courses":
+                    return new CourseAPIHandler(parent);
+                default:
+                    return null;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Student resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Student createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Student originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Student resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Student parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class CourseAPIHandler : ODataAPIHandler<Course>
+    {
+        Student student;
+        public CourseAPIHandler(Student student)
+        {
+            this.student = student;
+        }
+
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Course createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new Course();
+                StudentController.Courses.Add(createdObject);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                var id = keyValues.First().Value.ToString();
+                var course = StudentController.Courses.First(x => x.Id == Int32.Parse(id));
+
+                StudentController.Courses.Remove(course);
+
+                return ODataAPIResponseStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return ODataAPIResponseStatus.Failure;
+            }
+        }
+
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Course originalObject, out string errorMessage)
+        {
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                var id = keyValues["Id"].ToString();
+                originalObject = StudentController.Courses.FirstOrDefault(x => x.Id == Int32.Parse(id));
+
+                if (originalObject == null)
+                {
+                    status = ODataAPIResponseStatus.NotFound;
+                }
+            }
+            catch (Exception ex)
+            {
+                status = ODataAPIResponseStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override IODataAPIHandler GetNestedHandler(Course parent, string navigationPropertyName)
+        {
+            return null;
+        }
+
+        public override ODataAPIResponseStatus TryAddRelatedObject(Course resource, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            this.student.Courses.Add(resource);
+
+            return ODataAPIResponseStatus.Success;
+        }
+
+        public override Task<ODataAPIResponseStatus> TryCreateAsync(IDictionary<string, object> keyValues, out Course createdObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryGetAsync(IDictionary<string, object> keyValues, out Course originalObject, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryDeleteAsync(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ODataAPIResponseStatus> TryAddRelatedObjectAsync(Course resource, out string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IODataAPIHandler GetNestedHandlerAsync(Course parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -31,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            var controllers = new[] { typeof(EmployeesController), typeof(CompanyController), typeof(MetadataController) };
+            var controllers = new[] { typeof(EmployeesController), typeof(CompanyController), typeof(MetadataController), typeof(StudentController) };
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
@@ -1486,6 +1486,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [Theory]
+        [InlineData("/convention/Students")]
+        [InlineData("/convention/Students?$expand=StudentCourses")]
+        public async Task PostStudent_WithCourse(string uri)
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + uri;
+
+            var content = @"{'StudentId':1,'StudentName':'Student 1',
+                            'StudentCourses':[{'CourseId': 99, 'CourseName': 'Course 99'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            var expected = "Courses\":[{\"CourseId\":99,\"CourseName\":\"Course 99\"}]";
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Contains(expected, json);
             }
         }
 

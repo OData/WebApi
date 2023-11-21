@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 
@@ -160,6 +161,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public int Id { get; set; }
         public string Street { get; set; }
     }
+
+    [DataContract]
+    public class Student
+    {
+        [Key]
+        [DataMember(Name="StudentId")]
+        public int Id { get; set; }
+
+        [DataMember(Name = "StudentName")]
+        public string Name { get; set; }
+
+        [DataMember(Name = "StudentCourses")]
+        public List<Course> Courses { get; set; }
+    }
+
+    [DataContract]
+    public class Course
+    {
+        [Key]
+        [DataMember(Name = "CourseId")]
+        public int Id { get; set; }
+
+        [DataMember(Name = "CourseName")]
+        public string Name { get; set; }
+    }
+
 
     public class FriendColl<T> : ICollection<T>
     {

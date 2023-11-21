@@ -24,9 +24,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
     <!-- Define the Items for .NET Standard 2.0 -->
     <PackageReference Include="Desktop.Analyzers" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.3" />
     <!-- PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" /> -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
@@ -79,6 +79,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Netcore.app">
+      <Version>2.0.3</Version>
+    </PackageReference>
   </ItemGroup>
   <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
     <PropertyGroup>

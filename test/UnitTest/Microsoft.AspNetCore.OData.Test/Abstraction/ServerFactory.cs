@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
             builder.ConfigureServices(services =>
             {
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
                 services.AddMvc();
 #else
                 services.AddMvc(options => options.EnableEndpointRouting = false)

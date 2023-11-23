@@ -270,8 +270,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
     public class PathAndQueryController : TestODataController
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "MVC1004:Rename model bound parameter.", Justification = "<Pending>")]
         public void Get(ODataPath path, ODataQueryOptions queryOptions) { }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "MVC1004:Rename model bound parameter.", Justification = "<Pending>")]
         public void Get(ODataPath path) { }
     }
 
@@ -297,12 +299,14 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
     public class KeyAndRelatedKeyAndPathController : TestODataController
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "MVC1004:Rename model bound parameter.", Justification = "<Pending>")]
         public void Get(int key, int relatedKey, ODataPath path) { }
 
         public void Get(int key, int relatedKey) { }
 
         public void Get(int key, int relatedKey, int navigationProperty) { }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "MVC1004:Rename model bound parameter.", Justification = "<Pending>")]
         public void Get(int key, ODataPath path) { }
     }
 

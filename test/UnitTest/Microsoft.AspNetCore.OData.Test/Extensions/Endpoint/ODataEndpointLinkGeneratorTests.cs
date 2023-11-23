@@ -5,7 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-#if !NETCOREAPP2_0
+#if !NETCOREAPP2_1
 using System;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Common;

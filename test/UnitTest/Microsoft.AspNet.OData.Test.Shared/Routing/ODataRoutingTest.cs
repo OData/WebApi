@@ -666,6 +666,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         }
 
         [AcceptVerbs("GET", "POST", "PUT", "PATCH", "DELETE", "CUSTOM")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "MVC1004:Rename model bound parameter.", Justification = "<Pending>")]
         public string HandleUnmappedRequest(ODataPath path)
         {
             return path.PathTemplate;

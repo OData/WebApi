@@ -8,7 +8,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
     using Microsoft.AspNetCore.Mvc.Internal;
     using Microsoft.AspNetCore.Http.Internal;
 #endif
@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Test.Extensions
             var services = new Mock<IServiceProvider>();
             services.Setup(s => s.GetService(typeof(ApplicationPartManager))).Returns(new ApplicationPartManager());
 
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
             var request = new DefaultHttpRequest(new DefaultHttpContext { RequestServices = services.Object });
 #else
             var request = new DefaultHttpContext { RequestServices = services.Object }.Request;

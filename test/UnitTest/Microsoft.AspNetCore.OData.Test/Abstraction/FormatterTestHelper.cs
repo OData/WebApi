@@ -16,7 +16,7 @@ using Microsoft.AspNet.OData.Test.Formatter;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
     using Microsoft.AspNetCore.Mvc.Internal;
 #endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;

@@ -17,7 +17,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
 using System.Text;
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OData;
@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 as IReadOnlyList<ControllerActionDescriptor>;
             actionDescriptors = actionDescriptors.Where(a => a.ActionName == actionName).ToList();
             var serviceProvider = routeBuilder.ServiceProvider;
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
             var actionsProvider = serviceProvider.GetRequiredService<IActionDescriptorCollectionProvider>();
             var actionConstraintsProvider = serviceProvider.GetRequiredService<ActionConstraintCache>();
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();

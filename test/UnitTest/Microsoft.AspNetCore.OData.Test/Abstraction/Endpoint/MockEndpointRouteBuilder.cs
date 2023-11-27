@@ -5,7 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-#if !NETCOREAPP2_0
+#if !NETCOREAPP2_1
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;

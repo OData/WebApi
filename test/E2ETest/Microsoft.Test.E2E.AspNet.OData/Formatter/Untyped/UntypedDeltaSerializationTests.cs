@@ -70,7 +70,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 
             for (int i = 10; i < 15; i++)
             {
-                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["@id"].Value));
+                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["@odata.id"].Value));
             }
         }
     }

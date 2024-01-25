@@ -158,7 +158,8 @@ namespace Microsoft.AspNet.OData.Formatter
             ODataMessageWriterSettings writerSettings = internalRequest.WriterSettings;
             writerSettings.BaseUri = baseAddress;
 
-            if (serializer.ODataPayloadKind == ODataPayloadKind.Delta)
+            // Set the response version to v4.01 when the request is a delta patch, but not any time we write a delta response payload.
+            if (serializer.ODataPayloadKind == ODataPayloadKind.Delta && internalRequest.Method == ODataRequestMethod.Patch)
             {
                 writerSettings.Version = ODataVersion.V401;
             }

@@ -21,18 +21,14 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 {
     public class UntypedDeltaSerializationTests : WebHostTestBase
     {
-        private readonly ITestOutputHelper output;
-
-        public UntypedDeltaSerializationTests(WebHostTestFixture fixture, ITestOutputHelper output)
+        public UntypedDeltaSerializationTests(WebHostTestFixture fixture)
             : base(fixture)
         {
-            this.output = output;
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
@@ -59,7 +55,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             string url = "/untyped/UntypedDeltaCustomers?$deltatoken=abc";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + url);
 
-            // by default, the odata version is 4.0. It will throw:
+            // By default, the odata version is 4.0. It will throw:
             // "Cannot transition from state 'DeletedResource' to state 'NestedResourceInfo' when writing an OData 4.0 payload.
             // To write content to a deleted resource, please specify ODataVersion 4.01 or greater in MessageWriterSettings."
             request.Headers.Add("OData-Version", "4.01");

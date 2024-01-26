@@ -1228,6 +1228,15 @@
     <Compile Include="..\LowerCamelCase\LowerCamelCaseTest.cs">
       <Link>LowerCamelCase\LowerCamelCaseTest.cs</Link>
     </Compile>
+    <Compile Include="..\MediaTypes\MediaTypesModels.cs">
+      <Link>MediaTypes\MediaTypesModels.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaTypes\MediaTypesOrdersController.cs">
+      <Link>MediaTypes\MediaTypesOrdersController.cs</Link>
+    </Compile>
+    <Compile Include="..\MediaTypes\MediaTypesTests.cs">
+      <Link>MediaTypes\MediaTypesTests.cs</Link>
+    </Compile>
     <Compile Include="..\ModelAliasing\FormattersTests.cs">
       <Link>ModelAliasing\FormattersTests.cs</Link>
     </Compile>

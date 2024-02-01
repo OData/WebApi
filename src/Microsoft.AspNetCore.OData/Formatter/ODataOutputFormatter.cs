@@ -191,7 +191,8 @@ namespace Microsoft.AspNet.OData.Formatter
             // Set the character set.
             MediaTypeHeaderValue currentContentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
             RequestHeaders requestHeader = request.GetTypedHeaders();
-            if (requestHeader != null && requestHeader.AcceptCharset != null)
+            // Starting from ASP .NET Core 3.0 AcceptCharset returns an empty collection instead of null.
+            if (requestHeader?.AcceptCharset?.Count > 0)
             {
                 IEnumerable<string> acceptCharsetValues = requestHeader.AcceptCharset.Select(cs => cs.Value.Value);
 

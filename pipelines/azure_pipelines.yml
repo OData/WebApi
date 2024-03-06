@@ -36,7 +36,7 @@ extends:
         steps:
         - checkout: self
           fetchTags: false
-        - template: /pipelines/rolling-policheck-v1.yml
+        - template: /pipelines/rolling-policheck-v1.yml@self
         - task: NuGetToolInstaller@0
           displayName: Use NuGet >=5.8.0
           inputs:

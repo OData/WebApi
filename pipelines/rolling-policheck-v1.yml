@@ -1,0 +1,5 @@
+steps:
+- task: PythonScript@0
+  inputs:
+    scriptSource: inline
+    script: print('This is a placeholder task for the excluded securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1 task')

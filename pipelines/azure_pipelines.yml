@@ -32,6 +32,7 @@ extends:
           name: MSSecurity-1ES-Build-Agents-Pool
           image: MSSecurity-1ES-Windows-2022
           os: windows
+          type: windows
         variables:
         - name: ob_outputDirectory
           value: '$(Build.ArtifactStagingDirectory)/ONEBRANCH_ARTIFACT'

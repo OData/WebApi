@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include:
+    - master
+
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: master
+
+pr:
+  - master
+variables:
+  BuildPlatform: 'Any Cpu'
+  BuildConfiguration: 'Release'
+stages: 
+- stage: Build
+  jobs:
+    - job: Main
+      displayName: Main Build
+      # setting a 3hour timeout as webapi tests normally take about 2hr 30 mins
+      timeoutInMinutes: 180
+
+      pool:
+        vmImage: windows-2019  # The project is still targeting on .NET 4.5, we need this vm image to finish .NET 4.5 build. We should update it later.
+
+      steps:
+        - template: ./common.yml

@@ -2,7 +2,7 @@ trigger:
   branches:
     include:
     - master
-name: $(date:yyyyMMdd)$(rev:.r)
+name: WebApi-master-rolling-$(date:yyyyMMdd)$(rev:.r)
 variables:
 - name: BuildConfiguration
   value: release
@@ -36,7 +36,7 @@ extends:
         steps:
         - checkout: self
           fetchTags: false
-        - template: pipelines/rolling-policheck-v1.yml
+        - template: /pipelines/rolling-policheck-v1.yml
         - task: NuGetToolInstaller@0
           displayName: Use NuGet >=5.8.0
           inputs:

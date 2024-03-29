@@ -551,7 +551,11 @@ namespace Microsoft.AspNet.OData.Builder
                 bool isCollection;
                 IEdmTypeConfiguration mappedType;
 
-                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
+                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType, out bool isValid);
+                if (!isValid)
+                {
+                    continue;
+                }
 
                 if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
                 {
@@ -694,17 +698,25 @@ namespace Microsoft.AspNet.OData.Builder
 
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type
         // earlier or the user told us about it.
-        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType)
+        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType, out bool IsValid)
         {
             Contract.Assert(property != null);
+
+            IsValid = true;
+            mappedType = null;
+            isCollection = false;
+
+            if (typeof(ODataIdContainer) == property.PropertyType)
+            {
+                IsValid = false;
+                return (PropertyKind)(int.MaxValue);
+            }
 
             // IDictionary<string, object> is used as a container to save/retrieve dynamic properties for an open type.
             // It is different from other collections (for example, IEnumerable<T> or IDictionary<string, int>)
             // which are used as navigation properties.
             if (typeof(IDictionary<string, object>).IsAssignableFrom(property.PropertyType))
             {
-                mappedType = null;
-                isCollection = false;
                 return PropertyKind.Dynamic;
             }
 
@@ -712,16 +724,12 @@ namespace Microsoft.AspNet.OData.Builder
             // It is different from other collections (for example, IDictionary<string,IDictionary<string, int>>)          
             if (typeof(IODataInstanceAnnotationContainer).IsAssignableFrom(property.PropertyType))
             {
-                mappedType = null;
-                isCollection = false;
-
                 return PropertyKind.InstanceAnnotations;
             }
 
             PropertyKind propertyKind;
             if (TryGetPropertyTypeKind(property.PropertyType, out mappedType, out propertyKind))
             {
-                isCollection = false;
                 return propertyKind;
             }
 
@@ -729,6 +737,13 @@ namespace Microsoft.AspNet.OData.Builder
             if (TypeHelper.IsCollection(property.PropertyType, out elementType))
             {
                 isCollection = true;
+
+                if (typeof(ODataIdContainer) == elementType)
+                {
+                    IsValid = false;
+                    return (PropertyKind)(int.MaxValue);
+                }
+
                 if (TryGetPropertyTypeKind(elementType, out mappedType, out propertyKind))
                 {
                     return propertyKind;

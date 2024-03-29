@@ -291,17 +291,20 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             string typeName = edmSchemaType.FullName();
-            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assembliesResolver);
 
-            if (matchingTypes.Count() > 1)
+            // Calling "ToList()" to avoid multiple enumerates.
+            IList<Type> matchingTypes = GetMatchingTypes(typeName, assembliesResolver).ToList();
+
+            if (matchingTypes.Count > 1)
             {
                 throw Error.Argument("edmTypeReference", SRResources.MultipleMatchingClrTypesForEdmType,
-                    typeName, String.Join(",", matchingTypes.Select(type => type.AssemblyQualifiedName)));
+                    typeName, String.Join(",", matchingTypes.Select(t => t.AssemblyQualifiedName)));
             }
 
-            edmModel.SetAnnotationValue<ClrTypeAnnotation>(edmSchemaType, new ClrTypeAnnotation(matchingTypes.SingleOrDefault()));
+            Type type = matchingTypes.Count == 0 ? null : matchingTypes[0];
+            edmModel.SetAnnotationValue(edmSchemaType, new ClrTypeAnnotation(type));
 
-            return matchingTypes.SingleOrDefault();
+            return type;
         }
 
         public static bool IsNotFilterable(IEdmProperty edmProperty, IEdmProperty pathEdmProperty,

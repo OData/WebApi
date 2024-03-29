@@ -2374,6 +2374,30 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.Many);
         }
 
+        public class TypeContainsODataIdContainer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public ODataIdContainer Container { get; set; }
+            public IList<ODataIdContainer> Containers { get; set; }
+        }
+
+        [Fact]
+        public void CanBuildModel_OmitODataIdContainerProperties()
+        {
+            var configuration = RoutingConfigurationFactory.Create();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration, isQueryCompositionMode: true);
+            builder.EntityType<TypeContainsODataIdContainer>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityType entity = model.AssertHasEntityType(typeof(TypeContainsODataIdContainer));
+
+            Assert.Equal(2, entity.Properties().Count());
+            entity.AssertHasKey(model, "Id", EdmPrimitiveTypeKind.Int32);
+            entity.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, true);
+        }
+
         [Theory]
         [InlineData(typeof(object[]))]
         [InlineData(typeof(IEnumerable<object>))]
@@ -3351,6 +3375,37 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 
         [Fact]
         public void CanConfig_MaxLengthOfStringAndBinaryType()
+        {
+            // Arrange
+            ODataModelBuilder modelBuidler = ODataConventionModelBuilderFactory.Create();
+            modelBuidler.EntitySet<MaxLengthEntity>("MaxLengthEntity");
+            var entityType = modelBuidler.EntityType<MaxLengthEntity>();
+
+            // Act
+            IEdmModel model = modelBuidler.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "MaxLengthEntity");
+            IEdmStringTypeReference nameType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("Name")).Type;
+            IEdmStringTypeReference nonLengthType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("NonLength")).Type;
+
+            // Assert
+            Assert.NotNull(model);
+            var nameProp = entityType.Properties.Where(p => p.Name.Equals("Name")).First();
+            Assert.NotNull(nameProp);
+            var byteProp = entityType.Properties.Where(p => p.Name.Equals("Byte")).First();
+            Assert.NotNull(byteProp);
+            var nonLengthProp = entityType.Properties.Where(p => p.Name.Equals("NonLength")).First();
+            Assert.NotNull(nonLengthProp);
+            Assert.Equal(3, ((LengthPropertyConfiguration)nameProp).MaxLength);
+            Assert.Equal(5, ((LengthPropertyConfiguration)byteProp).MaxLength);
+            Assert.Null(((LengthPropertyConfiguration)nonLengthProp).MaxLength);
+            Assert.Equal(3, nameType.MaxLength);
+            Assert.Null(nonLengthType.MaxLength);
+        }
+
+        [Fact]
+        public void CanBuildEdmModel_OmitODataIdContainerProperty()
         {
             // Arrange
             ODataModelBuilder modelBuidler = ODataConventionModelBuilderFactory.Create();

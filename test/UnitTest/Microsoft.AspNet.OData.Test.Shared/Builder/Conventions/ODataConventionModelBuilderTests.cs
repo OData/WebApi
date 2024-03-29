@@ -3403,37 +3403,6 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.Equal(3, nameType.MaxLength);
             Assert.Null(nonLengthType.MaxLength);
         }
-
-        [Fact]
-        public void CanBuildEdmModel_OmitODataIdContainerProperty()
-        {
-            // Arrange
-            ODataModelBuilder modelBuidler = ODataConventionModelBuilderFactory.Create();
-            modelBuidler.EntitySet<MaxLengthEntity>("MaxLengthEntity");
-            var entityType = modelBuidler.EntityType<MaxLengthEntity>();
-
-            // Act
-            IEdmModel model = modelBuidler.GetEdmModel();
-            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "MaxLengthEntity");
-            IEdmStringTypeReference nameType =
-                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("Name")).Type;
-            IEdmStringTypeReference nonLengthType =
-                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("NonLength")).Type;
-
-            // Assert
-            Assert.NotNull(model);
-            var nameProp = entityType.Properties.Where(p => p.Name.Equals("Name")).First();
-            Assert.NotNull(nameProp);
-            var byteProp = entityType.Properties.Where(p => p.Name.Equals("Byte")).First();
-            Assert.NotNull(byteProp);
-            var nonLengthProp = entityType.Properties.Where(p => p.Name.Equals("NonLength")).First();
-            Assert.NotNull(nonLengthProp);
-            Assert.Equal(3, ((LengthPropertyConfiguration)nameProp).MaxLength);
-            Assert.Equal(5, ((LengthPropertyConfiguration)byteProp).MaxLength);
-            Assert.Null(((LengthPropertyConfiguration)nonLengthProp).MaxLength);
-            Assert.Equal(3, nameType.MaxLength);
-            Assert.Null(nonLengthType.MaxLength);
-        }
     }
 
     public enum UserType

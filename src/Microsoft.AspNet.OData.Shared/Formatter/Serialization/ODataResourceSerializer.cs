@@ -1750,16 +1750,17 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 if (changedProperties != null)
                 {
-                    IDictionary<IEdmStructuralProperty, PathSelectItem> newDic = new Dictionary<IEdmStructuralProperty, PathSelectItem>();
+                    IDictionary<IEdmStructuralProperty, PathSelectItem> propertiesToReturn
+                        = new Dictionary<IEdmStructuralProperty, PathSelectItem>();
                     foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
                     {
                         if (changedProperties.Contains(complexProperty.Key.Name))
                         {
-                            newDic[complexProperty.Key] = complexProperty.Value;
+                            propertiesToReturn[complexProperty.Key] = complexProperty.Value;
                         }
                     }
 
-                    return newDic;
+                    return propertiesToReturn;
                 }
             }
 

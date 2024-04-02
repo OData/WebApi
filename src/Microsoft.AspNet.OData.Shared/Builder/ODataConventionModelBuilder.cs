@@ -551,8 +551,8 @@ namespace Microsoft.AspNet.OData.Builder
                 bool isCollection;
                 IEdmTypeConfiguration mappedType;
 
-                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType, out bool isValid);
-                if (!isValid)
+                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType, out bool mapped);
+                if (!mapped)
                 {
                     continue;
                 }
@@ -698,17 +698,17 @@ namespace Microsoft.AspNet.OData.Builder
 
         // figures out the type of the property (primitive, complex, navigation) and the corresponding edm type if we have seen this type
         // earlier or the user told us about it.
-        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType, out bool IsValid)
+        private PropertyKind GetPropertyType(PropertyInfo property, out bool isCollection, out IEdmTypeConfiguration mappedType, out bool mapped)
         {
             Contract.Assert(property != null);
 
-            IsValid = true;
+            mapped = true;
             mappedType = null;
             isCollection = false;
 
-            if (typeof(ODataIdContainer) == property.PropertyType)
+            if (typeof(ODataIdContainer).IsAssignableFrom(property.PropertyType))
             {
-                IsValid = false;
+                mapped = false;
                 return (PropertyKind)(int.MaxValue);
             }
 
@@ -738,9 +738,9 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 isCollection = true;
 
-                if (typeof(ODataIdContainer) == elementType)
+                if (typeof(ODataIdContainer).IsAssignableFrom(elementType))
                 {
-                    IsValid = false;
+                    mapped = false;
                     return (PropertyKind)(int.MaxValue);
                 }
 

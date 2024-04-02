@@ -301,10 +301,10 @@ namespace Microsoft.AspNet.OData.Formatter
                     typeName, String.Join(",", matchingTypes.Select(t => t.AssemblyQualifiedName)));
             }
 
-            Type type = matchingTypes.Count == 0 ? null : matchingTypes[0];
-            edmModel.SetAnnotationValue(edmSchemaType, new ClrTypeAnnotation(type));
+            Type clrType = matchingTypes.Count == 0 ? null : matchingTypes[0];
+            edmModel.SetAnnotationValue(edmSchemaType, new ClrTypeAnnotation(clrType));
 
-            return type;
+            return clrType;
         }
 
         public static bool IsNotFilterable(IEdmProperty edmProperty, IEdmProperty pathEdmProperty,

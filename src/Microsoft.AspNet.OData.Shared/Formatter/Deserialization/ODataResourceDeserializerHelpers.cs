@@ -257,7 +257,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (path.EdmType.AsElementType() is IEdmEntityType entityType)
             {
                 //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
-                //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
+                //for Delta and EdmEntity object setting as an added property ODataIdContainer in those classes
                 ODataPath odataPath = new ODataPath(path.Segments);
 
                 // if there is no Id on the resource, try to compute one from path
@@ -286,6 +286,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                     else
                     {
+                        // TODO: the logic to use the first 'ODataIdContainer' property as the container looks simple and error
                         PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(entityType, readContext.Model).GetProperties().FirstOrDefault(x => x.PropertyType == typeof(ODataIdContainer));
                         if (containerPropertyInfo != null)
                         {

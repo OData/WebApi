@@ -2374,6 +2374,30 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             entity.AssertHasNavigationProperty(model, "NavigationCollection", new { ID = default(int) }.GetType(), isNullable: false, multiplicity: EdmMultiplicity.Many);
         }
 
+        public class TypeContainsODataIdContainer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public ODataIdContainer Container { get; set; }
+            public IList<ODataIdContainer> Containers { get; set; }
+        }
+
+        [Fact]
+        public void CanBuildModel_OmitODataIdContainerProperties()
+        {
+            var configuration = RoutingConfigurationFactory.Create();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration, isQueryCompositionMode: true);
+            builder.EntityType<TypeContainsODataIdContainer>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityType entity = model.AssertHasEntityType(typeof(TypeContainsODataIdContainer));
+
+            Assert.Equal(2, entity.Properties().Count());
+            entity.AssertHasKey(model, "Id", EdmPrimitiveTypeKind.Int32);
+            entity.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, true);
+        }
+
         [Theory]
         [InlineData(typeof(object[]))]
         [InlineData(typeof(IEnumerable<object>))]

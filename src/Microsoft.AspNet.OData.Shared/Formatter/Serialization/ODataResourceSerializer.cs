@@ -697,7 +697,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
@@ -781,7 +785,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
@@ -1643,7 +1651,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> selectedComplex in complexProperties)
             {
@@ -1666,7 +1678,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> selectedComplex in complexProperties)
             {
@@ -1734,7 +1750,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+        private static IDictionary<IEdmStructuralProperty, PathSelectItem> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = selectExpandNode.SelectedComplexTypeProperties;
 
@@ -1748,26 +1764,23 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     changedProperties = deltaObject.GetChangedPropertyNames();
                 }
 
-                foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
+                if (changedProperties != null)
                 {
-                    if (changedProperties == null || changedProperties.Contains(complexProperty.Key.Name))
+                    IDictionary<IEdmStructuralProperty, PathSelectItem> propertiesToReturn
+                        = new Dictionary<IEdmStructuralProperty, PathSelectItem>();
+                    foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
                     {
-                        IEdmTypeReference type = complexProperty.Key?.Type;
-
-                        if (type != null && type.IsStructured() && resourceContext.EdmModel != null)
+                        if (changedProperties.Contains(complexProperty.Key.Name))
                         {
-                            Type clrType = EdmLibHelpers.GetClrType(type.AsStructured(), resourceContext.EdmModel);
-
-                            if (clrType != null && clrType == typeof(ODataIdContainer))
-                            {
-                                continue;
-                            }
+                            propertiesToReturn[complexProperty.Key] = complexProperty.Value;
                         }
-
-                        yield return complexProperty;
                     }
+
+                    return propertiesToReturn;
                 }
             }
+
+            return complexProperties;
         }
 
         private IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> GetNavigationPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)

@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Asnchronously patch a DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
+        /// Asynchronously patch a DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>.
         /// </summary>
         /// <param name="originalCollection">Original collection of the type which needs to be updated.</param>
         /// <returns>A task representing a DeltaSet response.</returns>
@@ -104,7 +104,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="apiHandlerFactory">API Handler Factory.</param>
         /// <returns>DeltaSet response.</returns>
         public DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
-        {         
+        {
             Debug.Assert(apiHandlerOfT != null, "apiHandlerOfT != null");
 
             return CopyChangedValues(apiHandlerOfT, apiHandlerFactory);

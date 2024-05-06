@@ -698,6 +698,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(writer != null);
 
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
@@ -782,6 +786,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(writer != null);
 
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
@@ -1644,6 +1652,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(writer != null);
 
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> selectedComplex in complexProperties)
             {
@@ -1667,6 +1679,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(writer != null);
 
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = GetPropertiesToWrite(selectExpandNode, resourceContext);
+            if (complexProperties == null)
+            {
+                return;
+            }
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> selectedComplex in complexProperties)
             {
@@ -1734,7 +1750,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private IDictionary<IEdmStructuralProperty, PathSelectItem> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+        private static IDictionary<IEdmStructuralProperty, PathSelectItem> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = selectExpandNode.SelectedComplexTypeProperties;
 

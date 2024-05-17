@@ -50,7 +50,7 @@ extends:
           - output: nuget
             displayName: 'NuGet push - Nightly packages to MyGet'
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            searchPatternPush: $(Build.ArtifactStagingDirectory)\Nuget\*Nightly*.nupkg
+            packagesToPush: $(Build.ArtifactStagingDirectory)\Nuget\*Nightly*.nupkg
             nuGetFeedType: external
             externalEndpoint: MyGet.org - AspNetCoreOData Feed
         steps:

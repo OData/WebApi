@@ -29,16 +29,16 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
-      name: Azure-Pipelines-1ESPT-ExDShared
-      image: windows-2022
+      name: MSSecurity-1ES-Build-Agents-Pool
+      image:  MSSecurity-1ES-Windows-2022
       os: windows
     customBuildTags:
     - ES365AIMigrationTooling
     stages:
-    - stage: stage
+    - stage: build
       jobs:
-      - job: Job_1
-        displayName: Agent job 1
+      - job: Main
+        displayName: Main Build
         timeoutInMinutes: 240
         steps:
         - checkout: self

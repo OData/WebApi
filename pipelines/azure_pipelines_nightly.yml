@@ -61,7 +61,7 @@ extends:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
             searchPatternPush: $(Build.ArtifactStagingDirectory)\Nuget\*Nightly*.nupkg
             nuGetFeedType: external
-            externalEndpoint: MyGet.org - WebApi Netcore Feed
+            externalEndpoint: MyGet.org - AspNetCoreOData Feed
         steps:
         - checkout: self
         - template: pipelines/task-group-policheck-v1.yml@self

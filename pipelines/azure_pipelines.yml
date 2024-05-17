@@ -43,7 +43,7 @@ extends:
         steps:
         - checkout: self
           fetchTags: false
-        - template: task-group-policheck-v1.yml@self
+        - template: pipelines/task-group-policheck-v1.yml@self
         - task: NuGetToolInstaller@0
           displayName: Use NuGet >=5.8.0
           inputs:

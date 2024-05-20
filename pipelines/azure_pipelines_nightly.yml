@@ -44,7 +44,6 @@ extends:
             targetPath: $(Build.ArtifactStagingDirectory)\sbom
           - output: pipelineArtifact
             displayName: 'Publish Artifact - Nuget Packages'
-            condition: succeededOrFailed()
             targetPath: $(Build.ArtifactStagingDirectory)\Nuget
             artifactName: NuGetDrop
           - output: nuget
@@ -52,7 +51,7 @@ extends:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
             packagesToPush: $(Build.ArtifactStagingDirectory)\Nuget\*Nightly*.nupkg
             nuGetFeedType: external
-            externalEndpoint: MyGet.org - AspNetCoreOData Feed
+            publishFeedCredentials: 'MyGet.org - AspNetCoreOData Feed'
         steps:
         - checkout: self
         - template: pipelines/task-group-policheck-v1.yml@self

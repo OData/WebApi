@@ -3,27 +3,139 @@ trigger:
     include:
     - master
 
-resources:
-  repositories:
-  - repository: self
-    type: git
-    ref: master
-
 pr:
   - master
+
+name: $(date:yyyyMMdd)$(rev:.r)
 variables:
-  BuildPlatform: 'Any Cpu'
-  BuildConfiguration: 'Release'
-stages: 
-- stage: Build
-  jobs:
-    - job: Main
-      displayName: Main Build
-      # setting a 3hour timeout as webapi tests normally take about 2hr 30 mins
-      timeoutInMinutes: 180
-
-      pool:
-        vmImage: windows-2019  # The project is still targeting on .NET 4.5, we need this vm image to finish .NET 4.5 build. We should update it later.
-
-      steps:
-        - template: ./common.yml
+- name: BuildConfiguration
+  value: release
+- name: BuildPlatform
+  value: any cpu
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+- name: ProductBinPath
+  value: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: MSSecurity-1ES-Build-Agents-Pool
+      image: MSSecurity-1ES-Windows-2019
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
+    stages:
+    - stage: build
+      jobs:
+      - job: Main
+        displayName: Main Build
+        timeoutInMinutes: 240
+        steps:
+        - checkout: self
+          fetchTags: false
+        - template: pipelines/task-group-policheck-v1.yml@self
+        - task: NuGetToolInstaller@0
+          displayName: Use NuGet >=5.8.0
+          inputs:
+            versionSpec: '>=5.8.0'
+        - task: UseDotNet@2
+          displayName: Use .NET Core sdk 2.x
+          inputs:
+            version: 2.x
+        - task: UseDotNet@2
+          displayName: Use .NET Core sdk 3.1
+          inputs:
+            version: 3.x
+        - task: NuGetCommand@2
+          displayName: NuGet restore **\*.sln
+          inputs:
+            solution: sln/WebApiOData.AspNet.sln;sln/WebApiOData.AspNetCore.sln;sln/WebApiOData.E2E.AspNet.sln;sln/WebApiOData.E2E.AspNetCore.sln
+        - task: VSBuild@1
+          displayName: Build solution sln\WebApiOData.AspNet.sln
+          inputs:
+            solution: 'sln\WebApiOData.AspNet.sln '
+            platform: $(BuildPlatform)
+            configuration: $(BuildConfiguration)
+        - task: VSBuild@1
+          displayName: Build solution sln\WebApiOData.E2E.AspNet.sln
+          inputs:
+            solution: sln\WebApiOData.E2E.AspNet.sln
+            platform: $(BuildPlatform)
+            configuration: $(BuildConfiguration)
+        - task: DotNetCoreCLI@2
+          displayName: 'build Microsoft.AspNetCore.OData.csproj '
+          inputs:
+            projects: $(Build.SourcesDirectory)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj
+            arguments: --configuration $(BuildConfiguration) --no-incremental
+        - task: DotNetCoreCLI@2
+          displayName: build .NET Core Unit test project
+          inputs:
+            projects: $(Build.SourcesDirectory)\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj
+            arguments: --configuration $(BuildConfiguration) --no-incremental
+        - task: DotNetCoreCLI@2
+          displayName: build .NET Core E2E test project
+          inputs:
+            projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.csproj
+            arguments: --configuration $(BuildConfiguration) --no-incremental
+        - task: DotNetCoreCLI@2
+          displayName: build .NET Core 3x E2E test project
+          inputs:
+            projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore3x\Microsoft.Test.E2E.AspNetCore3x.OData.csproj
+            arguments: --configuration $(BuildConfiguration) --no-incremental
+        - task: PowerShell@2
+          displayName: PowerShell Script
+          inputs:
+            filePath: '$(Build.SourcesDirectory)\tools\MeasureCodeSharing.ps1 '
+            arguments: $(Build.SourcesDirectory)
+        - task: PowerShell@2
+          displayName: Skip StrongName for Classic
+          inputs:
+            targetType: inline
+            script: |
+              $PROGRAMFILESX86 = [Environment]::GetFolderPath("ProgramFilesX86")
+              $SN = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe"
+              $SNx64 = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe"
+              & $SN /Vr $(Build.SourcesDirectory)\bin\Release\Microsoft.AspNet.OData.dll
+              & $SNx64 /Vr $(Build.SourcesDirectory)\bin\Release\Microsoft.AspNet.OData.dll
+              & $SN /Vr $(Build.SourcesDirectory)\bin\release\netstandard2.0\Microsoft.AspNetCore.OData.dll
+              & $SNx64 /Vr $(Build.SourcesDirectory)\bin\release\netstandard2.0\Microsoft.AspNetCore.OData.dll
+              & $SN /Vr $(Build.SourcesDirectory)\bin\Release\UnitTest\AspNet\Microsoft.AspNet.OData.Test.dll
+              & $SNx64 /Vr $(Build.SourcesDirectory)\bin\Release\UnitTest\AspNet\Microsoft.AspNet.OData.Test.dll
+              & $SN /Vr $(Build.SourcesDirectory)\bin\Release\E2ETest\AspNet\Microsoft.Test.E2E.AspNet.OData.dll
+              & $SNx64 /Vr $(Build.SourcesDirectory)\bin\Release\E2ETest\AspNet\Microsoft.Test.E2E.AspNet.OData.dll
+              & $SN /Vr $(Build.SourcesDirectory)\bin\release\E2ETest\AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.dll
+              & $SNx64 /Vr $(Build.SourcesDirectory)\bin\release\E2ETest\AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.dll
+        - task: VSTest@2
+          displayName: Classic Unit Tests (Microsoft.AspNet.OData.Test.dll)
+          inputs:
+            testAssemblyVer2: '**\bin\**\UnitTest\**\Microsoft.AspNet.OData.Test.dll'
+        - task: DotNetCoreCLI@2
+          displayName: 'Core Unit Tests (Microsoft.AspNetCore.OData.Test.csproj) '
+          inputs:
+            command: test
+            projects: $(Build.SourcesDirectory)\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj
+            arguments: --configuration $(BuildConfiguration) --no-build
+        - task: VSTest@2
+          displayName: Classic E2E Tests (Microsoft.Test.E2E.AspNet.OData.dll)
+          inputs:
+            testAssemblyVer2: '**\bin\**\E2ETest\**\Microsoft.Test.E2E.AspNet.OData.dll'
+            testFiltercriteria: (DisplayName!=Microsoft.Test.E2E.AspNet.OData.ODataPathHandler.UnicodeRouteTests_Todoü.CRUDEntitySetShouldWork)
+        - task: DotNetCoreCLI@2
+          displayName: Core E2E Tests (Microsoft.Test.E2E.AspNetCore.OData.csproj)
+          inputs:
+            command: test
+            projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.csproj
+            arguments: --configuration $(BuildConfiguration) --no-build
+        - task: DotNetCoreCLI@2
+          displayName: Core E2E 3x Tests (Microsoft.Test.E2E.AspNetCore3x.OData.csproj)
+          inputs:
+            command: test
+            projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore3x\Microsoft.Test.E2E.AspNetCore3x.OData.csproj
+            arguments: --configuration $(BuildConfiguration) --no-build --filter FullyQualifiedName!=Microsoft.Test.E2E.AspNet.OData.QueryComposition.SelectExpandEFTests.QueryForLongSelectList -v diag

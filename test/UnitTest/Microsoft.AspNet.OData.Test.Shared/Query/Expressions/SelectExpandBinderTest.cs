@@ -295,8 +295,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange
             _settings.HandleNullPropagation = HandleNullPropagationOption.True;
 
-            IEdmEntityType vipCustomer = _model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "QueryVipCustomer");
-            IEdmNavigationProperty specialOrdersNav = vipCustomer.DeclaredNavigationProperties().Single(c => c.Name == "SpecialOrders");
+            IEdmEntityType vipCustomer = _model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == nameof(QueryVipCustomer));
+            IEdmNavigationProperty specialOrdersNav = vipCustomer.DeclaredNavigationProperties().Single(c => c.Name == nameof(QueryVipCustomer.SpecialOrders));
             ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
                 new ODataExpandPath(new NavigationPropertySegment(specialOrdersNav, navigationSource: _orders)),
                 _orders,
@@ -317,8 +317,12 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Expression projection = _binder.ProjectAsWrapper(source, selectExpand, vipCustomer, _customers);
 
             // Assert
-            IEnumerable<SelectExpandWrapper<QueryOrder>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<QueryOrder>>;
-            Assert.Null(projectedOrders);
+            object rawProjectionResult = Expression.Lambda(projection).Compile().DynamicInvoke();
+            Assert.NotNull(rawProjectionResult);
+            SelectExpandWrapper<QueryVipCustomer> projectedCustomer = rawProjectionResult as SelectExpandWrapper<QueryVipCustomer>;
+            Assert.NotNull(projectedCustomer);
+            Assert.True(projectedCustomer.TryGetPropertyValue(nameof(QueryVipCustomer.SpecialOrders), out object rawSpecialOrders));
+            Assert.Null(rawSpecialOrders);
         }
 
         [Fact]

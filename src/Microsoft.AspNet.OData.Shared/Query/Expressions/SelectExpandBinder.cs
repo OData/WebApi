@@ -978,8 +978,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        private Expression ProjectCollection(Expression source, Type elementType,
-            SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmNavigationSource navigationSource,
+        private Expression ProjectCollection(
+            Expression source,
+            Type elementType,
+            SelectExpandClause selectExpandClause,
+            IEdmStructuredType structuredType,
+            IEdmNavigationSource navigationSource,
             OrderByClause orderByClause,
             long? topOption,
             long? skipOption,
@@ -1005,9 +1009,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             //      (ElementType element) => new Wrapper { }
             LambdaExpression selector = Expression.Lambda(projection, element);
 
+            Expression modifiedSource = source;
             if (orderByClause != null)
             {
-                source = AddOrderByQueryForSource(source, orderByClause, elementType);
+                modifiedSource = AddOrderByQueryForSource(modifiedSource, orderByClause, elementType);
             }
 
             bool hasTopValue = topOption != null && topOption.HasValue;
@@ -1033,7 +1038,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         bool alreadyOrdered = false;
                         foreach (var prop in properties)
                         {
-                            source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType, alreadyOrdered);
+                            modifiedSource = ExpressionHelpers.OrderByPropertyExpression(modifiedSource, prop.Name, elementType, alreadyOrdered);
                             if (!alreadyOrdered)
                             {
                                 alreadyOrdered = true;
@@ -1046,14 +1051,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (hasSkipvalue)
             {
                 Contract.Assert(skipOption.Value <= Int32.MaxValue);
-                source = ExpressionHelpers.Skip(source, (int)skipOption.Value, elementType,
+                modifiedSource = ExpressionHelpers.Skip(modifiedSource, (int)skipOption.Value, elementType,
                     _settings.EnableConstantParameterization);
             }
 
             if (hasTopValue)
             {
                 Contract.Assert(topOption.Value <= Int32.MaxValue);
-                source = ExpressionHelpers.Take(source, (int)topOption.Value, elementType,
+                modifiedSource = ExpressionHelpers.Take(modifiedSource, (int)topOption.Value, elementType,
                     _settings.EnableConstantParameterization);
             }
 
@@ -1066,12 +1071,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         if (_settings.PageSize.HasValue)
                         {
-                            source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
+                            modifiedSource = ExpressionHelpers.Take(modifiedSource, _settings.PageSize.Value + 1, elementType,
                                 _settings.EnableConstantParameterization);
                         }
                         else if (_settings.ModelBoundPageSize.HasValue)
                         {
-                            source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                            modifiedSource = ExpressionHelpers.Take(modifiedSource, modelBoundPageSize.Value + 1, elementType,
                                 _settings.EnableConstantParameterization);
                         }
                     }
@@ -1081,7 +1086,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // expression
             //      source.Select((ElementType element) => new Wrapper { })
             var selectMethod = GetSelectMethod(elementType, projection.Type);
-            Expression selectedExpresion = Expression.Call(selectMethod, source, selector);
+            Expression selectedExpresion = Expression.Call(selectMethod, modifiedSource, selector);
 
             // Append ToList() to collection as a hint to LINQ provider to buffer correlated subqueries in memory and avoid executing N+1 queries
             if (_settings.EnableCorrelatedSubqueryBuffering)

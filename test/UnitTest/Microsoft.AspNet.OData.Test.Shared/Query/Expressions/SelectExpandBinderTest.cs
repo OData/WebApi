@@ -290,6 +290,42 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_Collection_TopOnNullExpand()
+        {
+            // Arrange
+            _settings.HandleNullPropagation = HandleNullPropagationOption.True;
+
+            IEdmEntityType vipCustomer = _model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == nameof(QueryVipCustomer));
+            IEdmNavigationProperty specialOrdersNav = vipCustomer.DeclaredNavigationProperties().Single(c => c.Name == nameof(QueryVipCustomer.SpecialOrders));
+            ExpandedNavigationSelectItem expandItem = new ExpandedNavigationSelectItem(
+                new ODataExpandPath(new NavigationPropertySegment(specialOrdersNav, navigationSource: _orders)),
+                _orders,
+                selectAndExpand: null,
+                filterOption: null,
+                orderByOption: null,
+                topOption: 10,
+                skipOption: null,
+                countOption: null,
+                searchOption: null,
+                levelsOption: null);
+            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
+
+            QueryVipCustomer customer = new QueryVipCustomer();
+            Expression source = Expression.Constant(customer);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, vipCustomer, _customers);
+
+            // Assert
+            object rawProjectionResult = Expression.Lambda(projection).Compile().DynamicInvoke();
+            Assert.NotNull(rawProjectionResult);
+            SelectExpandWrapper<QueryVipCustomer> projectedCustomer = rawProjectionResult as SelectExpandWrapper<QueryVipCustomer>;
+            Assert.NotNull(projectedCustomer);
+            Assert.True(projectedCustomer.TryGetPropertyValue(nameof(QueryVipCustomer.SpecialOrders), out object rawSpecialOrders));
+            Assert.Null(rawSpecialOrders);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_Collection_ProjectedValueNullAndHandleNullPropagationTrue()
         {
             // Arrange

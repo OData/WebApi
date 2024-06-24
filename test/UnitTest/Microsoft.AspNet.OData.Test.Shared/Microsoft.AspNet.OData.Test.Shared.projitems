@@ -155,6 +155,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\HttpRequestODataMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataReaderExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataEnumDeserializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContextTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataSingletonDeserializerTest.cs" />

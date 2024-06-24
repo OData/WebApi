@@ -88,7 +88,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResourceBase oDataResource,
+        internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResourceWrapper resourceWrapper,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             //Apply instance annotations for both entityobject/changedobject/delta and normal resources
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return;
             }
 
-            SetInstanceAnnotations(oDataResource, persistentInstanceAnnotationContainer, transientInstanceAnnotationContainer, deserializerProvider, readContext);
+            SetInstanceAnnotations(resourceWrapper, persistentInstanceAnnotationContainer, transientInstanceAnnotationContainer, deserializerProvider, readContext);
         }
 
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
@@ -302,13 +302,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         internal static void SetInstanceAnnotations(
-            ODataResourceBase oDataResource,
+            ODataResourceWrapper resourceWrapper,
             IODataInstanceAnnotationContainer instanceAnnotationContainer,
             IODataInstanceAnnotationContainer transientAnnotationContainer,
             ODataDeserializerProvider deserializerProvider,
             ODataDeserializerContext readContext)
         {
-            foreach (ODataInstanceAnnotation annotation in oDataResource.InstanceAnnotations)
+            foreach (ODataInstanceAnnotation annotation in resourceWrapper.ResourceBase.InstanceAnnotations)
             {
                 if (!TransientAnnotations.TransientAnnotationTerms.Contains(annotation.Name))
                 {
@@ -320,11 +320,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            foreach (ODataProperty property in oDataResource.Properties)
+            foreach (ODataProperty property in resourceWrapper.ResourceBase.Properties)
             {
                 foreach (ODataInstanceAnnotation annotation in property.InstanceAnnotations)
                 {
                     AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation, property.Name);
+                }
+            }
+
+            // Add the instance annotations of property without value
+            foreach (ODataPropertyInfo propertyInfo in resourceWrapper.NestedPropertyInfos)
+            {
+                foreach (ODataInstanceAnnotation annotation in propertyInfo.InstanceAnnotations)
+                {
+                    AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation, propertyInfo.Name);
                 }
             }
         }

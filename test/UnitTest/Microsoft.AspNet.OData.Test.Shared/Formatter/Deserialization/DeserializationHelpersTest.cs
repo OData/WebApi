@@ -370,7 +370,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             var deletedEntity = new DeltaDeletedEntityObject<SimpleOpenCustomer>();
 
             // Act
-            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, customerTypeReference, odataResource, _deserializerProvider, readContext);
+            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, customerTypeReference, topLevelResourceWrapper, _deserializerProvider, readContext);
 
             // Assert
 

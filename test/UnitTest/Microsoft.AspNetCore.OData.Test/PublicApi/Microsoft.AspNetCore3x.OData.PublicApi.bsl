@@ -3936,6 +3936,7 @@ public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResour
 public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper : ODataItemBase {
 	public ODataResourceWrapper (Microsoft.OData.ODataResourceBase item)
 
+	System.Collections.Generic.IList`1[[Microsoft.OData.ODataPropertyInfo]] NestedPropertyInfos  { public get; }
 	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper]] NestedResourceInfos  { public get; }
 	[
 	ObsoleteAttribute(),

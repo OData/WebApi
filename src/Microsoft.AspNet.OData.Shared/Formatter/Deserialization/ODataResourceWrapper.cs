@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             : base(item)
         {
             NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
+            NestedPropertyInfos = new List<ODataPropertyInfo>();
             ResourceBase = item;
         }
 
@@ -49,5 +50,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Gets the inner nested resource infos.
         /// </summary>
         public IList<ODataNestedResourceInfoWrapper> NestedResourceInfos { get; private set; }
+
+        /// <summary>
+        /// Gets the nested property infos.
+        /// The nested property info is a property without value but could have instance annotations.
+        /// </summary>
+        public IList<ODataPropertyInfo> NestedPropertyInfos { get; private set; }
     }
 }

@@ -483,7 +483,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("resourceWrapper");
             }
 
-            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.ResourceBase, DeserializerProvider, readContext);
+            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper, DeserializerProvider, readContext);
         }
 
         /// <summary>

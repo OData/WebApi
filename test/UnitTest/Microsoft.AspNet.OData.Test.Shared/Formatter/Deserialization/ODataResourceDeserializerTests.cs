@@ -975,7 +975,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(new TimeSpan(0, 1, 2, 3, 4), customer.ReleaseTime);
         }
 
-
         [Fact]
         public void ReadResource_CanReadInstanceAnnotationforOpenType()
         {
@@ -1021,6 +1020,67 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(991, customer.CustomerId);
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("GuidProperty").Count);
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("CustomerId").Count);
+        }
+
+        [Fact]
+        public void ReadResource_CanReadNestedPropertyInfo()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+
+            ODataPropertyInfo propertyInfo = new ODataPropertyInfo
+            {
+                Name = "Address",
+                InstanceAnnotations = new List<ODataInstanceAnnotation>
+                {
+                    new ODataInstanceAnnotation("NS.AnnotationOnPropertyWithoutValue", new ODataCollectionValue
+                    {
+                        TypeName = "Collection(Edm.Int32)",
+                        Items = new object[] { 15, 16 }
+                    })
+                }
+            };
+
+            ODataResource odataResource = new ODataResource
+            {
+                Properties = new ODataProperty[]
+                {
+                    new ODataProperty { Name = "Name", Value = "AManWithNestedPropertyInfo" }
+                },
+                TypeName = typeof(SimpleOpenCustomer).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
+            topLevelResourceWrapper.NestedPropertyInfos.Add(propertyInfo);
+
+            // Act
+            SimpleOpenCustomer customer = deserializer.ReadResource(topLevelResourceWrapper, customerTypeReference, readContext)
+                as SimpleOpenCustomer;
+
+            // Assert
+            Assert.NotNull(customer);
+
+            // Verify the declared properties
+            Assert.Equal("AManWithNestedPropertyInfo", customer.Name);
+
+            // Verify the instance annotations
+            Assert.NotNull(customer.InstanceAnnotations);
+            var annotationOnProperty = Assert.Single(customer.InstanceAnnotations.GetPropertyAnnotations("Address"));
+
+            Assert.Equal("NS.AnnotationOnPropertyWithoutValue", annotationOnProperty.Key);
+            IEnumerable<int> collectionValue = annotationOnProperty.Value as IEnumerable<int>;
+            Assert.Equal(new int[] { 15, 16 }, collectionValue);
         }
 
         [Fact]

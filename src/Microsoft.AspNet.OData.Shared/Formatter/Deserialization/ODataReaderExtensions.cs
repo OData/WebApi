@@ -189,6 +189,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     itemsStack.Push(deltaResourceSetWrapper);
                     break;
 
+                case ODataReaderState.NestedProperty:
+                    Contract.Assert(itemsStack.Count > 0, "The nested property info should be a non-null primitive value within resource wrapper.");
+                    ODataResourceWrapper resourceParentWrapper = (ODataResourceWrapper)itemsStack.Peek();
+                    resourceParentWrapper.NestedPropertyInfos.Add((ODataPropertyInfo)reader.Item);
+                    break;
+
                 case ODataReaderState.DeltaLink:
                 case ODataReaderState.DeltaDeletedLink:
 

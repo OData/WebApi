@@ -213,6 +213,34 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteDeltaObjectInline_Calls_CreateDeltaNestedResourceInfo_ForEachSelectedComplexProperty()
+        {
+            // Arrange
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedComplexTypeProperties = new Dictionary<IEdmStructuralProperty, PathSelectItem>
+                {
+                    { new Mock<IEdmStructuralProperty>().Object, null },
+                    { new Mock<IEdmStructuralProperty>().Object, null }
+                }
+            };
+
+            Mock<ODataWriter> writer = new Mock<ODataWriter>();
+            Mock<ODataResourceSerializer> serializer = new Mock<ODataResourceSerializer>(_serializerProvider);
+            serializer.Setup(s => s.CreateSelectExpandNode(It.IsAny<ResourceContext>())).Returns(selectExpandNode);
+            serializer.CallBase = true;
+
+            serializer.Setup(s => s.CreateDeltaNestedResourceInfo(selectExpandNode.SelectedComplexTypeProperties.ElementAt(0).Key, It.IsAny<ResourceContext>())).Verifiable();
+            serializer.Setup(s => s.CreateDeltaNestedResourceInfo(selectExpandNode.SelectedComplexTypeProperties.ElementAt(1).Key, It.IsAny<ResourceContext>())).Verifiable();
+
+            // Act
+            serializer.Object.WriteDeltaObjectInline(_customer, _customerType, writer.Object, _writeContext);
+
+            // Assert
+            serializer.Verify();
+        }
+
+        [Fact]
         public void WriteObjectInline_Calls_CreateComplexNestedResourceInfo_ForEachSelectedComplexProperty()
         {
             // Arrange

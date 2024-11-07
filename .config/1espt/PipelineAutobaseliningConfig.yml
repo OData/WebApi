@@ -13,3 +13,22 @@ pipelines:
           lastModifiedDate: 2024-11-06
         armory:
           lastModifiedDate: 2024-11-06
+  2557:
+    retail:
+      source:
+        credscan:
+          lastModifiedDate: 2024-11-07
+        eslint:
+          lastModifiedDate: 2024-11-07
+        psscriptanalyzer:
+          lastModifiedDate: 2024-11-07
+        armory:
+          lastModifiedDate: 2024-11-07
+      binary:
+        credscan:
+          lastModifiedDate: 2024-11-07
+        binskim:
+          lastModifiedDate: 2024-11-07
+        spotbugs:
+          lastModifiedDate: 2024-11-07
+    usedNonDefaultBranch: true

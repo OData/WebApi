@@ -91,7 +91,17 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     {
                         try
                         {
-                            path = new Routing.ODataPath(new ODataUriParser(readContext.Model, new Uri(navigationSource.Path.Path, UriKind.Relative)).ParsePath());
+                            ODataUriParser parser;
+                            if (readContext != null && readContext.InternalRequest != null && readContext.InternalRequest.RequestContainer != null)
+                            {
+                                parser = new ODataUriParser(readContext.Model, new Uri(navigationSource.Path.Path, UriKind.Relative), readContext.InternalRequest.RequestContainer);
+                            }
+                            else
+                            {
+                                parser = new ODataUriParser(readContext.Model, new Uri(navigationSource.Path.Path, UriKind.Relative));
+                            }
+
+                            path = new Routing.ODataPath(parser.ParsePath());
                         }
                         catch (ODataException)
                         {
@@ -332,7 +342,16 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                     try
                     {
-                        ODataUriParser parser = new ODataUriParser(readContext.Model, new Uri(serviceRoot), resourceWrapper.ResourceBase.Id);
+                        ODataUriParser parser;
+                        if (internalRequest.RequestContainer != null)
+                        {
+                            parser = new ODataUriParser(readContext.Model, new Uri(serviceRoot), resourceWrapper.ResourceBase.Id, internalRequest.RequestContainer);
+                        }
+                        else
+                        {
+                            parser = new ODataUriParser(readContext.Model, new Uri(serviceRoot), resourceWrapper.ResourceBase.Id);
+                        }
+
                         odataPath = parser.ParsePath();
                     }
                     catch (ODataException)

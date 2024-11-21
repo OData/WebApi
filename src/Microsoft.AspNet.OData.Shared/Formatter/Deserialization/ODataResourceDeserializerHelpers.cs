@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         try
                         {
                             ODataUriParser parser;
-                            if (readContext != null && readContext.InternalRequest != null && readContext.InternalRequest.RequestContainer != null)
+                            if (readContext?.InternalRequest?.RequestContainer != null)
                             {
                                 parser = new ODataUriParser(readContext.Model, new Uri(navigationSource.Path.Path, UriKind.Relative), readContext.InternalRequest.RequestContainer);
                             }

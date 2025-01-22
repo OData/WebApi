@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -21,6 +22,7 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Types;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -1937,6 +1939,65 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             string value = path.ToString();
 
             Assert.Equal("Products('')", value);
+        }
+
+        [Fact]
+        public void ApplyIdToPath_CreatesODataPathWithNullKeySegment_IfKeyValueNotSet2()
+        {
+            ODataResource resource = new ODataResource { TypeName = _productEdmType.FullName(), Id = new Uri("Products('42')", UriKind.RelativeOrAbsolute) };
+            ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(resource);
+            var currentContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                Path = _readContext.Path,
+                Request = RequestFactory.CreateFromModel(_edmModel)
+            };
+
+            int test = 0;
+
+            IServiceProvider container = new MockContainer(builder =>
+            {
+                builder.AddService(ServiceLifetime.Singleton, sp => _edmModel);
+                builder.AddService(ServiceLifetime.Singleton, typeof(ODataUriResolver), sp => new MyUriResolver(() => { test++; }));
+            });
+
+#if NETCORE
+            currentContext.Request.ODataFeature().RouteName = "Route";
+            currentContext.Request.ODataFeature().RequestContainer = container;
+#else
+            currentContext.Request.Properties["Microsoft.AspNet.OData.RequestContainer"] = container;
+#endif
+
+            ODataPath path = ODataResourceDeserializerHelpers.ApplyIdToPath(currentContext, resourceWrapper);
+
+            Assert.NotNull(path);
+            string value = path.ToString();
+
+            Assert.Equal(1, test);
+            Assert.Equal("Products(42)", value);
+        }
+
+        public class MyUriResolver : ODataUriResolver
+        {
+            public MyUriResolver(Action action)
+            {
+                Action = action;
+            }
+
+            public Action Action { get; }
+
+            public override IEnumerable<KeyValuePair<string, object>> ResolveKeys(IEdmEntityType type, IList<string> positionalValues, Func<IEdmTypeReference, string, object> convertFunc)
+            {
+                Action();
+
+                IList<string> newValues = new List<string>(positionalValues.Count);
+                foreach (var v in positionalValues)
+                {
+                    newValues.Add(v.Trim('\''));
+                }
+
+                return base.ResolveKeys(type, newValues, convertFunc);
+            }
         }
 
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)

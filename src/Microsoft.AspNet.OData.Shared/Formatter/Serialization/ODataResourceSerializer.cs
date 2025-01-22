@@ -1804,7 +1804,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> GetNavigationPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
-            ISet<IEdmNavigationProperty> navigationProperties = selectExpandNode.SelectedNavigationProperties;
+            IEnumerable<IEdmNavigationProperty> navigationProperties = selectExpandNode.ExpandedProperties?.Keys;
 
             if (navigationProperties == null)
             {

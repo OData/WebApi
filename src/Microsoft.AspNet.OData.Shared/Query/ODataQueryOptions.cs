@@ -273,6 +273,22 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
+        /// Gets the maxpagesize from the request Prefer header.
+        /// </summary>
+        public int? RequestPrefersMaxPageSize
+        {
+            get
+            {
+                if (RequestPreferenceHelpers.RequestPrefersMaxPageSize(InternalRequest.Headers, out int pageSize))
+                {
+                    return pageSize;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -432,10 +448,10 @@ namespace Microsoft.AspNet.OData.Query
                 pageSize = querySettings.ModelBoundPageSize.Value;
             }
 
-            int preferredPageSize = -1;
-            if (RequestPreferenceHelpers.RequestPrefersMaxPageSize(InternalRequest.Headers, out preferredPageSize))
+            int? preferredPageSize = RequestPrefersMaxPageSize;
+            if (preferredPageSize.HasValue)
             {
-                pageSize = Math.Min(pageSize, preferredPageSize);
+                pageSize = Math.Min(pageSize, preferredPageSize.Value);
             }
 
             if (pageSize > 0)

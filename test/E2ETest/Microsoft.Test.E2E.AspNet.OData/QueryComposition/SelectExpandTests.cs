@@ -674,6 +674,52 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             JArray doubleData = (JArray)result["DoubleData"];
             Assert.Single(doubleData); // only one item
         }
+
+        [Fact]
+        public async Task DollarCountSegmentAfterDollarExpandWorks()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?$expand=SelectOrders/$count", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject json = await response.Content.ReadAsObject<JObject>();
+            Assert.NotNull(json);
+
+            Assert.Equal("10", (string)json["SelectOrders@odata.count"]);
+        }
+
+        [Fact]
+        public async Task DollarCountSegmentAfterDollarExpandWithNestedFilterWorks()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?$expand=SelectOrders/$count($filter=Id gt 5)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject json = await response.Content.ReadAsObject<JObject>();
+            Assert.NotNull(json);
+
+            Assert.Equal("4", (string)json["SelectOrders@odata.count"]);
+        }
     }
 
     public class SelectCustomerController : TestODataController

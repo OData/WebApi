@@ -1808,7 +1808,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationProperties == null)
             {
-                yield break;
+                navigationProperties = resourceContext.StructuredType.DeclaredNavigationProperties();
             }
 
             if (resourceContext.EdmObject is IDelta changedObject)

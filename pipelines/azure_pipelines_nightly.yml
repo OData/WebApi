@@ -228,10 +228,11 @@ extends:
                   "toolVersion": "6.2.9304.0"
                 }
               ]
-        - task: petergroenewegen.PeterGroenewegen-Xpirit-Vsts-Build-InlinePowershell.Xpirit-Vsts-Build-InlinePowershell.InlinePowershell@1
+        - task: PowerShell@2
           displayName: Generate Nightly Version
           inputs:
-            Script: |-
+            targetType: 'inline'
+            script: |-
               $date = Get-Date 
               $NightlyBuildVersion = $date.ToString('yyyyMMddHHmm')
               echo "##vso[task.setvariable variable=VersionNugetNightlyBuild]$NightlyBuildVersion"

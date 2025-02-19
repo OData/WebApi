@@ -164,10 +164,16 @@ extends:
           inputs:
             script: |
               mkdir $(Build.ArtifactStagingDirectory)\sbom
-        - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        - task: EsrpCodeSigning@5
           displayName: ESRP CodeSign - WebApi Product Signing
           inputs:
             ConnectedServiceName: ESRP CodeSigning - OData
+            AppRegistrationClientId: 'ce6e119c-a8c2-4744-9699-cd5389102d0d'
+            AppRegistrationTenantId: '33e01921-4d64-4f8c-a055-5bdaffd5e33d'
+            AuthAKVName: ODataESRPKeyVault
+            AuthCertName: ODataCodeSignAuth-AutoRotate
+            AuthSignCertName: ODataCodeSigningCert2024
+            ServiceEndpointUrl: 'https://api.esrp.microsoft.com/api/v2'
             FolderPath: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
             Pattern: Microsoft.AspNet.OData.dll,Microsoft.AspNetCore.OData.dll
             signConfigType: inlineSignParams
@@ -263,10 +269,16 @@ extends:
           inputs:
             command: custom
             arguments: pack $(Build.SourcesDirectory)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.Nightly.nuspec -NonInteractive -OutputDirectory $(Build.ArtifactStagingDirectory)\Nuget -Properties Configuration=$(BuildConfiguration);ProductRoot=$(ProductBinPath);SourcesRoot=$(Build.SourcesDirectory);VersionFullSemantic=$(VersionFullSemantic);NightlyBuildVersion=$(VersionNugetNightlyBuild);VersionNuGetSemantic=$(VersionNuGetSemantic);AspNetCorePackageDependency="$(AspNetCorePackageDependency)";DependencyInjection2PackageDependency="$(DependencyInjection2PackageDependency)";ODataLibPackageDependency="$(ODataLibPackageDependency)";NewtonsoftJsonPackageDependency="$(NewtonsoftJsonPackageDependency)";VersionNugetNightlyBuild=$(VersionNugetNightlyBuild) -Verbosity Detailed -Symbols  -SymbolPackageFormat snupkg
-        - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        - task: EsrpCodeSigning@5
           displayName: ESRP CodeSigning Nuget Packages
           inputs:
             ConnectedServiceName: ESRP CodeSigning - OData
+            AppRegistrationClientId: 'ce6e119c-a8c2-4744-9699-cd5389102d0d'
+            AppRegistrationTenantId: '33e01921-4d64-4f8c-a055-5bdaffd5e33d'
+            AuthAKVName: ODataESRPKeyVault
+            AuthCertName: ODataCodeSignAuth-AutoRotate
+            AuthSignCertName: ODataCodeSigningCert2024
+            ServiceEndpointUrl: 'https://api.esrp.microsoft.com/api/v2'
             FolderPath: $(Build.ArtifactStagingDirectory)\Nuget
             Pattern: '*.nupkg'
             signConfigType: inlineSignParams

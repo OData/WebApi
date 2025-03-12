@@ -159,6 +159,21 @@ namespace Microsoft.AspNet.OData.Builder
         public bool NotCountable { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the property is not insertable. Default is false.
+        /// </summary>
+        public bool NotInsertable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is not updatable. Default is false.
+        /// </summary>
+        public bool NotUpdatable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is not deletable. Default is false.
+        /// </summary>
+        public bool NotDeletable { get; set; }
+
+        /// <summary>
         /// Get or sets order in "order by"  expression.
         /// </summary>
         public int Order { get; set; }
@@ -273,6 +288,60 @@ namespace Microsoft.AspNet.OData.Builder
         public PropertyConfiguration IsCountable()
         {
             NotCountable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as not insertable.
+        /// </summary>
+        public PropertyConfiguration IsNotInsertable()
+        {
+            NotInsertable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as insertable.
+        /// </summary>
+        public PropertyConfiguration IsInsertable()
+        {
+            NotInsertable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as not updatable.
+        /// </summary>
+        public PropertyConfiguration IsNotUpdatable()
+        {
+            NotUpdatable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as updatable.
+        /// </summary>
+        public PropertyConfiguration IsUpdatable()
+        {
+            NotUpdatable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as not deletable.
+        /// </summary>
+        public PropertyConfiguration IsNotDeletable()
+        {
+            NotDeletable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as deletable.
+        /// </summary>
+        public PropertyConfiguration IsDeletable()
+        {
+            NotDeletable = false;
             return this;
         }
 

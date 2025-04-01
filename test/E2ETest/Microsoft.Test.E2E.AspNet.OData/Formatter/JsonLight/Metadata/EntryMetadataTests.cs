@@ -21,6 +21,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Model;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
@@ -296,7 +297,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             //Act
             HttpResponseMessage response = await Client.SendAsync(request);
-            JObject result = await response.Content.ReadAsObject<JObject>();
+            string content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
             returnedParentEntities = (JArray)result["value"];
             for (int i = 0; i < returnedParentEntities.Count; i++)
             {
@@ -311,7 +313,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
             //Assert
             foreach (var returnedChildEntityId in returnedChildrenIdentities)
             {
-                Assert.Contains(childEntities, (x) => x.Id == returnedChildEntityId);
+                try
+                {
+                    Assert.Contains(childEntities, (x) => x.Id == returnedChildEntityId);
+                }
+                catch (XunitException)
+                {
+                    Assert.True(false, $"Child entity with Id {returnedChildEntityId} was not found in the original set of child entities: " +
+                        $"{string.Join(",", childEntities.Select(d => d.Id).ToArray())}.\r\n" +
+                        $"Returned children entities: {string.Join(",", returnedChildrenIdentities)}.\r\n" +
+                        $"Entities: {string.Join(",", entities.Select(d => d.Id).ToArray())}.\r\n" +
+                        $"Parent content: {content}.\r\n");
+                }
             }
         }
     }

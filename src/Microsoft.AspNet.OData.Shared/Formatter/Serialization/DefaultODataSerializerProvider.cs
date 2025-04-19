@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Routing;
@@ -21,6 +22,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// The default <see cref="ODataSerializerProvider"/>.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
     public partial class DefaultODataSerializerProvider : ODataSerializerProvider
     {
         private readonly IServiceProvider _rootContainer;
@@ -80,6 +82,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         internal ODataSerializer GetODataPayloadSerializerImpl(Type type, Func<IEdmModel> modelFunction, ODataPath path, Type errorType)
         {
             if (type == null)
@@ -140,10 +143,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     return GetEdmTypeSerializer(edmType);
                 }
             }
-            else
+            else if (type.IsGenericType() && EdmLibHelpers.IsDynamicTypeWrapper(type.GetGenericArguments()[0]))
             {
-                return null;
+                // $apply
+
+                return GetEdmTypeSerializer(path.Segments.OfType<EntitySetSegment>().FirstOrDefault().EdmType.ToEdmTypeReference(true));
             }
+            return null;
         }
     }
 }

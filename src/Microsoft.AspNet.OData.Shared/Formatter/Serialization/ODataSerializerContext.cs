@@ -6,7 +6,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
@@ -327,6 +329,29 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, edmObject.GetType().FullName,
                         typeof(IEdmObject).Name);
+                }
+            }
+            else if (typeof(IEnumerable).IsAssignableFrom(type) &&
+                typeof(IEdmObject).IsAssignableFrom(type.GetGenericArguments().FirstOrDefault()))
+            {
+                edmType = null;
+                IEnumerable list = instance as IEnumerable;
+                if (list != null)
+                {
+                    IEnumerator enumerator = list.GetEnumerator();
+                    if (enumerator.MoveNext())
+                    {
+                        IEdmObject edo = (IEdmObject)enumerator.Current;
+                        IEdmCollectionType edmCollection = new EdmCollectionType(edo.GetEdmType());
+                        edmType = new EdmCollectionTypeReference(edmCollection);
+                    }
+                }
+
+                if (edmType == null)
+                {
+                    Type innerType = type.GetGenericArguments().FirstOrDefault();
+                    string innerTypeName = innerType == null ? null : innerType.Name;
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, type.FullName, innerTypeName);
                 }
             }
             else

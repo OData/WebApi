@@ -10,6 +10,8 @@ variables:
   value: none
 - name: ProductBinPath
   value: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
+- group: OData-ESRP-CodeSigning
+
 schedules:
 - cron: 0 3 * * 1,2,3,4,5
   branches:
@@ -164,10 +166,16 @@ extends:
           inputs:
             script: |
               mkdir $(Build.ArtifactStagingDirectory)\sbom
-        - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        - task: EsrpCodeSigning@5
           displayName: ESRP CodeSign - WebApi Product Signing
           inputs:
-            ConnectedServiceName: ESRP CodeSigning - OData
+            ConnectedServiceName: $(ODataEsrpConnectionServiceName)
+            AppRegistrationClientId: '$(ODataEsrpAppRegistrationClientId)'
+            AppRegistrationTenantId: '$(ODataEsrpAppRegistrationTenantId)'
+            AuthAKVName: $(ODataEsrpAuthAKVName)
+            AuthCertName: $(ODataEsrpAuthCertName)
+            AuthSignCertName: $(ODataEsrpAuthSignCertName)
+            ServiceEndpointUrl: '$(ODataEsrpServiceEndpointUrl)'
             FolderPath: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
             Pattern: Microsoft.AspNet.OData.dll,Microsoft.AspNetCore.OData.dll
             signConfigType: inlineSignParams
@@ -228,10 +236,11 @@ extends:
                   "toolVersion": "6.2.9304.0"
                 }
               ]
-        - task: petergroenewegen.PeterGroenewegen-Xpirit-Vsts-Build-InlinePowershell.Xpirit-Vsts-Build-InlinePowershell.InlinePowershell@1
+        - task: PowerShell@2
           displayName: Generate Nightly Version
           inputs:
-            Script: |-
+            targetType: 'inline'
+            script: |-
               $date = Get-Date 
               $NightlyBuildVersion = $date.ToString('yyyyMMddHHmm')
               echo "##vso[task.setvariable variable=VersionNugetNightlyBuild]$NightlyBuildVersion"
@@ -262,10 +271,16 @@ extends:
           inputs:
             command: custom
             arguments: pack $(Build.SourcesDirectory)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.Nightly.nuspec -NonInteractive -OutputDirectory $(Build.ArtifactStagingDirectory)\Nuget -Properties Configuration=$(BuildConfiguration);ProductRoot=$(ProductBinPath);SourcesRoot=$(Build.SourcesDirectory);VersionFullSemantic=$(VersionFullSemantic);NightlyBuildVersion=$(VersionNugetNightlyBuild);VersionNuGetSemantic=$(VersionNuGetSemantic);AspNetCorePackageDependency="$(AspNetCorePackageDependency)";DependencyInjection2PackageDependency="$(DependencyInjection2PackageDependency)";ODataLibPackageDependency="$(ODataLibPackageDependency)";NewtonsoftJsonPackageDependency="$(NewtonsoftJsonPackageDependency)";VersionNugetNightlyBuild=$(VersionNugetNightlyBuild) -Verbosity Detailed -Symbols  -SymbolPackageFormat snupkg
-        - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        - task: EsrpCodeSigning@5
           displayName: ESRP CodeSigning Nuget Packages
           inputs:
-            ConnectedServiceName: ESRP CodeSigning - OData
+            ConnectedServiceName: $(ODataEsrpConnectionServiceName)
+            AppRegistrationClientId: '$(ODataEsrpAppRegistrationClientId)'
+            AppRegistrationTenantId: '$(ODataEsrpAppRegistrationTenantId)'
+            AuthAKVName: $(ODataEsrpAuthAKVName)
+            AuthCertName: $(ODataEsrpAuthCertName)
+            AuthSignCertName: $(ODataEsrpAuthSignCertName)
+            ServiceEndpointUrl: '$(ODataEsrpServiceEndpointUrl)'
             FolderPath: $(Build.ArtifactStagingDirectory)\Nuget
             Pattern: '*.nupkg'
             signConfigType: inlineSignParams

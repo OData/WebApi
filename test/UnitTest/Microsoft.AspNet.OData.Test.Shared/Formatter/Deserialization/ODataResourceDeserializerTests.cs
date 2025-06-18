@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -975,7 +976,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(new TimeSpan(0, 1, 2, 3, 4), customer.ReleaseTime);
         }
 
-
         [Fact]
         public void ReadResource_CanReadInstanceAnnotationforOpenType()
         {
@@ -1021,6 +1021,67 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(991, customer.CustomerId);
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("GuidProperty").Count);
             Assert.Equal(1, customer.InstanceAnnotations.GetPropertyAnnotations("CustomerId").Count);
+        }
+
+        [Fact]
+        public void ReadResource_CanReadNestedPropertyInfo()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+
+            ODataPropertyInfo propertyInfo = new ODataPropertyInfo
+            {
+                Name = "Address",
+                InstanceAnnotations = new List<ODataInstanceAnnotation>
+                {
+                    new ODataInstanceAnnotation("NS.AnnotationOnPropertyWithoutValue", new ODataCollectionValue
+                    {
+                        TypeName = "Collection(Edm.Int32)",
+                        Items = new object[] { 15, 16 }
+                    })
+                }
+            };
+
+            ODataResource odataResource = new ODataResource
+            {
+                Properties = new ODataProperty[]
+                {
+                    new ODataProperty { Name = "Name", Value = "AManWithNestedPropertyInfo" }
+                },
+                TypeName = typeof(SimpleOpenCustomer).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
+            topLevelResourceWrapper.NestedPropertyInfos.Add(propertyInfo);
+
+            // Act
+            SimpleOpenCustomer customer = deserializer.ReadResource(topLevelResourceWrapper, customerTypeReference, readContext)
+                as SimpleOpenCustomer;
+
+            // Assert
+            Assert.NotNull(customer);
+
+            // Verify the declared properties
+            Assert.Equal("AManWithNestedPropertyInfo", customer.Name);
+
+            // Verify the instance annotations
+            Assert.NotNull(customer.InstanceAnnotations);
+            var annotationOnProperty = Assert.Single(customer.InstanceAnnotations.GetPropertyAnnotations("Address"));
+
+            Assert.Equal("NS.AnnotationOnPropertyWithoutValue", annotationOnProperty.Key);
+            IEnumerable<int> collectionValue = annotationOnProperty.Value as IEnumerable<int>;
+            Assert.Equal(new int[] { 15, 16 }, collectionValue);
         }
 
         [Fact]
@@ -1877,6 +1938,65 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             string value = path.ToString();
 
             Assert.Equal("Products('')", value);
+        }
+
+        [Fact]
+        public void ApplyIdToPath_CreatesODataPathWithNullKeySegment_IfKeyValueNotSet2()
+        {
+            ODataResource resource = new ODataResource { TypeName = _productEdmType.FullName(), Id = new Uri("Products('42')", UriKind.RelativeOrAbsolute) };
+            ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(resource);
+            var currentContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                Path = _readContext.Path,
+                Request = RequestFactory.CreateFromModel(_edmModel)
+            };
+
+            int test = 0;
+
+            IServiceProvider container = new MockContainer(builder =>
+            {
+                builder.AddService(ServiceLifetime.Singleton, sp => _edmModel);
+                builder.AddService(ServiceLifetime.Singleton, typeof(ODataUriResolver), sp => new MyUriResolver(() => { test++; }));
+            });
+
+#if NETCORE
+            currentContext.Request.ODataFeature().RouteName = "Route";
+            currentContext.Request.ODataFeature().RequestContainer = container;
+#else
+            currentContext.Request.Properties["Microsoft.AspNet.OData.RequestContainer"] = container;
+#endif
+
+            ODataPath path = ODataResourceDeserializerHelpers.ApplyIdToPath(currentContext, resourceWrapper);
+
+            Assert.NotNull(path);
+            string value = path.ToString();
+
+            Assert.Equal(1, test);
+            Assert.Equal("Products(42)", value);
+        }
+
+        public class MyUriResolver : ODataUriResolver
+        {
+            public MyUriResolver(Action action)
+            {
+                Action = action;
+            }
+
+            public Action Action { get; }
+
+            public override IEnumerable<KeyValuePair<string, object>> ResolveKeys(IEdmEntityType type, IList<string> positionalValues, Func<IEdmTypeReference, string, object> convertFunc)
+            {
+                Action();
+
+                IList<string> newValues = new List<string>(positionalValues.Count);
+                foreach (var v in positionalValues)
+                {
+                    newValues.Add(v.Trim('\''));
+                }
+
+                return base.ResolveKeys(type, newValues, convertFunc);
+            }
         }
 
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)

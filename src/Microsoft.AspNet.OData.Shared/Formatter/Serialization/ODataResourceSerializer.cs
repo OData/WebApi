@@ -462,6 +462,29 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
+        /// Creates the <see cref="ODataNestedResourceInfo"/> to be written while writing this delta nested property (complex or entity).
+        /// </summary>
+        /// <param name="property">The property for which the nested resource info is being created.</param>
+        /// <param name="resourceContext">The context for the property instance being written.</param>
+        /// <returns>The nested resource info to be written. Returns 'null' will omit this property serialization.</returns>
+        /// <remarks>It enables customer to get more control by overriding this method. </remarks>
+        public virtual ODataNestedResourceInfo CreateDeltaNestedResourceInfo(IEdmProperty property, ResourceContext resourceContext)
+        {
+            if (property == null)
+            {
+                throw Error.ArgumentNull(nameof(property));
+            }
+
+            return property.Type != null ?
+                new ODataNestedResourceInfo
+                {
+                    IsCollection = property.Type.IsCollection(),
+                    Name = property.Name
+                } :
+                null;
+        }
+
+        /// <summary>
         /// Creates the <see cref="ODataNestedResourceInfo"/> to be written while writing this dynamic complex property.
         /// </summary>
         /// <param name="propertyName">The dynamic property name.</param>
@@ -705,15 +728,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = complexProperty.Key.Type.IsCollection(),
-                    Name = complexProperty.Key.Name
-                };
+                ODataNestedResourceInfo nestedResourceInfo = CreateDeltaNestedResourceInfo(complexProperty.Key, resourceContext);
 
-                writer.WriteStart(nestedResourceInfo);
-                WriteDeltaComplexAndExpandedNavigationProperty(complexProperty.Key, null, resourceContext, writer);
-                writer.WriteEnd();
+                if (nestedResourceInfo != null)
+                {
+                    writer.WriteStart(nestedResourceInfo);
+                    WriteDeltaComplexAndExpandedNavigationProperty(complexProperty.Key, null, resourceContext, writer);
+                    writer.WriteEnd();
+                }
             }
         }
 
@@ -732,15 +754,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
             {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = navigationProperty.Key.Type.IsCollection(),
-                    Name = navigationProperty.Key.Name
-                };
+                ODataNestedResourceInfo nestedResourceInfo = CreateDeltaNestedResourceInfo(navigationProperty.Key, resourceContext);
 
-                writer.WriteStart(nestedResourceInfo);
-                WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
-                writer.WriteEnd();
+                if (nestedResourceInfo != null)
+                {
+                    writer.WriteStart(nestedResourceInfo);
+                    WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                    writer.WriteEnd();
+                }
             }
         }
 
@@ -760,15 +781,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
             {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = navigationProperty.Key.Type.IsCollection(),
-                    Name = navigationProperty.Key.Name
-                };
+                ODataNestedResourceInfo nestedResourceInfo = CreateDeltaNestedResourceInfo(navigationProperty.Key, resourceContext);
 
-                await writer.WriteStartAsync(nestedResourceInfo);
-                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
-                await writer.WriteEndAsync();
+                if (nestedResourceInfo != null)
+                {
+                    await writer.WriteStartAsync(nestedResourceInfo);
+                    await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                    await writer.WriteEndAsync();
+                }
             }
         }
 
@@ -793,15 +813,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> complexProperty in complexProperties)
             {
-                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
-                {
-                    IsCollection = complexProperty.Key.Type.IsCollection(),
-                    Name = complexProperty.Key.Name
-                };
+                ODataNestedResourceInfo nestedResourceInfo = CreateDeltaNestedResourceInfo(complexProperty.Key, resourceContext);
 
-                await writer.WriteStartAsync(nestedResourceInfo);
-                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(complexProperty.Key, null, resourceContext, writer);
-                await writer.WriteEndAsync();
+                if (nestedResourceInfo != null)
+                {
+                    await writer.WriteStartAsync(nestedResourceInfo);
+                    await WriteDeltaComplexAndExpandedNavigationPropertyAsync(complexProperty.Key, null, resourceContext, writer);
+                    await writer.WriteEndAsync();
+                }
             }
         }
 
@@ -1785,11 +1804,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> GetNavigationPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
-            ISet<IEdmNavigationProperty> navigationProperties = selectExpandNode.SelectedNavigationProperties;
+            IEnumerable<IEdmNavigationProperty> navigationProperties = selectExpandNode.ExpandedProperties?.Keys;
 
             if (navigationProperties == null)
             {
-                yield break;
+                navigationProperties = resourceContext.StructuredType.DeclaredNavigationProperties();
             }
 
             if (resourceContext.EdmObject is IDelta changedObject)

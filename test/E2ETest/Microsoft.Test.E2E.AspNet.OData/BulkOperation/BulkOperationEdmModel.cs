@@ -76,6 +76,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             EntitySetConfiguration<Student> students = builder.EntitySet<Student>("Students");
             EntitySetConfiguration<Course> courses = builder.EntitySet<Course>("Courses");
 
+            builder.EntitySet<Customer>("Customers");
+
             // maybe following lines are not required once bug #1587 is fixed.
             // 1587: It's better to support automatically adding actions and functions in ODataConventionModelBuilder.
             AddBoundActionsAndFunctions(employee);

@@ -31,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            var controllers = new[] { typeof(EmployeesController), typeof(CompanyController), typeof(MetadataController), typeof(StudentController) };
+            var controllers = new[] { typeof(EmployeesController), typeof(CompanyController), typeof(MetadataController), typeof(StudentController), typeof(CustomersController) };
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
@@ -1160,6 +1160,43 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains(expected, json.ToString());
+            }
+        }
+
+        [Fact]
+        public async Task PatchCustomer_WithDeletes_Orders_ForArrayNavigationProperty()
+        {
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Customers(1)";
+
+            var content = @"{
+  ""Name"": ""Updated Organization"",
+  ""Orders@delta"": [
+    {
+        ""Price"": 99
+    },
+    {
+     ""@removed"":{""reason"":""deleted"" },
+     ""@id"":""Orders(13)""
+    },
+    {
+      ""@id"":""Orders(42)"",
+      ""Price"": 88
+    }
+  ]
+}";
+
+            var requestForPatch = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPatch.Headers.Add("OData-Version", "4.01");
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPatch.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPatch))
+            {
+                // All verifications are done in the controller/action.
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
         }
 

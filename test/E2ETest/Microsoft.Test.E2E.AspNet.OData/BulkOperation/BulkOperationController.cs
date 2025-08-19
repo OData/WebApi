@@ -11,6 +11,7 @@ using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
@@ -518,6 +519,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             handler.DeepInsert(student, Request.GetModel(), new APIHandlerFactory(Request.GetModel()));
 
             return Created(student);
+        }
+    }
+
+    public class CustomersController : TestODataController
+    {
+        [ODataRoute("Customers({key})")]
+        [HttpPatch]
+        [EnableQuery]
+        public ITestActionResult Patch(int key, Delta<Customer> delta)
+        {
+            Assert.True(delta.TryGetPropertyValue("Orders", out var orders));
+
+            DeltaSet<Order> changes = orders as DeltaSet<Order>;
+            Assert.NotNull(changes);
+
+            Delta<Order> change1 = changes[0] as Delta<Order>;
+            Assert.NotNull(change1);
+            Assert.Equal("Price", string.Join(",", change1.GetChangedPropertyNames()));
+
+            DeltaDeletedEntityObject<Order> change2 = changes[1] as DeltaDeletedEntityObject<Order>;
+            Assert.NotNull(change2);
+            Assert.Equal(DeltaDeletedEntryReason.Deleted, change2.Reason);
+            Assert.Equal(new Uri("Orders(13)", UriKind.Relative), change2.Id);
+
+            Delta<Order> change3 = changes[2] as Delta<Order>;
+            Assert.NotNull(change3);
+            Assert.Equal("Orders(42)", change3.ODataIdContainer.ODataId);
+
+            return Ok();
         }
     }
 }

@@ -80,6 +80,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         public List<OrderLine> OrderLines { get; set; }
     }
 
+    public class Customer
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public Order[] Orders { get; set; } // use array to test serialization of arrays
+    }
+
     public class OrderLine
     {
         [Key]

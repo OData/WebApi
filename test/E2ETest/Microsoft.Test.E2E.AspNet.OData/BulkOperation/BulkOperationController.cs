@@ -534,6 +534,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             DeltaSet<Order> changes = orders as DeltaSet<Order>;
             Assert.NotNull(changes);
 
+            Assert.Equal(3, changes.Count);
             Delta<Order> change1 = changes[0] as Delta<Order>;
             Assert.NotNull(change1);
             Assert.Equal("Price", string.Join(",", change1.GetChangedPropertyNames()));

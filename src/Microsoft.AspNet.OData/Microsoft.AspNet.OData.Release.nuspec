@@ -15,6 +15,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
     <icon>images\odata.png</icon>
+    <readme>docs\README.md</readme>
     <repository type="git" url="https://github.com/OData/WebApi.git" branch="master"/>
     <dependencies>
       <dependency id="Microsoft.AspNet.WebApi.Client" version="$AspNetPackageDependency$" />
@@ -34,5 +35,6 @@
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData\**\*.cs" target="src\Microsoft.AspNet.OData" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
     <file src="$SourcesRoot$\images\odata.png" target="images\" />
+    <file src="$SourcesRoot$\README.md" target="docs\" />
   </files>
 </package>

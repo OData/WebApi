@@ -4,7 +4,7 @@
     <id>Microsoft.AspNetCore.OData</id>
     <title>Microsoft ASP.NET Core 2.0 and 3.x for OData v4.0</title>
     <version>$VersionNuGetSemantic$-Nightly$NightlyBuildVersion$</version>
-    <authors>OData (.NET Foundation)</authors>
+    <authors>Microsoft</authors>
     <copyright>&#169; .NET Foundation and Contributors. All rights reserved.</copyright>
     <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC and to support OData query syntax for your web APIs.</description>
     <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC.</summary>

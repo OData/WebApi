@@ -4,8 +4,8 @@
     <id>Microsoft.AspNetCore.OData</id>
     <title>Microsoft ASP.NET Core 2.0 and 3.x for OData v4.0</title>
     <version>$VersionNuGetSemantic$</version>
-    <authors>OData (.NET Foundation)</authors>
-    <copyright>&#169; .NET Foundation and Contributors. All rights reserved.</copyright>
+    <authors>Microsoft</authors>
+    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC and to support OData query syntax for your web APIs.</description>
     <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC.</summary>
     <releaseNotes>https://docs.microsoft.com/en-us/odata/changelog/webapi-7x</releaseNotes>
@@ -14,7 +14,8 @@
     <license type="expression">MIT</license>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNetCore WebApi OData</tags>
-    <icon>images\odata.png</icon>    
+    <icon>images\odata.png</icon>
+    <readme>docs\README.md</readme>
     <repository type="git" url="https://github.com/OData/WebApi.git" branch="master"/>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
@@ -38,5 +39,6 @@
     <file src="$SourcesRoot$\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
     <file src="$SourcesRoot$\images\odata.png" target="images\" />
+    <file src="$SourcesRoot$\README.md" target="docs\" />
   </files>
 </package>

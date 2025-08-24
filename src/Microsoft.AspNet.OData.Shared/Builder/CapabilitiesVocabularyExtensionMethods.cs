@@ -253,6 +253,125 @@ namespace Microsoft.AspNet.OData.Builder
             model.SetVocabularyAnnotation(target, properties, CapabilitiesVocabularyConstants.ExpandRestrictions);
         }
 
+        /// <summary>
+        /// Set Org.OData.Capabilities.V1.InsertRestrictions to target.
+        /// </summary>
+        /// <param name="model">The model referenced to.</param>
+        /// <param name="target">The target entity set to set the inline annotation.</param>
+        /// <param name="isInsertable">This entity set can be inserted.</param>
+        /// <param name="nonInsertableProperties">These properties SHOULD be omitted from POST requests because the server will ignore their values.</param>
+        /// <param name="nonInsertableNavigationProperties">These navigation properties do not allow InsertLink requests.</param>
+        public static void SetInsertRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target, bool isInsertable,
+            IEnumerable<IEdmProperty> nonInsertableProperties,
+            IEnumerable<IEdmNavigationProperty> nonInsertableNavigationProperties)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (target == null)
+            {
+                throw Error.ArgumentNull("target");
+            }
+
+            nonInsertableProperties = nonInsertableProperties ?? EmptyStructuralProperties;
+            nonInsertableNavigationProperties = nonInsertableNavigationProperties ?? EmptyNavigationProperties;
+
+            IList<IEdmPropertyConstructor> properties = new List<IEdmPropertyConstructor>
+            {
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.InsertRestrictionsInsertable,
+                    new EdmBooleanConstant(isInsertable)),
+
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.InsertRestrictionsNonInsertableProperties,
+                    new EdmCollectionExpression(
+                        nonInsertableProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray())),
+
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.InsertRestrictionsNonInsertableNavigationProperties,
+                    new EdmCollectionExpression(
+                        nonInsertableNavigationProperties.Select(p => new EdmNavigationPropertyPathExpression(p.Name)).ToArray()))
+            };
+
+            model.SetVocabularyAnnotation(target, properties, CapabilitiesVocabularyConstants.InsertRestrictions);
+        }
+
+        /// <summary>
+        /// Set Org.OData.Capabilities.V1.UpdateRestrictions to target.
+        /// </summary>
+        /// <param name="model">The model referenced to.</param>
+        /// <param name="target">The target entity set to set the inline annotation.</param>
+        /// <param name="isUpdatable">This entity set can be updated.</param>
+        /// <param name="nonUpdatableProperties">These properties SHOULD be omitted from PUT or PATCH requests because the server will ignore their values.These properties do not allow UpdateValue and DeleteValue requests.</param>
+        /// <param name="nonUpdatableNavigationProperties">These navigation properties do not allow UpdateLink requests.</param>
+        public static void SetUpdateRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target, bool isUpdatable,
+            IEnumerable<IEdmProperty> nonUpdatableProperties,
+            IEnumerable<IEdmNavigationProperty> nonUpdatableNavigationProperties)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (target == null)
+            {
+                throw Error.ArgumentNull("target");
+            }
+
+            nonUpdatableProperties = nonUpdatableProperties ?? EmptyStructuralProperties;
+            nonUpdatableNavigationProperties = nonUpdatableNavigationProperties ?? EmptyNavigationProperties;
+
+            IList<IEdmPropertyConstructor> properties = new List<IEdmPropertyConstructor>
+            {
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.UpdateRestrictionsUpdatable,
+                    new EdmBooleanConstant(isUpdatable)),
+
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.UpdateRestrictionsNonUpdatableProperties,
+                    new EdmCollectionExpression(
+                        nonUpdatableProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray())),
+
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.UpdateRestrictionsNonUpdatableNavigationProperties,
+                    new EdmCollectionExpression(
+                        nonUpdatableNavigationProperties.Select(p => new EdmNavigationPropertyPathExpression(p.Name)).ToArray()))
+            };
+
+            model.SetVocabularyAnnotation(target, properties, CapabilitiesVocabularyConstants.UpdateRestrictions);
+        }
+
+        /// <summary>
+        /// Set Org.OData.Capabilities.V1.DeleteRestrictions to target.
+        /// </summary>
+        /// <param name="model">The model referenced to.</param>
+        /// <param name="target">The target entity set to set the inline annotation.</param>
+        /// <param name="isDeletable">This entity set can be deleted.</param>
+        /// <param name="nonDeletableNavigationProperties">These navigation properties do not allow DeleteLink requests.</param>
+        public static void SetDeleteRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target, bool isDeletable,
+            IEnumerable<IEdmNavigationProperty> nonDeletableNavigationProperties)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (target == null)
+            {
+                throw Error.ArgumentNull("target");
+            }
+
+            nonDeletableNavigationProperties = nonDeletableNavigationProperties ?? EmptyNavigationProperties;
+
+            IList<IEdmPropertyConstructor> properties = new List<IEdmPropertyConstructor>
+            {
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.DeleteRestrictionsDeletable,
+                    new EdmBooleanConstant(isDeletable)),
+
+                new EdmPropertyConstructor(CapabilitiesVocabularyConstants.DeleteRestrictionsNonDeletableNavigationProperties,
+                    new EdmCollectionExpression(
+                        nonDeletableNavigationProperties.Select(p => new EdmNavigationPropertyPathExpression(p.Name)).ToArray()))
+            };
+
+            model.SetVocabularyAnnotation(target, properties, CapabilitiesVocabularyConstants.DeleteRestrictions);
+        }
+
         private static void SetVocabularyAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
             IList<IEdmPropertyConstructor> properties, string qualifiedName)
         {

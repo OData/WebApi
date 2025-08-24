@@ -77,5 +77,38 @@ namespace Microsoft.AspNet.OData.Builder
 
         /// <summary>Property NonExpandableProperties of Org.OData.Capabilities.V1.ExpandRestrictions</summary>
         public const string ExpandRestrictionsNonExpandableProperties = "NonExpandableProperties";
+
+        /// <summary>Org.OData.Capabilities.V1.InsertRestrictions</summary>
+        public const string InsertRestrictions = "Org.OData.Capabilities.V1.InsertRestrictions";
+
+        /// <summary>Property Insertable of Org.OData.Capabilities.V1.InsertRestrictions</summary>
+        public const string InsertRestrictionsInsertable = "Insertable";
+
+        /// <summary>Property NonInsertableProperties of Org.OData.Capabilities.V1.InsertRestrictions</summary>
+        public const string InsertRestrictionsNonInsertableProperties = "NonInsertableProperties";
+
+        /// <summary>Property NonInsertableNavigationProperties of Org.OData.Capabilities.V1.InsertRestrictions</summary>
+        public const string InsertRestrictionsNonInsertableNavigationProperties = "NonInsertableNavigationProperties";
+
+        /// <summary>Org.OData.Capabilities.V1.UpdateRestrictions</summary>
+        public const string UpdateRestrictions = "Org.OData.Capabilities.V1.UpdateRestrictions";
+
+        /// <summary>Property Updatable of Org.OData.Capabilities.V1.UpdateRestrictions</summary>
+        public const string UpdateRestrictionsUpdatable = "Updatable";
+
+        /// <summary>Property NonUpdatableProperties of Org.OData.Capabilities.V1.UpdateRestrictions</summary>
+        public const string UpdateRestrictionsNonUpdatableProperties = "NonUpdatableProperties";
+
+        /// <summary>Property NonUpdatableNavigationProperties of Org.OData.Capabilities.V1.UpdateRestrictions</summary>
+        public const string UpdateRestrictionsNonUpdatableNavigationProperties = "NonUpdatableNavigationProperties";
+
+        /// <summary>Org.OData.Capabilities.V1.DeleteRestrictions</summary>
+        public const string DeleteRestrictions = "Org.OData.Capabilities.V1.DeleteRestrictions";
+
+        /// <summary>Property Deletable of Org.OData.Capabilities.V1.DeleteRestrictions</summary>
+        public const string DeleteRestrictionsDeletable = "Deletable";
+
+        /// <summary>Property NonDeletableNavigationProperties of Org.OData.Capabilities.V1.DeleteRestrictions</summary>
+        public const string DeleteRestrictionsNonDeletableNavigationProperties = "NonDeletableNavigationProperties";
     }
 }

@@ -1107,6 +1107,9 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	EntityTypeConfiguration EntityType  { public virtual get; }
 	string Name  { public get; }
+	bool NotDeletable  { public get; public set; }
+	bool NotInsertable  { public get; public set; }
+	bool NotUpdatable  { public get; public set; }
 
 	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, NavigationSourceConfiguration targetNavigationSource)
 	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, NavigationSourceConfiguration targetNavigationSource, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] bindingPath)
@@ -1124,6 +1127,12 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 	public virtual NavigationSourceConfiguration HasNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty, NavigationLinkBuilder navigationLinkBuilder)
 	public virtual NavigationSourceConfiguration HasReadLink (Microsoft.AspNet.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
 	public virtual NavigationSourceConfiguration HasUrl (string url)
+	public virtual NavigationSourceConfiguration IsDeletable ()
+	public virtual NavigationSourceConfiguration IsInsertable ()
+	public virtual NavigationSourceConfiguration IsNotDeletable ()
+	public virtual NavigationSourceConfiguration IsNotInsertable ()
+	public virtual NavigationSourceConfiguration IsNotUpdatable ()
+	public virtual NavigationSourceConfiguration IsUpdatable ()
 	public virtual void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration)
 	public virtual void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration, string bindingPath)
 }
@@ -1156,6 +1165,12 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 	public NavigationPropertyBindingConfiguration HasSingletonBinding (Expression`1 navigationExpression, NavigationSourceConfiguration`1 targetSingleton)
 	public NavigationPropertyBindingConfiguration HasSingletonBinding (Expression`1 navigationExpression, string singletonName)
 	public NavigationPropertyBindingConfiguration HasSingletonBinding (Expression`1 navigationExpression, string singletonName)
+	public virtual NavigationSourceConfiguration`1 IsDeletable ()
+	public virtual NavigationSourceConfiguration`1 IsInsertable ()
+	public virtual NavigationSourceConfiguration`1 IsNotDeletable ()
+	public virtual NavigationSourceConfiguration`1 IsNotInsertable ()
+	public virtual NavigationSourceConfiguration`1 IsNotUpdatable ()
+	public virtual NavigationSourceConfiguration`1 IsUpdatable ()
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
@@ -1219,10 +1234,13 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	string Name  { public get; public set; }
 	bool NonFilterable  { public get; public set; }
 	bool NotCountable  { public get; public set; }
+	bool NotDeletable  { public get; public set; }
 	bool NotExpandable  { public get; public set; }
 	bool NotFilterable  { public get; public set; }
+	bool NotInsertable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	bool NotUpdatable  { public get; public set; }
 	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
@@ -1244,17 +1262,23 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	public PropertyConfiguration Filter (string[] properties)
 	public PropertyConfiguration Filter (QueryOptionSetting setting, string[] properties)
 	public PropertyConfiguration IsCountable ()
+	public PropertyConfiguration IsDeletable ()
 	public PropertyConfiguration IsExpandable ()
 	public PropertyConfiguration IsFilterable ()
+	public PropertyConfiguration IsInsertable ()
 	public PropertyConfiguration IsNavigable ()
 	public PropertyConfiguration IsNonFilterable ()
 	public PropertyConfiguration IsNotCountable ()
+	public PropertyConfiguration IsNotDeletable ()
 	public PropertyConfiguration IsNotExpandable ()
 	public PropertyConfiguration IsNotFilterable ()
+	public PropertyConfiguration IsNotInsertable ()
 	public PropertyConfiguration IsNotNavigable ()
 	public PropertyConfiguration IsNotSortable ()
+	public PropertyConfiguration IsNotUpdatable ()
 	public PropertyConfiguration IsSortable ()
 	public PropertyConfiguration IsUnsortable ()
+	public PropertyConfiguration IsUpdatable ()
 	public PropertyConfiguration OrderBy ()
 	public PropertyConfiguration OrderBy (QueryOptionSetting setting)
 	public PropertyConfiguration OrderBy (string[] properties)

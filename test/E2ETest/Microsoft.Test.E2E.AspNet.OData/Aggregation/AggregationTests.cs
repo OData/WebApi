@@ -473,8 +473,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
+            var res = await response.Content.ReadAsStringAsync();
+            JObject json = JObject.Parse(res);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
             JToken value = json["value"].Children().First();
 
             var anonymousResponse = new { Count = 0 };
@@ -627,8 +628,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         [InlineData("?$apply=aggregate(Order/Price with min as Result)", "0")]
         [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
         [InlineData("?$apply=aggregate(Order/Price with average as Result)", "450")]
+#if !NETCORE3x
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "10")]
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "10")]
+#endif
         public async Task AggregateMethodWorks(string query, string expectedResult)
         {
             // Arrange

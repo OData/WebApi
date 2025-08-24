@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
@@ -318,6 +319,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         internal IEdmTypeReference GetEdmType(object instance, Type type)
         {
             IEdmTypeReference edmType;
+            if (type != null && type.IsGenericType() && EdmLibHelpers.IsDynamicTypeWrapper(type.GetGenericArguments()[0]))
+            {
+               return this.Path.Segments.OfType<EntitySetSegment>().FirstOrDefault()?.EdmType?.ToEdmTypeReference(true);
+            }
+
 
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)

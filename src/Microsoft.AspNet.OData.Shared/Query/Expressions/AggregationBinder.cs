@@ -168,8 +168,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             if (_aggregateExpressions != null
                 && _aggregateExpressions.OfType<AggregateExpression>().Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
-                && _groupingProperties != null
-                && _groupingProperties.Any()
+                //&& _groupingProperties != null
+                //&& _groupingProperties.Any()
                 && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any()))
             {
                 var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this.ElementType);
@@ -351,11 +351,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             // Create method to get property collections to aggregate
             MethodInfo selectManyMethod
-                = ExpressionHelperMethods.EnumerableSelectManyGeneric.MakeGenericMethod(baseElementType, selectedElementType);
+                = ExpressionHelperMethods.EnumerableSelectManyGeneric.MakeGenericMethod(baseType == this.ElementType ? this.ElementType: baseElementType, selectedElementType);
 
             // Create the lambda that acceses the property in the selectMany clause.
-            var selectManyParam = Expression.Parameter(baseElementType, "$it");
-            var propertyExpression = Expression.Property(selectManyParam, expression.Expression.NavigationProperty.Name);
+            var selectManyParam = baseType == this.ElementType ? this.LambdaParameter : Expression.Parameter(baseElementType, "$it");
+            var propertyExpression = Expression.Property(source, expression.Expression.NavigationProperty.Name);
             var selectManyLambda = Expression.Lambda(propertyExpression, selectManyParam);
 
             // Get expression to get collection of entities
@@ -406,16 +406,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // we need cast it to IEnumerable<baseType> during expression building (IEnumerable)$it
             // however for EF6 we need to use $it.AsQueryable() due to limitations in types of casts that will properly translated
             Expression asQuerableExpression = null;
-            if (ClassicEF)
-            {
+            //if (ClassicEF)
+            //{
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
                 asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
-            }
-            else
-            {
-                var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
-                asQuerableExpression = Expression.Convert(accum, queryableType);
-            }
+            //}
+            //else
+            //{
+            //    var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
+            //    asQuerableExpression = Expression.Convert(accum, queryableType);
+            //}
 
             // $count is a virtual property, so there's not a propertyLambda to create.
             if (expression.Method == AggregationMethod.VirtualPropertyCount)
@@ -590,6 +590,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // .GroupBy($it => new NoGroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this.LambdaParameter);
             }
+            
 
             return ExpressionHelpers.GroupBy(query, groupLambda, elementType, this._groupByClrType);
         }

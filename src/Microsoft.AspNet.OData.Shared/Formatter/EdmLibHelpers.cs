@@ -1052,7 +1052,8 @@ namespace Microsoft.AspNet.OData.Formatter
                         propertyTypeQuerySettings.PageSize;
                 }
 
-                if (mergedQuerySettings.MaxTop == 0 && propertyTypeQuerySettings.MaxTop != 0)
+                if (!mergedQuerySettings.MaxTop.HasValue ||
+                    (mergedQuerySettings.MaxTop == 0 && propertyTypeQuerySettings.MaxTop != 0))
                 {
                     mergedQuerySettings.MaxTop =
                         propertyTypeQuerySettings.MaxTop;

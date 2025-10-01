@@ -62,6 +62,7 @@ extends:
           inputs:
             solution: 'sln\WebApiOData.AspNet.sln '
             platform: $(BuildPlatform)
+            restoreNugetPackages: true
             configuration: $(BuildConfiguration)
         - task: VSBuild@1
           displayName: Build solution sln\WebApiOData.E2E.AspNet.sln

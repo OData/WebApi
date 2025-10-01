@@ -62,6 +62,19 @@ extends:
           inputs:
             versionSpec: '>=5.8.0'
             checkLatest: true
+        - task: PowerShell@2
+          displayName: 'Install .NET Framework 4.5 Targeting Pack'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Download and install .NET Framework 4.5 Developer Pack
+              $url = "https://go.microsoft.com/fwlink/?linkid=321335&clcid=0x409"
+              $output = "$env:TEMP\NDP451-KB2861696-x86-x64-DevPack.exe"
+              Write-Host "Downloading .NET Framework 4.5.1 Developer Pack..."
+              Invoke-WebRequest -Uri $url -OutFile $output
+              Write-Host "Installing .NET Framework 4.5.1 Developer Pack..."
+              Start-Process -FilePath $output -ArgumentList "/S" -Wait
+              Write-Host "Installation completed."
         - task: UseDotNet@2
           displayName: Use .NET Core sdk 2.x
           inputs:

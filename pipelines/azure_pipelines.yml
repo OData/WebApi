@@ -50,14 +50,44 @@ extends:
           inputs:
             targetType: 'inline'
             script: |
-              # Download and install .NET Framework 4.5 Developer Pack
-              $url = "https://go.microsoft.com/fwlink/?linkid=321335&clcid=0x409"
-              $output = "$env:TEMP\NDP451-KB2861696-x86-x64-DevPack.exe"
-              Write-Host "Downloading .NET Framework 4.5.1 Developer Pack..."
-              Invoke-WebRequest -Uri $url -OutFile $output
-              Write-Host "Installing .NET Framework 4.5.1 Developer Pack..."
-              Start-Process -FilePath $output -ArgumentList "/S" -Wait
-              Write-Host "Installation completed."
+              # Check if .NET Framework 4.5 targeting pack is already available
+              $targetingPackPath = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+              if (Test-Path $targetingPackPath) {
+                Write-Host ".NET Framework 4.5 targeting pack is already available at: $targetingPackPath"
+                exit 0
+              }
+              
+              # Try to install via chocolatey first (faster and more reliable)
+              try {
+                Write-Host "Attempting to install .NET Framework 4.5.2 Developer Pack via chocolatey..."
+                choco install netfx-4.5.2-devpack -y --timeout 300
+                Write-Host "Installation via chocolatey completed successfully."
+              }
+              catch {
+                Write-Host "Chocolatey installation failed, trying direct download..."
+                
+                # Fallback to direct download with timeout and better error handling
+                $url = "https://download.microsoft.com/download/4/3/B/43B61315-B2CE-4F5B-9E32-34CCA07B2F0E/NDP452-KB2901951-x86-x64-DevPack.exe"
+                $output = "$env:TEMP\NDP452-KB2901951-x86-x64-DevPack.exe"
+                
+                Write-Host "Downloading .NET Framework 4.5.2 Developer Pack from: $url"
+                $webClient = New-Object System.Net.WebClient
+                $webClient.DownloadTimeout = 300000  # 5 minutes timeout
+                $webClient.DownloadFile($url, $output)
+                
+                if (Test-Path $output) {
+                  Write-Host "Download completed. Installing .NET Framework 4.5.2 Developer Pack..."
+                  $process = Start-Process -FilePath $output -ArgumentList "/quiet" -Wait -PassThru
+                  if ($process.ExitCode -eq 0) {
+                    Write-Host "Installation completed successfully."
+                  } else {
+                    Write-Host "Installation failed with exit code: $($process.ExitCode)"
+                  }
+                } else {
+                  Write-Host "Download failed - file not found at: $output"
+                  exit 1
+                }
+              }
         - task: UseDotNet@2
           displayName: Use .NET Core sdk 2.x
           inputs:

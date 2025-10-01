@@ -24,6 +24,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    
+    <!-- .NET Framework Reference Assemblies Path Configuration -->
+    <!-- Ensure MSBuild can find .NET Framework 4.5+ reference assemblies on build agents -->
+    <TargetFrameworkRootPath Condition="'$(TargetFrameworkRootPath)' == '' AND Exists('$(ProgramFiles)\Reference Assemblies\Microsoft\Framework')">$(ProgramFiles)\Reference Assemblies\Microsoft\Framework\</TargetFrameworkRootPath>
+    <TargetFrameworkRootPath Condition="'$(TargetFrameworkRootPath)' == '' AND Exists('$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework')">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\</TargetFrameworkRootPath>
 
     <!-- Variables for output redirection (localization, signing, etc)-->
     <Language Condition=" '$(Language)' == '' ">ENU</Language>

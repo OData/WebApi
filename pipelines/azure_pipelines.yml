@@ -62,8 +62,8 @@ extends:
           inputs:
             solution: 'sln\WebApiOData.AspNet.sln '
             platform: $(BuildPlatform)
-            restoreNugetPackages: true
             configuration: $(BuildConfiguration)
+            vsVersion: '16.0'  # This specifies Visual Studio 2019
         - task: VSBuild@1
           displayName: Build solution sln\WebApiOData.E2E.AspNet.sln
           inputs:

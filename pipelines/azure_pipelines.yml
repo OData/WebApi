@@ -46,47 +46,51 @@ extends:
           inputs:
             versionSpec: '>=5.8.0'
         - task: PowerShell@2
-          displayName: 'Install .NET Framework 4.5 Targeting Pack'
+          displayName: 'Setup .NET Framework Build Environment'
           inputs:
             targetType: 'inline'
             script: |
-              # Check if .NET Framework 4.5 targeting pack is already available
-              $targetingPackPath = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
-              if (Test-Path $targetingPackPath) {
-                Write-Host ".NET Framework 4.5 targeting pack is already available at: $targetingPackPath"
-                exit 0
+              # Force install .NET Framework 4.5.2 Developer Pack via direct download
+              # This ensures the reference assemblies are properly registered with MSBuild
+              
+              Write-Host "Downloading .NET Framework 4.5.2 Developer Pack..."
+              $url = "https://download.microsoft.com/download/4/3/B/43B61315-B2CE-4F5B-9E32-34CCA07B2F0E/NDP452-KB2901951-x86-x64-DevPack.exe"
+              $output = "$env:TEMP\NDP452-KB2901951-x86-x64-DevPack.exe"
+              
+              # Download with timeout
+              $webClient = New-Object System.Net.WebClient
+              $webClient.DownloadTimeout = 300000  # 5 minutes timeout
+              try {
+                $webClient.DownloadFile($url, $output)
+                Write-Host "Download completed successfully."
+              } catch {
+                Write-Host "Download failed: $($_.Exception.Message)"
+                exit 1
               }
               
-              # Try to install via chocolatey first (faster and more reliable)
-              try {
-                Write-Host "Attempting to install .NET Framework 4.5.2 Developer Pack via chocolatey..."
-                choco install netfx-4.5.2-devpack -y --timeout 300
-                Write-Host "Installation via chocolatey completed successfully."
-              }
-              catch {
-                Write-Host "Chocolatey installation failed, trying direct download..."
+              if (Test-Path $output) {
+                Write-Host "Installing .NET Framework 4.5.2 Developer Pack..."
+                $process = Start-Process -FilePath $output -ArgumentList "/quiet", "/norestart" -Wait -PassThru
+                Write-Host "Installation process completed with exit code: $($process.ExitCode)"
                 
-                # Fallback to direct download with timeout and better error handling
-                $url = "https://download.microsoft.com/download/4/3/B/43B61315-B2CE-4F5B-9E32-34CCA07B2F0E/NDP452-KB2901951-x86-x64-DevPack.exe"
-                $output = "$env:TEMP\NDP452-KB2901951-x86-x64-DevPack.exe"
-                
-                Write-Host "Downloading .NET Framework 4.5.2 Developer Pack from: $url"
-                $webClient = New-Object System.Net.WebClient
-                $webClient.DownloadTimeout = 300000  # 5 minutes timeout
-                $webClient.DownloadFile($url, $output)
-                
-                if (Test-Path $output) {
-                  Write-Host "Download completed. Installing .NET Framework 4.5.2 Developer Pack..."
-                  $process = Start-Process -FilePath $output -ArgumentList "/quiet" -Wait -PassThru
-                  if ($process.ExitCode -eq 0) {
-                    Write-Host "Installation completed successfully."
-                  } else {
-                    Write-Host "Installation failed with exit code: $($process.ExitCode)"
-                  }
+                # Verify installation by checking for reference assemblies
+                $refAssembliesPath = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.2"
+                if (Test-Path $refAssembliesPath) {
+                  Write-Host "Reference assemblies found at: $refAssembliesPath"
                 } else {
-                  Write-Host "Download failed - file not found at: $output"
-                  exit 1
+                  Write-Host "Warning: Reference assemblies not found at expected location"
                 }
+                
+                # Also check v4.5 path
+                $refAssembliesPath45 = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+                if (Test-Path $refAssembliesPath45) {
+                  Write-Host "Reference assemblies for v4.5 found at: $refAssembliesPath45"
+                } else {
+                  Write-Host "Warning: Reference assemblies for v4.5 not found"
+                }
+              } else {
+                Write-Host "Download failed - installer not found"
+                exit 1
               }
         - task: UseDotNet@2
           displayName: Use .NET Core sdk 2.x
@@ -96,6 +100,33 @@ extends:
           displayName: Use .NET Core sdk 3.1
           inputs:
             version: 3.x
+        - task: PowerShell@2
+          displayName: 'Verify MSBuild .NET Framework Support'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # Set MSBuild environment variables to ensure proper .NET Framework support
+              Write-Host "Setting up MSBuild environment for .NET Framework builds..."
+              
+              # Check available .NET Framework versions
+              $frameworkPath = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework"
+              if (Test-Path $frameworkPath) {
+                Write-Host "Available .NET Framework versions:"
+                Get-ChildItem $frameworkPath | ForEach-Object { Write-Host "  - $($_.Name)" }
+              }
+              
+              # Force MSBuild to use the correct reference assemblies path
+              [Environment]::SetEnvironmentVariable("TargetFrameworkRootPath", "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework", "Process")
+              Write-Host "Set TargetFrameworkRootPath to: ${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework"
+              
+              # Verify MSBuild can find .NET Framework 4.5
+              $msbuildPath = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+              if (Test-Path $msbuildPath) {
+                Write-Host "MSBuild found at: $msbuildPath"
+                & $msbuildPath -version
+              } else {
+                Write-Host "Warning: MSBuild not found at expected location"
+              }
         - task: NuGetCommand@2
           displayName: NuGet restore **\*.sln
           inputs:

@@ -54,9 +54,9 @@ extends:
           inputs:
             version: 3.x
         - task: UseDotNet@2
-          displayName: Use .NET Core sdk 4.5
+          displayName: Use .NET Core sdk 4.8
           inputs:
-            version: 4.x
+            version: 4.8.x
         - task: NuGetCommand@2
           displayName: NuGet restore **\*.sln
           inputs:

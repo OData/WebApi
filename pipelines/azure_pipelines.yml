@@ -54,19 +54,11 @@ extends:
           inputs:
             version: 3.x
         - task: NuGetCommand@2
-          displayName: NuGet restore packages.config
-          inputs:
-            command: 'restore'
-            restoreSolution: '**\packages.config'
-            feedsToUse: 'select'
-            includeNuGetOrg: true
-        - task: NuGetCommand@2
           displayName: NuGet restore **\*.sln
           inputs:
             command: 'restore'
-            restoreSolution: 'sln/WebApiOData.AspNet.sln;sln/WebApiOData.AspNetCore.sln;sln/WebApiOData.E2E.AspNet.sln;sln/WebApiOData.E2E.AspNetCore.sln'
-            feedsToUse: 'select'
-            includeNuGetOrg: true
+            solution: sln/WebApiOData.AspNet.sln;sln/WebApiOData.AspNetCore.sln;sln/WebApiOData.E2E.AspNet.sln;sln/WebApiOData.E2E.AspNetCore.sln
+            restoreDirectory: '$(Build.SourcesDirectory)\sln\packages'
         - task: VSBuild@1
           displayName: Build solution sln\WebApiOData.AspNet.sln
           inputs:

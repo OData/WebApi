@@ -61,7 +61,7 @@ extends:
         - task: MSBuild@1
           displayName: Build solution sln\WebApiOData.AspNet.sln
           inputs:
-            solution: 'sln\WebApiOData.AspNet.sln '
+            solution: sln\WebApiOData.AspNet.sln
             platform: $(BuildPlatform)
             configuration: $(BuildConfiguration)
         - task: MSBuild@1

@@ -58,7 +58,6 @@ extends:
           inputs:
             command: 'restore'
             solution: sln/WebApiOData.AspNet.sln;sln/WebApiOData.AspNetCore.sln;sln/WebApiOData.E2E.AspNet.sln;sln/WebApiOData.E2E.AspNetCore.sln
-            restoreDirectory: '$(Build.SourcesDirectory)\sln\packages'
         - task: VSBuild@1
           displayName: Build solution sln\WebApiOData.AspNet.sln
           inputs:

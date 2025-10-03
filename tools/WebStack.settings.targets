@@ -24,7 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    
+
     <!-- Variables for output redirection (localization, signing, etc)-->
     <Language Condition=" '$(Language)' == '' ">ENU</Language>
     <LocalizedPath Condition=" '$(LocalizedPath)' == '' "></LocalizedPath>

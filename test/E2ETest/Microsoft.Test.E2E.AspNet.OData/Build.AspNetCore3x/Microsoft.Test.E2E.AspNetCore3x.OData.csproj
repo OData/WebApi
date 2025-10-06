@@ -40,6 +40,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.0" />
+    <!-- resolve CVE-2024-38095 -->
+    <PackageReference Include="System.Formats.Asn1" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>

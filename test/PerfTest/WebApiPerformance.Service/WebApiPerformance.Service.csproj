@@ -13,7 +13,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebApiPerformance.Service</RootNamespace>
     <AssemblyName>WebApiPerformance.Service</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <OutputPath>..\..\..\bin\$(Configuration)\PerfTest\bin\</OutputPath>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />

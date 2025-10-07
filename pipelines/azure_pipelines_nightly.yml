@@ -29,7 +29,7 @@ extends:
   parameters:
     pool:
       name: MSSecurity-1ES-Build-Agents-Pool
-      image: MSSecurity-1ES-Windows-2019
+      image: MSSecurity-1ES-Windows-2022
       os: windows
     customBuildTags:
     - ES365AIMigrationTooling
@@ -73,6 +73,7 @@ extends:
         - task: NuGetCommand@2
           displayName: NuGet restore *\*.sln
           inputs:
+            command: 'restore'
             solution: sln/WebApiOData.AspNet.sln;sln/WebApiOData.AspNetCore.sln;sln/WebApiOData.E2E.AspNet.sln;sln/WebApiOData.E2E.AspNetCore.sln
         - task: VSBuild@1
           displayName: Build solution sln\WebApiOData.AspNet.sln

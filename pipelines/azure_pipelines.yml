@@ -128,6 +128,7 @@ extends:
           inputs:
             testAssemblyVer2: '**\bin\**\E2ETest\**\Microsoft.Test.E2E.AspNet.OData.dll'
             testFiltercriteria: (DisplayName!=Microsoft.Test.E2E.AspNet.OData.ODataPathHandler.UnicodeRouteTests_Todoü.CRUDEntitySetShouldWork)
+            diagnosticsEnabled: True
         - task: DotNetCoreCLI@2
           displayName: Core E2E Tests (Microsoft.Test.E2E.AspNetCore.OData.csproj)
           inputs:

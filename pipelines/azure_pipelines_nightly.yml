@@ -150,6 +150,7 @@ extends:
             testRunTitle: WebApi-master -UnitTestSuite
             platform: $(TestBuildPlatform)
             configuration: $(TestBuildConfiguration)
+            diagnosticsEnabled: True
         - task: DotNetCoreCLI@2
           displayName: Core E2E Tests (Microsoft.Test.E2E.AspNetCore.OData.csproj)
           inputs:

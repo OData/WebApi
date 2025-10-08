@@ -36,7 +36,7 @@ extends:
       jobs:
       - job: Main
         displayName: Main Build
-        timeoutInMinutes: 420
+        timeoutInMinutes: 400
         steps:
         - checkout: self
           fetchTags: false

@@ -38,7 +38,7 @@ extends:
       jobs:
       - job: Main
         displayName: Main Build
-        timeoutInMinutes: 300
+        timeoutInMinutes: 400
         templateContext:
           outputs:
           - output: pipelineArtifact
@@ -157,12 +157,14 @@ extends:
             command: test
             projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.csproj
             arguments: --configuration $(BuildConfiguration) --no-build
+            publishTestResults: true
         - task: DotNetCoreCLI@2
           displayName: Core E2E 3x Tests (Microsoft.Test.E2E.AspNetCore3x.OData.csproj)
           inputs:
             command: test
             projects: $(Build.SourcesDirectory)\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore3x\Microsoft.Test.E2E.AspNetCore3x.OData.csproj
-            arguments: --configuration $(BuildConfiguration) --no-build  --filter FullyQualifiedName!=Microsoft.Test.E2E.AspNet.OData.QueryComposition.SelectExpandEFTests.QueryForLongSelectList -v diag
+            arguments: --configuration $(BuildConfiguration) --no-build  --filter FullyQualifiedName!=Microsoft.Test.E2E.AspNet.OData.QueryComposition.SelectExpandEFTests.QueryForLongSelectList
+            publishTestResults: true
         - task: CmdLine@2
           displayName: Create $(Build.ArtifactStagingDirectory)\sbom
           inputs:

@@ -11,7 +11,7 @@
 
   <!-- For NuGet Package Dependencies -->
   <PropertyGroup>
-    <AspNetPackageDependency>5.2.2</AspNetPackageDependency>
+    <AspNetPackageDependency>6.0.0</AspNetPackageDependency>
     <AspNetCorePackageDependency>[2.0.1, 3.0.0)</AspNetCorePackageDependency>
     <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
     <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>

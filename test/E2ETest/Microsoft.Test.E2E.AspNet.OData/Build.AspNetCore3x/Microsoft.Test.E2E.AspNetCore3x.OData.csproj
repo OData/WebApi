@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <!-- Disable incompatible analyzers for .NET Core 3.1 -->
+    <EnableMicrosoftExtensionsConfigurationBinderSourceGenerator>false</EnableMicrosoftExtensionsConfigurationBinderSourceGenerator>
   </PropertyGroup>
 
   <Import Project="..\..\..\..\tools\WebStack.settings.targets" />
@@ -43,6 +46,14 @@
     <!-- resolve CVE-2024-38095 -->
     <PackageReference Include="System.Formats.Asn1" Version="6.0.1" />
   </ItemGroup>
+
+  <!-- Disable incompatible analyzers/source generators for .NET Core 3.1 -->
+  <Target Name="RemoveIncompatibleAnalyzers" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="**\Microsoft.Extensions.Logging.Generators.dll" />
+      <Analyzer Remove="**\Microsoft.Extensions.Options.SourceGeneration.dll" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <Compile Include="..\Batch\Client\DefaultBatchGeneratedClient.cs">

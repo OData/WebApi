@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-    <!-- Disable incompatible analyzers for .NET Core 3.1 -->
-    <EnableMicrosoftExtensionsConfigurationBinderSourceGenerator>false</EnableMicrosoftExtensionsConfigurationBinderSourceGenerator>
   </PropertyGroup>
 
   <Import Project="..\..\..\..\tools\WebStack.settings.targets" />
@@ -45,22 +43,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.0" />
     <!-- resolve CVE-2024-38095 -->
     <PackageReference Include="System.Formats.Asn1" Version="6.0.1" />
-    <!-- Explicitly reference Microsoft.Extensions packages without analyzers to prevent CS8032 errors with .NET Core 3.1 SDK -->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" ExcludeAssets="analyzers" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" ExcludeAssets="analyzers" />
   </ItemGroup>
 
   <!-- Disable incompatible analyzers/source generators for .NET Core 3.1 -->
-  <ItemGroup>
-    <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <ExcludeAssets>analyzers</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Update="Microsoft.Extensions.Options" Version="8.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <ExcludeAssets>analyzers</ExcludeAssets>
-    </PackageReference>
-  </ItemGroup>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS8032</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\Batch\Client\DefaultBatchGeneratedClient.cs">

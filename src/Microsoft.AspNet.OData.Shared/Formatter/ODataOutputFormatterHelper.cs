@@ -381,6 +381,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 return null;
             }
 
+            // NOTE Comment this out to fix issue https://github.com/OData/WebApi/issues/2890
             if (IsOperationPath(path))
             {
                 var lastSegment = path.Segments.Last();

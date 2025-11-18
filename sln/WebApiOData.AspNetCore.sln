@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29418.71
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{31D1EFDE-8A05-4489-9621-3B163D48B0F0}"
 EndProject
@@ -23,13 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore3xODataSample.Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore3xEndpointSample.Web", "..\samples\AspNetCore3xEndpointSample.Web\AspNetCore3xEndpointSample.Web.csproj", "{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReproNavError", "..\samples\ReproNavError\ReproNavError.csproj", "{066F8FEE-156D-4663-B1F6-13367F659CCB}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{0fc1bf5e-f882-43d8-9451-ed9fa90dea4c}*SharedItemsImports = 5
-		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{2b8085f7-3625-489e-a963-e29c2bd1aa76}*SharedItemsImports = 5
-		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
-		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +62,12 @@ Global
 		{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{066F8FEE-156D-4663-B1F6-13367F659CCB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,8 +80,15 @@ Global
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
 		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
 		{7E23621F-31D5-4A0D-AFDA-987B1866B8AF} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
+		{066F8FEE-156D-4663-B1F6-13367F659CCB} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {731B144D-90AE-4567-B337-7CFE9965AACC}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{0fc1bf5e-f882-43d8-9451-ed9fa90dea4c}*SharedItemsImports = 5
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{2b8085f7-3625-489e-a963-e29c2bd1aa76}*SharedItemsImports = 5
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <Import Project="..\..\..\..\tools\WebStack.settings.targets" />
@@ -23,7 +24,7 @@
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.6" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
@@ -43,6 +44,11 @@
     <!-- resolve CVE-2024-38095 -->
     <PackageReference Include="System.Formats.Asn1" Version="6.0.1" />
   </ItemGroup>
+
+  <!-- Disable incompatible analyzers/source generators for .NET Core 3.1 -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CS8032</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\Batch\Client\DefaultBatchGeneratedClient.cs">

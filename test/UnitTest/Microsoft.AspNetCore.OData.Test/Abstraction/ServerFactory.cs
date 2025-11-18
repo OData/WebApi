@@ -24,7 +24,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -41,7 +40,11 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// <returns>An TestServer.</returns>
         public static TestServer Create(Type[] controllers, Action<IRouteBuilder> configureAction, Action<IServiceCollection> configureService = null)
         {
-            IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
+            // Use WebHostBuilder directly without CreateDefaultBuilder to avoid logging configuration
+            // CreateDefaultBuilder configures Microsoft.Extensions.Logging which is incompatible with Kestrel 2.3.6 on netcoreapp3.1
+            IWebHostBuilder builder = new WebHostBuilder()
+                .UseContentRoot(AppContext.BaseDirectory);
+            
             builder.ConfigureServices(services =>
             {
 #if NETCOREAPP2_1

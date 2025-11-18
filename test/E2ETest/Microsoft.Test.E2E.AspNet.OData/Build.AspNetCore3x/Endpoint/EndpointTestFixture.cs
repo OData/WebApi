@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
@@ -127,13 +126,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
                             EndpointRouteConfiguration config = new EndpointRouteConfiguration(endpoints);
                             configureMethod?.Invoke(null, new object[] { config });
                         });
-                    })
-                    .ConfigureLogging((hostingContext, logging) =>
-                    {
-                        logging.AddDebug();
-                        logging.SetMinimumLevel(LogLevel.Warning);
-                    }
-                )).Build();
+                    })).Build();
 
             _selfHostServer.Start();
         }

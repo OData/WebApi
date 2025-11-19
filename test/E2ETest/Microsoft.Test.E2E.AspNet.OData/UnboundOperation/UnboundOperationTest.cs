@@ -437,6 +437,56 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
             Assert.DoesNotContain("Street 11", responseString);
         }
 
+        [Fact]
+        public async Task FunctionImportWithExpand()
+        {
+            // Arrange
+            const int CustomerId = 407;
+            ConventionCustomer expectCustomer = new ConventionCustomersController().GetConventionCustomerById(CustomerId);
+            Assert.NotNull(expectCustomer);
+            Assert.NotNull(expectCustomer.Orders);
+            Assert.NotEmpty(expectCustomer.Orders);
+
+            // Act - Expand Orders navigation property from function import result
+            var requestUri = this.BaseAddress + "/odata/GetConventionCustomerByIdImport(CustomerId=" + CustomerId + ")?$expand=Orders";
+            var response = await Client.GetAsync(requestUri);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode, $"Request failed with status {response.StatusCode}. Response: {responseString}");
+            Assert.Contains("/$metadata#ConventionCustomers/$entity", responseString);
+            
+            // Verify customer data is present
+            string expect = "\"ID\":" + expectCustomer.ID;
+            Assert.Contains(expect, responseString);
+            expect = "\"Name\":\"" + expectCustomer.Name + "\"";
+            Assert.Contains(expect, responseString);
+            
+            // Verify expanded Orders are present
+            Assert.Contains("\"Orders\":", responseString);
+            foreach (var order in expectCustomer.Orders)
+            {
+                Assert.Contains("\"OrderName\":\"" + order.OrderName + "\"", responseString);
+            }
+        }
+
+        [Fact]
+        public async Task FunctionImportReturningCollectionWithExpand()
+        {
+            // Act - Expand Orders navigation property from function import returning collection
+            var requestUri = this.BaseAddress + "/odata/GetAllConventionCustomersImport()?$expand=Orders";
+            var response = await Client.GetAsync(requestUri);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode, $"Request failed with status {response.StatusCode}. Response: {responseString}");
+            Assert.Contains("/$metadata#ConventionCustomers", responseString);
+            
+            // Verify that orders are expanded for at least one customer
+            Assert.Contains("\"Orders\":", responseString);
+            Assert.Contains("\"OrderName\":", responseString);
+        }
+
         #endregion
     }
 }

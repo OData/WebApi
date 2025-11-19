@@ -1074,6 +1074,59 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.Equal("6+my", customer["value"]);
         }
 
+        [Fact]
+        public async Task ComposableFunctionWithContainedExpandedNavigationPropertyTest()
+        {
+            // Arrange
+            IEdmModel model = GetComposableApplicationFunctionModel();
+            var controllers = new[] { typeof(ApplicationFunctionController) };
+            var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/GetApps()/app1?$expand=Credentials");
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var apps = await response.Content.ReadAsObject<JArray>();
+            Assert.Equal("app1", apps["value"][0]["Id"]);
+            Assert.Equal("app1Cred1", apps["value"][0]["Credentials"][0]["Id"]);
+            Assert.Equal("app1Cred2", apps["value"][0]["Credentials"][1]["Id"]);
+        }
+
+        [Fact]
+        public async Task ComposableFunctionWithContainedNavigationPropertyPathTest()
+        {
+            // Arrange
+            IEdmModel model = GetComposableApplicationFunctionModel();
+            var controllers = new[] { typeof(ApplicationFunctionController) };
+            var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/GetApps()/app1/Credentials");
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var creds = await response.Content.ReadAsObject<JArray>();
+            Assert.Equal("app1Cred1", creds[0]["Id"]);
+            Assert.Equal("app2Cred2", creds[1]["Id"]);
+        }
+
         private static IEdmModel GetKeyCustomerOrderModel()
         {
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
@@ -1167,6 +1220,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
+
         public class KeyCustomerOrderController : TestODataController
         {
             [HttpGet]
@@ -1248,6 +1302,108 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 IQueryable<IEdmEntityObject> appliedCustomers = options.ApplyTo(customers) as IQueryable<IEdmEntityObject>;
 
                 return Ok(appliedCustomers);
+            }
+        }
+
+        public class Application
+        {
+            public string Id { get; set; }
+
+            [Contained]
+            public List<AppCredential> Credentials { get; set; }
+        }
+
+        public class AppCredential
+        {
+            public string Id { get; set; }
+        }
+
+        private IEdmModel GetComposableApplicationFunctionModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            //builder.EntitySet<Application>("Applications");
+            var appFunction = builder.Function("GetApps")
+                .ReturnsCollection<Application>();
+            appFunction.IsComposable = true;
+
+            return builder.GetEdmModel();
+        }
+
+        public class ApplicationFunctionController : TestODataController
+        {
+            private readonly List<Application> _apps = new List<Application>()
+            {
+                new Application()
+                {
+                    Id = "app1",
+                    Credentials = new List<AppCredential>
+                    {
+                        new AppCredential { Id = "app1Cred1" },
+                        new AppCredential { Id = "app1Cred2" }
+                    }
+                },
+                new Application()
+                {
+                    Id = "app2",
+                    Credentials = new List<AppCredential>
+                    {
+                        new AppCredential { Id = "app2Cred1" },
+                        new AppCredential { Id = "app2Cred2" }
+                    }
+                }
+            };
+
+            [HttpGet]
+            [ODataRoute("GetAppUsage()")]
+            [EnableQuery]
+            public ITestActionResult Get()
+            {
+                return Ok(_apps);
+            }
+
+            [HttpGet]
+            [ODataRoute("GetAppUsage()/{key}")]
+            [EnableQuery]
+            public IActionResult Get(string key)
+            {
+                var appUsage = _apps.FirstOrDefault(a => a.Id == key);
+                if (appUsage == null)
+                {
+                    return NotFound();
+                }
+                return Ok(appUsage);
+            }
+
+            [HttpGet]
+            [ODataRoute("ApplicationUsages/{appId}/KeyCredentials")]
+            [EnableQuery]
+            public IActionResult GetKeyCredentials([FromODataUri] string key)
+            {
+                var appUsage = _apps.FirstOrDefault(a => a.Id == key);
+                if (appUsage == null)
+                {
+                    return NotFound();
+                }
+                return Ok(appUsage.Credentials);
+            }
+
+
+            [HttpGet]
+            [ODataRoute("ApplicationUsages/{appId}/KeyCredentials/{keyId}")]
+            [EnableQuery]
+            public IActionResult GetkeyCredentialById([FromODataUri] string appId, [FromODataUri] string keyId)
+            {
+                var appUsage = _apps.FirstOrDefault(a => a.Id == appId);
+                if (appUsage == null)
+                {
+                    return NotFound();
+                }
+                var keyCredential = appUsage.Credentials.FirstOrDefault(k => k.Id == keyId);
+                if (keyCredential == null)
+                {
+                    return NotFound();
+                }
+                return Ok(keyCredential);
             }
         }
 

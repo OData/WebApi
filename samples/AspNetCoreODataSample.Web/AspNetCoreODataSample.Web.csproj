@@ -8,6 +8,7 @@
     <PackageReference Update="Microsoft.NETCore.App" Version="2.1.30" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.30" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.6" />
   </ItemGroup>
 
   <ItemGroup>

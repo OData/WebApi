@@ -1,0 +1,11 @@
+[HttpRequestValidationException (0x80004005): A potentially dangerous Request.QueryString value was detected from the client (q="...en Straub <ben@straub.cc> Date...").]
+   System.Web.HttpRequest.ValidateString(String value, String collectionKey, RequestValidationSource requestCollection) +12364166
+   System.Web.HttpRequest.ValidateHttpValueCollection(HttpValueCollection collection, RequestValidationSource requestCollection) +203
+   System.Web.HttpRequest.get_QueryString() +97
+   System.Web.UI.Page.DeterminePostBackMode() +129
+   System.Web.UI.Page.ProcessRequestMain(Boolean includeStagesBeforeAsyncPoint, Boolean includeStagesAfterAsyncPoint) +12333739
+   System.Web.UI.Page.ProcessRequest(Boolean includeStagesBeforeAsyncPoint, Boolean includeStagesAfterAsyncPoint) +12333257
+   System.Web.UI.Page.ProcessRequest() +119
+   System.Web.UI.Page.ProcessRequest(HttpContext context) +99
+   System.Web.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute() +913
+   System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean& completedSynchronously) +165

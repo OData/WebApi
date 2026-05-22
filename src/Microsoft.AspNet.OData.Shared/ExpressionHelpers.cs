@@ -79,6 +79,22 @@ namespace Microsoft.AspNet.OData
             return takeQuery;
         }
 
+        public static Expression Count(Expression source, Type elementType)
+        {
+            MethodInfo countMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
+            }
+
+            Expression countExpression = Expression.Call(null, countMethod, new[] { source });
+            return countExpression;
+        }
+
         public static Expression OrderByPropertyExpression(
             Expression source, 
             string propertyName, 

@@ -584,5 +584,74 @@ namespace Microsoft.AspNet.OData.Builder
 
             return propertyInfo.PropertyType;
         }
+
+        /// <summary>
+        /// Gets or sets whether the entity set is not insertable. Default is false.
+        /// </summary>
+        public bool NotInsertable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the entity set is not updatable. Default is false.
+        /// </summary>
+        public bool NotUpdatable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the entity set is not deletable. Default is false.
+        /// </summary>
+        public bool NotDeletable { get; set; }
+
+        /// <summary>
+        /// Sets the entity set as not insertable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsNotInsertable()
+        {
+            NotInsertable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as insertable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsInsertable()
+        {
+            NotInsertable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as not updatable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsNotUpdatable()
+        {
+            NotUpdatable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as updatable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsUpdatable()
+        {
+            NotUpdatable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as not deletable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsNotDeletable()
+        {
+            NotDeletable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as deletable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration IsDeletable()
+        {
+            NotDeletable = false;
+            return this;
+        }
     }
 }

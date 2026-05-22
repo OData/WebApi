@@ -793,6 +793,106 @@ namespace Microsoft.AspNet.OData.Builder
                 model.AddFilterRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
                 model.AddSortRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
                 model.AddExpandRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddInsertRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddUpdateRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddDeleteRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+            }
+        }
+
+        private static void AddInsertRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notInsertableProperties = entityTypeConfig.Properties.Where(property => property.NotInsertable);
+
+            IList<IEdmProperty> nonInsertableProperties = new List<IEdmProperty>();
+            IList<IEdmNavigationProperty> nonInsertableNavigationProperties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in notInsertableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        if (value.PropertyKind == EdmPropertyKind.Navigation)
+                        {
+                            nonInsertableNavigationProperties.Add((IEdmNavigationProperty)value);
+                        }
+                        else
+                        {
+                            nonInsertableProperties.Add(value);
+                        }
+                    }
+                }
+            }
+
+            if (entitySetConfiguration.NotInsertable || nonInsertableProperties.Any() || nonInsertableNavigationProperties.Any())
+            {
+                model.SetInsertRestrictionsAnnotation(target, !entitySetConfiguration.NotInsertable, nonInsertableProperties, nonInsertableNavigationProperties);
+            }
+        }
+
+        private static void AddUpdateRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notUpdatableProperties = entityTypeConfig.Properties.Where(property => property.NotUpdatable);
+
+            IList<IEdmProperty> nonUpdatableProperties = new List<IEdmProperty>();
+            IList<IEdmNavigationProperty> nonUpdatableNavigationProperties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in notUpdatableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        if (value.PropertyKind == EdmPropertyKind.Navigation)
+                        {
+                            nonUpdatableNavigationProperties.Add((IEdmNavigationProperty)value);
+                        }
+                        else
+                        {
+                            nonUpdatableProperties.Add(value);
+                        }
+                    }
+                }
+            }
+
+            if (entitySetConfiguration.NotUpdatable || nonUpdatableProperties.Any() || nonUpdatableNavigationProperties.Any())
+            {
+                model.SetUpdateRestrictionsAnnotation(target, !entitySetConfiguration.NotUpdatable, nonUpdatableProperties, nonUpdatableNavigationProperties);
+            }
+        }
+
+        private static void AddDeleteRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notDeletableProperties = entityTypeConfig.Properties.Where(property => property.NotDeletable);
+
+            IList<IEdmNavigationProperty> nonDeletableNavigationProperties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in notDeletableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        if (value.PropertyKind == EdmPropertyKind.Navigation)
+                        {
+                            nonDeletableNavigationProperties.Add((IEdmNavigationProperty)value);
+                        }
+                    }
+                }
+            }
+
+            if (entitySetConfiguration.NotDeletable || nonDeletableNavigationProperties.Any())
+            {
+                model.SetDeleteRestrictionsAnnotation(target, !entitySetConfiguration.NotDeletable, nonDeletableNavigationProperties);
             }
         }
 

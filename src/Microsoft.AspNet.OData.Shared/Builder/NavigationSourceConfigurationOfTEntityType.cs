@@ -778,5 +778,59 @@ namespace Microsoft.AspNet.OData.Builder
                 StructuredType = context.StructuredType
             };
         }
+
+        /// <summary>
+        /// Sets the entity set as not insertable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsNotInsertable()
+        {
+            _configuration.IsNotInsertable();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as insertable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsInsertable()
+        {
+            _configuration.IsInsertable();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as not updatable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsNotUpdatable()
+        {
+            _configuration.IsNotUpdatable();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as updatable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsUpdatable()
+        {
+            _configuration.IsUpdatable();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as not deletable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsNotDeletable()
+        {
+            _configuration.IsNotDeletable();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the entity set as deletable.
+        /// </summary>
+        public virtual NavigationSourceConfiguration<TEntityType> IsDeletable()
+        {
+            _configuration.IsDeletable();
+            return this;
+        }
     }
 }

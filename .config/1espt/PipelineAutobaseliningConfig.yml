@@ -38,11 +38,12 @@ pipelines:
         credscan:
           lastModifiedDate: 2025-02-20
         eslint:
-          lastModifiedDate: 2025-02-20
+          lastModifiedDate: 2026-05-22
         psscriptanalyzer:
-          lastModifiedDate: 2025-02-20
+          lastModifiedDate: 2026-05-22
         armory:
-          lastModifiedDate: 2025-02-20
+          lastModifiedDate: 2026-05-22
+    usedNonDefaultBranch: true
   406283:
     retail:
       source:

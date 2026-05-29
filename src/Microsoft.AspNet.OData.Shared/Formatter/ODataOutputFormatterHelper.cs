@@ -351,29 +351,6 @@ namespace Microsoft.AspNet.OData.Formatter
             return null;
         }
 
-        // This function is used to determine whether an OData path includes operation (import) path segments.
-        // We use this function to make sure the value of ODataUri.Path in ODataMessageWriterSettings is null
-        // when any path segment is an operation. ODL will try to calculate the context URL if the ODataUri.Path
-        // equals to null.
-        private static bool IsOperationPath(ODataPath path)
-        {
-            if (path == null)
-            {
-                return false;
-            }
-
-            foreach (ODataPathSegment segment in path.Segments)
-            {
-                if (segment is OperationSegment ||
-                    segment is OperationImportSegment)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private static Microsoft.OData.UriParser.ODataPath ConvertPath(ODataPath path)
         {
             if (path == null)
@@ -381,56 +358,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 return null;
             }
 
-            if (IsOperationPath(path))
-            {
-                var lastSegment = path.Segments.Last();
-                OperationSegment operation = lastSegment as OperationSegment;
-                if (operation != null && operation.EntitySet != null)
-                {
-                    return GeneratePath(operation.EntitySet);
-                }
-
-                OperationImportSegment operationImport = lastSegment as OperationImportSegment;
-                if (operationImport != null && operationImport.EntitySet != null)
-                {
-                    return GeneratePath(operationImport.EntitySet);
-                }
-
-                return null;
-            }
-
             return path.Path;
-        }
-
-        private static Microsoft.OData.UriParser.ODataPath GeneratePath(IEdmNavigationSource navigationSource)
-        {
-            Contract.Assert(navigationSource != null);
-
-            switch (navigationSource.NavigationSourceKind())
-            {
-                case EdmNavigationSourceKind.EntitySet:
-                    return new Microsoft.OData.UriParser.ODataPath(new EntitySetSegment((IEdmEntitySet)navigationSource));
-
-                case EdmNavigationSourceKind.Singleton:
-                    return new Microsoft.OData.UriParser.ODataPath(new SingletonSegment((IEdmSingleton)navigationSource));
-
-                case EdmNavigationSourceKind.ContainedEntitySet:
-                    IEdmContainedEntitySet containedEntitySet = (IEdmContainedEntitySet)navigationSource;
-                    Microsoft.OData.UriParser.ODataPath path = GeneratePath(containedEntitySet.ParentNavigationSource);
-                    IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                    foreach (var item in path)
-                    {
-                        segments.Add(item);
-                    }
-
-                    segments.Add(new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource));
-                    return new Microsoft.OData.UriParser.ODataPath(segments);
-
-                case EdmNavigationSourceKind.None:
-                case EdmNavigationSourceKind.UnknownEntitySet:
-                default:
-                    return null;
-            }
         }
     }
 }

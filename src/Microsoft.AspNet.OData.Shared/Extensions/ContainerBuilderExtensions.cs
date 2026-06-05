@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Extensions
     internal static class ContainerBuilderExtensions
     {
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "DI services")]
-        public static IContainerBuilder AddDefaultWebApiServices(this IContainerBuilder builder)
+        public static IContainerBuilder AddDefaultWebApiServices(this IContainerBuilder builder, long maxReceivedMessageSize = ODataMessageSizeOptions.DefaultMaxReceivedMessageSize)
         {
             if (builder == null)
             {
@@ -37,12 +37,12 @@ namespace Microsoft.AspNet.OData.Extensions
             builder.AddServicePrototype(new ODataMessageReaderSettings
             {
                 EnableMessageStreamDisposal = false,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = maxReceivedMessageSize },
             });
             builder.AddServicePrototype(new ODataMessageWriterSettings
             {
                 EnableMessageStreamDisposal = false,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = maxReceivedMessageSize },
             });
 
             // QueryValidators.

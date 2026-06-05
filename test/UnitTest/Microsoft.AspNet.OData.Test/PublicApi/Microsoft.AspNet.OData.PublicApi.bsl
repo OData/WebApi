@@ -629,6 +629,14 @@ public class Microsoft.AspNet.OData.ODataIdContainer {
 	string ODataId  { public get; public set; }
 }
 
+public class Microsoft.AspNet.OData.ODataMessageSizeOptions {
+	public static long DefaultMaxReceivedMessageSize = 104857600
+
+	public ODataMessageSizeOptions ()
+
+	long MaxReceivedMessageSize  { public get; public set; }
+}
+
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Http.DelegatingHandler, IDisposable {
 	public ODataNullValueMessageHandler ()
 

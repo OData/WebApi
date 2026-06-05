@@ -406,6 +406,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ODataContainmentTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataFormattingAttributeTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandlerTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataOptionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataPathHandlerExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataRoutingAttributeTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataSingletonTest.cs" />

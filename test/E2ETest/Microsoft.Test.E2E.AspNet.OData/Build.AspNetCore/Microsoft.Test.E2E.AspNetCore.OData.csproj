@@ -1204,6 +1204,18 @@
     <Compile Include="..\Formatter\SecurityTests.cs">
       <Link>Formatter\SecurityTests.cs</Link>
     </Compile>
+    <Compile Include="..\ReceivedMessageSize\MessageSizeModel.cs">
+      <Link>ReceivedMessageSize\MessageSizeModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ReceivedMessageSize\MessageSizeController.cs">
+      <Link>ReceivedMessageSize\MessageSizeController.cs</Link>
+    </Compile>
+    <Compile Include="..\ReceivedMessageSize\MessageSizeLimitTests.cs">
+      <Link>ReceivedMessageSize\MessageSizeLimitTests.cs</Link>
+    </Compile>
+    <Compile Include="..\ReceivedMessageSize\BatchMessageSizeLimitTests.cs">
+      <Link>ReceivedMessageSize\BatchMessageSizeLimitTests.cs</Link>
+    </Compile>
     <Compile Include="..\Formatter\ServerDrivenPagingTests.cs">
       <Link>Formatter\ServerDrivenPagingTests.cs</Link>
     </Compile>

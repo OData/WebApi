@@ -682,6 +682,14 @@ public class Microsoft.AspNet.OData.ODataIdContainer {
 	string ODataId  { public get; public set; }
 }
 
+public class Microsoft.AspNet.OData.ODataMessageSizeOptions {
+	public static long DefaultMaxReceivedMessageSize = 104857600
+
+	public ODataMessageSizeOptions ()
+
+	long MaxReceivedMessageSize  { public get; public set; }
+}
+
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : IFilterMetadata, IResultFilter {
 	public ODataNullValueMessageHandler ()
 
@@ -694,6 +702,7 @@ public class Microsoft.AspNet.OData.ODataOptions {
 
 	CompatibilityOptions CompatibilityOptions  { public get; public set; }
 	bool EnableContinueOnErrorHeader  { public get; public set; }
+	long MaxReceivedMessageSize  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
 }

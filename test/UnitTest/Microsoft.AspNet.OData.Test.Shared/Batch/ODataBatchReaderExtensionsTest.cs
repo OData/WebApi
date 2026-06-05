@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
@@ -83,7 +84,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
                 "The current batch reader state 'Initial' is invalid. The expected state is 'Operation'.");
         }
 
-        private static ODataMessageQuotas _odataMessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
+        private static ODataMessageQuotas _odataMessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = ODataMessageSizeOptions.DefaultMaxReceivedMessageSize };
 
         [Theory]
         // if no accept header, return multipart/mixed

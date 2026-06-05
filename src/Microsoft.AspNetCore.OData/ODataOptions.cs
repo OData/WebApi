@@ -5,6 +5,8 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData
@@ -35,5 +37,17 @@ namespace Microsoft.AspNet.OData
         /// Gets or Sets the set of flags that have options for backward compatibility
         /// </summary>
         public CompatibilityOptions CompatibilityOptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum size, in bytes, of an OData request or response message body.
+        /// Default is 100 MB (104,857,600 bytes). Must be greater than or equal to 1.
+        /// </summary>
+        public long MaxReceivedMessageSize
+        {
+            get => _messageSizeOptions.MaxReceivedMessageSize;
+            set => _messageSizeOptions.MaxReceivedMessageSize = value;
+        }
+
+        private readonly ODataMessageSizeOptions _messageSizeOptions = new ODataMessageSizeOptions();
     }
 }

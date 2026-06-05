@@ -791,6 +791,12 @@ Prefer: return=representation
             // TODO: assert somehow?
         }
 #endif
+
+        [Fact]
+        public void MessageQuotas_DefaultMaxReceivedMessageSize_IsBounded()
+        {
+            Assert.Equal(ODataMessageSizeOptions.DefaultMaxReceivedMessageSize, 100L * 1024 * 1024);
+        }
     }
 
     public class BatchTestCustomer

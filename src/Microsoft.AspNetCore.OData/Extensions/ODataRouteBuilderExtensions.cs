@@ -680,10 +680,11 @@ namespace Microsoft.AspNet.OData.Extensions
 
                 // Access the default query settings and options from the global container.
                 builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultQuerySettings());
-                builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultODataOptions());
+                ODataOptions defaultOptions = routeBuilder.GetDefaultODataOptions();
+                builder.AddService(ServiceLifetime.Singleton, sp => defaultOptions);
 
                 // Add the default webApi services.
-                builder.AddDefaultWebApiServices();
+                builder.AddDefaultWebApiServices(defaultOptions.MaxReceivedMessageSize);
 
                 // Add custom actions.
                 configureAction?.Invoke(builder);

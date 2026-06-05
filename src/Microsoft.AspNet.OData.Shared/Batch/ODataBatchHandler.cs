@@ -16,8 +16,8 @@ namespace Microsoft.AspNet.OData.Batch
     /// </summary>
     public abstract partial class ODataBatchHandler
     {
-        // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
-        private ODataMessageQuotas _messageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
+        // Use bounded default message size rather than relying solely on the hosting layer.
+        private ODataMessageQuotas _messageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = ODataMessageSizeOptions.DefaultMaxReceivedMessageSize };
 
         // Preference odata.continue-on-error.
         internal const string PreferenceContinueOnError = "continue-on-error";

@@ -33,6 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -837,12 +838,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void Default_ReceiveMessageSize_Is_MaxedOut()
+        public void Default_ReceiveMessageSize_Is_Bounded()
         {
             var formatter = CreateFormatter();
             var messageReaderQuotas = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
-            Assert.Equal(Int64.MaxValue, messageReaderQuotas.MaxReceivedMessageSize);
+            Assert.Equal(ODataMessageSizeOptions.DefaultMaxReceivedMessageSize, messageReaderQuotas.MaxReceivedMessageSize);
         }
 
         [Fact]

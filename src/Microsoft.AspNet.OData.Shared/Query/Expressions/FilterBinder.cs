@@ -332,12 +332,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         public virtual Expression BindSingleResourceFunctionCallNode(SingleResourceFunctionCallNode node)
         {
-            switch (node.Name)
+            EnterFunctionCall();
+
+            try
             {
-                case ClrCanonicalFunctions.CastFunctionName:
-                    return BindSingleResourceCastFunctionCall(node);
-                default:
-                    throw Error.NotSupported(SRResources.ODataFunctionNotSupported, node.Name);
+                switch (node.Name)
+                {
+                    case ClrCanonicalFunctions.CastFunctionName:
+                        return BindSingleResourceCastFunctionCall(node);
+                    default:
+                        throw Error.NotSupported(SRResources.ODataFunctionNotSupported, node.Name);
+                }
+            }
+            finally
+            {
+                ExitFunctionCall();
             }
         }
 

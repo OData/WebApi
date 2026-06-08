@@ -435,6 +435,9 @@
   <data name="MaxAnyAllExpressionLimitExceeded" xml:space="preserve">
     <value>The Any/All nesting limit of '{0}' has been exceeded. '{1}' can be configured on ODataQuerySettings or EnableQueryAttribute.</value>
   </data>
+  <data name="MaxFunctionCallDepthExceeded" xml:space="preserve">
+    <value>The function call depth limit of '{0}' has been exceeded. '{1}' can be configured on ODataValidationSettings, ODataQuerySettings or EnableQueryAttribute.</value>
+  </data>
   <data name="CannotAddToNullCollection" xml:space="preserve">
     <value>The property '{0}' on type '{1}' returned a null value. The input stream contains collection items which cannot be added if the instance is null.</value>
   </data>

@@ -122,6 +122,20 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Gets or sets the maximum depth of function call expressions inside the query.
+        /// For example: 'length(tolower(name)) eq 5', the depth of function call expressions is 2.
+        /// </summary>
+        public int MaxFunctionCallDepth
+        {
+            get => _validationSettings.MaxFunctionCallDepth;
+            set
+            {
+                _validationSettings.MaxFunctionCallDepth = value;
+                _querySettings.MaxFunctionCallDepth = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum depth of the Any or All elements nested inside the query. This limit helps prevent
         /// Denial of Service attacks.
         /// </summary>

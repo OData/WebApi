@@ -579,6 +579,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
+	int MaxFunctionCallDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
 	int MaxOrderByNodeCount  { public get; public set; }
 	int MaxSkip  { public get; public set; }
@@ -2893,6 +2894,7 @@ public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
+	int MaxFunctionCallDepth  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
 }
 
@@ -2922,6 +2924,7 @@ public class Microsoft.AspNet.OData.Query.ODataValidationSettings {
 	AllowedQueryOptions AllowedQueryOptions  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
+	int MaxFunctionCallDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
 	int MaxOrderByNodeCount  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxSkip  { public get; public set; }
@@ -4043,6 +4046,8 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
+	protected void EnterFunctionCall ()
+	protected void ExitFunctionCall ()
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
 }

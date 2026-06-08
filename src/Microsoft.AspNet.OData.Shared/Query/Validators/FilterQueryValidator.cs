@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
     public class FilterQueryValidator
     {
         private int _currentAnyAllExpressionDepth;
+        private int _currentFunctionCallDepth;
         private int _currentNodeCount;
         private readonly DefaultQuerySettings _defaultQuerySettings;
         private IEdmProperty _property;
@@ -86,6 +87,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
         public virtual void Validate(FilterClause filterClause, ODataValidationSettings settings, IEdmModel model)
         {
             _currentAnyAllExpressionDepth = 0;
+            _currentFunctionCallDepth = 0;
             _currentNodeCount = 0;
             _model = model;
 
@@ -606,9 +608,18 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
             ValidateFunction(node.Name, settings);
 
-            foreach (QueryNode argumentNode in node.Parameters)
+            EnterFunctionCall(settings);
+
+            try
             {
-                ValidateQueryNode(argumentNode, settings);
+                foreach (QueryNode argumentNode in node.Parameters)
+                {
+                    ValidateQueryNode(argumentNode, settings);
+                }
+            }
+            finally
+            {
+                ExitFunctionCall();
             }
         }
 
@@ -635,9 +646,19 @@ namespace Microsoft.AspNet.OData.Query.Validators
             }
 
             ValidateFunction(node.Name, settings);
-            foreach (QueryNode argumentNode in node.Parameters)
+
+            EnterFunctionCall(settings);
+
+            try
             {
-                ValidateQueryNode(argumentNode, settings);
+                foreach (QueryNode argumentNode in node.Parameters)
+                {
+                    ValidateQueryNode(argumentNode, settings);
+                }
+            }
+            finally
+            {
+                ExitFunctionCall();
             }
         }
 
@@ -762,6 +783,22 @@ namespace Microsoft.AspNet.OData.Query.Validators
         {
             Contract.Assert(_currentAnyAllExpressionDepth > 0);
             _currentAnyAllExpressionDepth--;
+        }
+
+        private void EnterFunctionCall(ODataValidationSettings validationSettings)
+        {
+            if (_currentFunctionCallDepth >= validationSettings.MaxFunctionCallDepth)
+            {
+                throw new ODataException(Error.Format(SRResources.MaxFunctionCallDepthExceeded, validationSettings.MaxFunctionCallDepth, "MaxFunctionCallDepth"));
+            }
+
+            _currentFunctionCallDepth++;
+        }
+
+        private void ExitFunctionCall()
+        {
+            Contract.Assert(_currentFunctionCallDepth > 0);
+            _currentFunctionCallDepth--;
         }
 
         private void IncrementNodeCount(ODataValidationSettings validationSettings)

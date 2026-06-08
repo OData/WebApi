@@ -1467,6 +1467,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The function call depth limit of &apos;{0}&apos; has been exceeded. &apos;{1}&apos; can be configured on ODataValidationSettings, ODataQuerySettings or EnableQueryAttribute..
+        /// </summary>
+        internal static string MaxFunctionCallDepthExceeded
+        {
+            get
+            {
+                return ResourceManager.GetString("MaxFunctionCallDepthExceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the &apos;{1}&apos; property on EnableQueryAttribute or ODataValidationSettings, or set the &apos;MaxDepth&apos; property in ExpandAttribute..
         /// </summary>
         internal static string MaxExpandDepthExceeded

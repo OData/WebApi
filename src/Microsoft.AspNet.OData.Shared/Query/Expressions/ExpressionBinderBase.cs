@@ -74,6 +74,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         internal IWebApiAssembliesResolver InternalAssembliesResolver { get; set; }
 
+        private int _functionCallDepth = 0;
+
         /// <summary>
         /// Base query used for the binder.
         /// </summary>
@@ -252,6 +254,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, Model, InternalAssembliesResolver);
 
+            // If the source type is the same as the conversion type, we can skip the conversion
+            // No sense to create a convert expression.
+            if (source.Type == conversionType)
+            {
+                return source;
+            }
+
             if (conversionType == typeof(bool?) && source.Type == typeof(bool))
             {
                 // we handle null propagation ourselves. So, if converting from bool to Nullable<bool> ignore.
@@ -409,12 +418,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Contract.Assert(member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method);
 
+            Expression[] strippedArguments = arguments;
             IEnumerable<Expression> functionCallArguments = arguments;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 // we don't have to check if the argument is null inside the function call as we do it already
                 // before calling the function. So remove the redundant null checks.
-                functionCallArguments = arguments.Select(a => RemoveInnerNullPropagation(a));
+                strippedArguments = arguments.Select(a => RemoveInnerNullPropagation(a)).ToArray();
+                functionCallArguments = strippedArguments;
             }
 
             // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none
@@ -503,6 +514,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                                 expression = unaryExpression.Operand;
                             }
                         }
+
+                        // Recursively remove any further nested null-propagation conditionals,
+                        // e.g. when contains() is used as an argument to another function call.
+                        expression = RemoveInnerNullPropagation(expression);
                     }
                 }
             }
@@ -1247,87 +1262,96 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
-            switch (node.Name)
+            EnterFunctionCall();
+
+            try
             {
-                case ClrCanonicalFunctions.StartswithFunctionName:
-                    return BindStartsWith(node);
+                switch (node.Name)
+                {
+                    case ClrCanonicalFunctions.StartswithFunctionName:
+                        return BindStartsWith(node);
 
-                case ClrCanonicalFunctions.EndswithFunctionName:
-                    return BindEndsWith(node);
+                    case ClrCanonicalFunctions.EndswithFunctionName:
+                        return BindEndsWith(node);
 
-                case ClrCanonicalFunctions.ContainsFunctionName:
-                    return BindContains(node);
+                    case ClrCanonicalFunctions.ContainsFunctionName:
+                        return BindContains(node);
 
-                case ClrCanonicalFunctions.SubstringFunctionName:
-                    return BindSubstring(node);
+                    case ClrCanonicalFunctions.SubstringFunctionName:
+                        return BindSubstring(node);
 
-                case ClrCanonicalFunctions.LengthFunctionName:
-                    return BindLength(node);
+                    case ClrCanonicalFunctions.LengthFunctionName:
+                        return BindLength(node);
 
-                case ClrCanonicalFunctions.IndexofFunctionName:
-                    return BindIndexOf(node);
+                    case ClrCanonicalFunctions.IndexofFunctionName:
+                        return BindIndexOf(node);
 
-                case ClrCanonicalFunctions.TolowerFunctionName:
-                    return BindToLower(node);
+                    case ClrCanonicalFunctions.TolowerFunctionName:
+                        return BindToLower(node);
 
-                case ClrCanonicalFunctions.ToupperFunctionName:
-                    return BindToUpper(node);
+                    case ClrCanonicalFunctions.ToupperFunctionName:
+                        return BindToUpper(node);
 
-                case ClrCanonicalFunctions.TrimFunctionName:
-                    return BindTrim(node);
+                    case ClrCanonicalFunctions.TrimFunctionName:
+                        return BindTrim(node);
 
-                case ClrCanonicalFunctions.ConcatFunctionName:
-                    return BindConcat(node);
+                    case ClrCanonicalFunctions.ConcatFunctionName:
+                        return BindConcat(node);
 
-                case ClrCanonicalFunctions.MatchesPatternFunctionName:
-                    return BindMatchesPattern(node);
+                    case ClrCanonicalFunctions.MatchesPatternFunctionName:
+                        return BindMatchesPattern(node);
 
-                case ClrCanonicalFunctions.YearFunctionName:
-                case ClrCanonicalFunctions.MonthFunctionName:
-                case ClrCanonicalFunctions.DayFunctionName:
-                    return BindDateRelatedProperty(node); // Date & DateTime & DateTimeOffset
+                    case ClrCanonicalFunctions.YearFunctionName:
+                    case ClrCanonicalFunctions.MonthFunctionName:
+                    case ClrCanonicalFunctions.DayFunctionName:
+                        return BindDateRelatedProperty(node); // Date & DateTime & DateTimeOffset
 
-                case ClrCanonicalFunctions.HourFunctionName:
-                case ClrCanonicalFunctions.MinuteFunctionName:
-                case ClrCanonicalFunctions.SecondFunctionName:
-                    return BindTimeRelatedProperty(node); // TimeOfDay & DateTime & DateTimeOffset
+                    case ClrCanonicalFunctions.HourFunctionName:
+                    case ClrCanonicalFunctions.MinuteFunctionName:
+                    case ClrCanonicalFunctions.SecondFunctionName:
+                        return BindTimeRelatedProperty(node); // TimeOfDay & DateTime & DateTimeOffset
 
-                case ClrCanonicalFunctions.FractionalSecondsFunctionName:
-                    return BindFractionalSeconds(node);
+                    case ClrCanonicalFunctions.FractionalSecondsFunctionName:
+                        return BindFractionalSeconds(node);
 
-                case ClrCanonicalFunctions.RoundFunctionName:
-                    return BindRound(node);
+                    case ClrCanonicalFunctions.RoundFunctionName:
+                        return BindRound(node);
 
-                case ClrCanonicalFunctions.FloorFunctionName:
-                    return BindFloor(node);
+                    case ClrCanonicalFunctions.FloorFunctionName:
+                        return BindFloor(node);
 
-                case ClrCanonicalFunctions.CeilingFunctionName:
-                    return BindCeiling(node);
+                    case ClrCanonicalFunctions.CeilingFunctionName:
+                        return BindCeiling(node);
 
-                case ClrCanonicalFunctions.CastFunctionName:
-                    return BindCastSingleValue(node);
+                    case ClrCanonicalFunctions.CastFunctionName:
+                        return BindCastSingleValue(node);
 
-                case ClrCanonicalFunctions.IsofFunctionName:
-                    return BindIsOf(node);
+                    case ClrCanonicalFunctions.IsofFunctionName:
+                        return BindIsOf(node);
 
-                case ClrCanonicalFunctions.DateFunctionName:
-                    return BindDate(node);
+                    case ClrCanonicalFunctions.DateFunctionName:
+                        return BindDate(node);
 
-                case ClrCanonicalFunctions.TimeFunctionName:
-                    return BindTime(node);
+                    case ClrCanonicalFunctions.TimeFunctionName:
+                        return BindTime(node);
 
-                case ClrCanonicalFunctions.NowFunctionName:
-                    return BindNow(node);
+                    case ClrCanonicalFunctions.NowFunctionName:
+                        return BindNow(node);
 
-                default:
-                    // Get Expression of custom binded method.
-                    Expression expression = BindCustomMethodExpressionOrNull(node);
-                    if (expression != null)
-                    {
-                        return expression;
-                    }
+                    default:
+                        // Get Expression of custom binded method.
+                        Expression expression = BindCustomMethodExpressionOrNull(node);
+                        if (expression != null)
+                        {
+                            return expression;
+                        }
 
-                    throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
+                        throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
+                }
+            }
+            finally
+            {
+                ExitFunctionCall();
             }
         }
 
@@ -1475,9 +1499,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // Entity Framework doesn't have ToString method for nullable numeric types.
                 // Call ToString method on non-nullable numeric types.
                 return Expression.Condition(
-                    Expression.Property(source, "HasValue"),
-                    Expression.Call(sourceValue, "ToString", typeArguments: null, arguments: null),
-                    Expression.Constant(null, typeof(string)));
+                    Expression.Not(Expression.Property(source, "HasValue")),
+                    Expression.Constant(null, typeof(string)),
+                    Expression.Call(sourceValue, "ToString", typeArguments: null, arguments: null));
             }
             else
             {
@@ -2009,6 +2033,29 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return constantType;
+        }
+
+        /// <summary>
+        /// Increments the function call depth counter and validates that the maximum depth has not been exceeded.
+        /// </summary>
+        /// <exception cref="ODataException">Thrown when the maximum function call depth has been reached or exceeded.</exception>
+        protected void EnterFunctionCall()
+        {
+            if (_functionCallDepth >= QuerySettings.MaxFunctionCallDepth)
+            {
+                throw new ODataException(Error.Format(SRResources.MaxFunctionCallDepthExceeded, QuerySettings.MaxFunctionCallDepth, "MaxFunctionCallDepth"));
+            }
+
+            _functionCallDepth++;
+        }
+
+        /// <summary>
+        /// Decrements the function call depth counter.
+        /// </summary>
+        protected void ExitFunctionCall()
+        {
+            Contract.Assert(_functionCallDepth > 0);
+            _functionCallDepth--;
         }
     }
 }

@@ -279,7 +279,17 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query)
         {
-            return ApplyTo(query, new ODataQuerySettings());
+            ODataQuerySettings settings = new ODataQuerySettings();
+
+            // Only do the following in ApplyTo() without providing 'ODataQuerySettings'.
+            // Let's check whether 'Validate()' is called, if called, Let's use the 'MaxFunctionCallDepth' from the validation settings into the 'default generated querysettings'.
+            // Otherwise, let's use the default setting in the ODataQuerySettings.
+            if (Context.ValidationSettings != null)
+            {
+                settings.MaxFunctionCallDepth = Context.ValidationSettings.MaxFunctionCallDepth;
+            }
+
+            return ApplyTo(query, settings);
         }
 
         /// <summary>
@@ -290,8 +300,18 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query, AllowedQueryOptions ignoreQueryOptions)
         {
+            ODataQuerySettings settings = new ODataQuerySettings();
+
+            // Only do the following in ApplyTo() without providing 'ODataQuerySettings'.
+            // Let's check whether 'Validate()' is called, if called, Let's use the 'MaxFunctionCallDepth' from the validation settings into the 'default generated querysettings'.
+            // Otherwise, let's use the default setting in the ODataQuerySettings.
+            if (Context.ValidationSettings != null)
+            {
+                settings.MaxFunctionCallDepth = Context.ValidationSettings.MaxFunctionCallDepth;
+            }
+
             _ignoreQueryOptions = ignoreQueryOptions;
-            return ApplyTo(query, new ODataQuerySettings());
+            return ApplyTo(query, settings);
         }
 
         /// <summary>

@@ -14,9 +14,11 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     public class ODataQuerySettings
     {
+        internal const int DefaultMaxFunctionCallDepth = 15;// the depth of function call expressions recursively in a query, such as 'length(tolower(name)) eq 5', the depth is 2.
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int? _pageSize;
         private int? _modelBoundPageSize;
+        private int _maxFunctionCallDepth = DefaultMaxFunctionCallDepth;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -101,6 +103,23 @@ namespace Microsoft.AspNet.OData.Query
         public bool EnableCorrelatedSubqueryBuffering { get; set; }
 
         /// <summary>
+        /// Gets or sets the maximum depth for function calls in a query binding.
+        /// </summary>
+        public int MaxFunctionCallDepth
+        {
+            get => _maxFunctionCallDepth;
+            set
+            {
+                if (value < 1)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _maxFunctionCallDepth = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum number of query results to return.
         /// </summary>
         /// <value>
@@ -139,6 +158,7 @@ namespace Microsoft.AspNet.OData.Query
             ModelBoundPageSize = settings.ModelBoundPageSize;
             HandleReferenceNavigationPropertyExpandFilter = settings.HandleReferenceNavigationPropertyExpandFilter;
             EnableCorrelatedSubqueryBuffering = settings.EnableCorrelatedSubqueryBuffering;
+            MaxFunctionCallDepth = settings.MaxFunctionCallDepth;
         }
     }
 }

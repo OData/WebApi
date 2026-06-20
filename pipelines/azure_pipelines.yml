@@ -16,6 +16,10 @@ variables:
   value: none
 - name: ProductBinPath
   value: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
+- group: OData-ESRP-CodeSigning
+- name: AZURE_ARTIFACTS_FEED
+  value: "$(ODataFeed)"
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -41,10 +45,10 @@ extends:
         - checkout: self
           fetchTags: false
         - template: pipelines/task-group-policheck-v1.yml@self
-        - task: NuGetToolInstaller@0
-          displayName: Use NuGet >=5.8.0
-          inputs:
-            versionSpec: '>=5.8.0'
+
+        - task: NuGetAuthenticate@1
+          displayName: 'Authenticate to the feed'
+          
         - task: UseDotNet@2
           displayName: Use .NET Core sdk 2.x
           inputs:

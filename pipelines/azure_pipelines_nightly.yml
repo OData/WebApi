@@ -10,7 +10,7 @@ variables:
   value: none
 - name: ProductBinPath
   value: $(Build.SourcesDirectory)\bin\$(BuildConfiguration)
-- group: OData-ESRP-CodeSigning
+- group: OData-Shared
 - name: AZURE_ARTIFACTS_FEED
   value: "$(ODataFeed)"
 

@@ -1,4 +1,14 @@
 trigger: none
+
+parameters:
+  - name: PublishMode
+    displayName: Package publishing mode ('NightlyOnly' for nightly packages; 'ReleaseAndNightly' for both release and nightly packages)
+    type: string
+    default: NightlyOnly
+    values:
+    - NightlyOnly
+    - ReleaseAndNightly
+
 variables:
 - name: BuildParameters.ArtifactName
   value: drop
@@ -13,6 +23,13 @@ variables:
 - group: OData-Shared
 - name: AZURE_ARTIFACTS_FEED
   value: "$(ODataFeed)"
+- ${{ if eq(parameters.PublishMode, 'NightlyOnly') }}:
+  - name: PackagesToPush
+    value: $(Build.ArtifactStagingDirectory)\Nuget\*Nightly*nupkg
+
+- ${{ if eq(parameters.PublishMode, 'ReleaseAndNightly') }}: 
+  - name: PackagesToPush
+    value: '$(Build.ArtifactStagingDirectory)\Nuget\*.nupkg;$(Build.ArtifactStagingDirectory)\Nuget\*.snupkg'
 
 schedules:
 - cron: 0 3 * * 1,2,3,4,5
@@ -59,7 +76,7 @@ extends:
           - output: nuget
             displayName: 'NuGet push - Packages to Internal Feed'
             packageParentPath: '$(Build.ArtifactStagingDirectory)\Nuget'
-            packagesToPush: '$(Build.ArtifactStagingDirectory)\Nuget\*.nupkg;$(Build.ArtifactStagingDirectory)\Nuget\*.snupkg'
+            packagesToPush: '$(PackagesToPush)'
             nuGetFeedType: internal
             publishVstsFeed: $(ODataPublishFeed)
             allowPackageConflicts: true

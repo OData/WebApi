@@ -47,16 +47,16 @@ namespace Microsoft.AspNet.OData
             if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
                 pageSize = GetMaxPageSize(preferences, MaxPageSize);
-                if (pageSize >= 0)
+                if (pageSize < 0)
                 {
-                    return true;
+                    // maxpagesize supersedes odata.maxpagesize, so only fall back to odata.maxpagesize
+                    // when no maxpagesize preference was supplied.
+                    pageSize = GetMaxPageSize(preferences, ODataMaxPageSize);
                 }
-                //maxpagesize supersedes odata.maxpagesize
-                pageSize = GetMaxPageSize(preferences, ODataMaxPageSize);
-                if (pageSize >= 0)
-                {
-                    return true;
-                }
+
+                // Preferred max page size is only honored when it is a positive integer.
+                // A value of 0 (or any non-positive value) is not a meaningful page size; ignore it
+                return pageSize > 0;
             }
 
             return false;
@@ -74,7 +74,8 @@ namespace Microsoft.AspNet.OData
             {
                 int index = maxPageSize.IndexOf(preferenceHeaderName, StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
                 String value = String.Empty;
-                if (maxPageSize[index++] == '=')
+                // A bare token (e.g. "Prefer: maxpagesize" with no "=value"), should not throw
+                if (index < maxPageSize.Length && maxPageSize[index++] == '=')
                 {
                     while (index < maxPageSize.Length && Char.IsDigit(maxPageSize[index]))
                     {

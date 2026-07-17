@@ -421,6 +421,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PerRequestContentNegotiatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRequestParameterBindingTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryableLimitationTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RequestPreferenceHelpersTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResourceContextTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandNestedDollarCountTest.cs" />

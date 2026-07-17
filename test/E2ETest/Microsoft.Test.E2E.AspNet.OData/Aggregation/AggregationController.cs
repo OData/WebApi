@@ -241,4 +241,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             return employees.AsQueryable();
         }
     }
+
+    public class OpenAggregationProductsController : TestODataController
+    {
+        private static readonly List<OpenAggregationProduct> products = new List<OpenAggregationProduct>
+        {
+            new OpenAggregationProduct { Id = 1, Name = "P1", SupplierRegion = "Region-A", DynamicProperties = new Dictionary<string, object>() },
+            new OpenAggregationProduct { Id = 2, Name = "P2", SupplierRegion = "Region-B", DynamicProperties = new Dictionary<string, object>() },
+            new OpenAggregationProduct { Id = 3, Name = "P3", SupplierRegion = "Region-C", DynamicProperties = new Dictionary<string, object>() },
+        };
+
+        [EnableQuery]
+        public ITestActionResult Get()
+        {
+            return Ok(products);
+        }
+    }
 }

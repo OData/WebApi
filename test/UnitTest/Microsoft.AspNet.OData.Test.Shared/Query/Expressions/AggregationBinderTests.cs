@@ -90,6 +90,33 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
+        [Fact]
+        public void GroupByOpenType_UnmodeledClrProperty_ResolvesFromDynamicContainer_NotClrMember()
+        {
+            // ExcludedClrProperty is a public CLR member excluded from the EDM model via [NotMapped].
+            // On an open type, a groupby over that name must bind from the dynamic property container
+            // (open-type semantics) rather than reflecting the excluded CLR member directly.
+            IEdmModel model = GetModel<DynamicProductWithExcludedProperty>();
+            ApplyClause clause = CreateApplyNode("groupby((ExcludedClrProperty))", model, typeof(DynamicProductWithExcludedProperty));
+
+            var binder = new AggregationBinder(
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False },
+                WebApiAssembliesResolverFactory.Create(),
+                typeof(DynamicProductWithExcludedProperty),
+                model,
+                clause.Transformations.First());
+
+            var query = Enumerable.Empty<DynamicProductWithExcludedProperty>().AsQueryable();
+            var applyExpr = binder.Bind(query).Expression;
+            var result = ExpressionStringBuilder.ToString(applyExpr);
+
+            // Resolved from the dynamic container ...
+            Assert.Contains("ProductProperties.ContainsKey(ExcludedClrProperty)", result);
+            // ... and NOT bound to the excluded CLR member ($it.ExcludedClrProperty).
+            Assert.DoesNotContain("$it.ExcludedClrProperty", result);
+        }
+
+
 
         [Fact]
         public void SingleSum()

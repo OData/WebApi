@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json;
@@ -851,6 +852,64 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(2, results.Count);
             Assert.Equal("Redmond", ((results[0]["NextOfKin"] as JObject)["PhysicalAddress"] as JObject)["City"].ToString());
             Assert.Equal("Nairobi", ((results[1]["NextOfKin"] as JObject)["PhysicalAddress"] as JObject)["City"].ToString());
+        }
+    }
+
+    public class OpenTypeAggregationTests : WebHostTestBase
+    {
+        public OpenTypeAggregationTests(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(OpenAggregationProductsController));
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.MapODataServiceRoute("openaggregation", "openaggregation", GetEdmModel(configuration));
+        }
+
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
+        {
+            var builder = configuration.CreateConventionModelBuilder();
+            builder.EntitySet<OpenAggregationProduct>("OpenAggregationProducts");
+            return builder.GetEdmModel();
+        }
+
+        // On an open type, $apply=groupby over a property that is not declared in the EDM model resolves
+        // the name from the dynamic property container, not from a same-named CLR property that was
+        // excluded from the model.
+        [Fact]
+        public async Task GroupByOpenType_UndeclaredClrProperty_ResolvesFromDynamicContainer()
+        {
+            // Arrange
+            string requestUri = this.BaseAddress +
+                "/openaggregation/OpenAggregationProducts?$apply=groupby((SupplierRegion), aggregate($count as Count))";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            HttpResponseMessage response = await this.Client.SendAsync(request);
+            string body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(HttpStatusCode.OK == response.StatusCode, $"Status={response.StatusCode}, Body={body}");
+
+            JToken parsed = JToken.Parse(body);
+            JArray groups = (parsed as JArray) ?? (parsed["value"] as JArray);
+            Assert.True(groups != null, $"Could not find groups array. Body={body}");
+
+            // SupplierRegion is not present as a dynamic (open) property on any row, so grouping resolves
+            // it from the (empty) container -> a single null-keyed group covering all three rows.
+            Assert.True(groups.Count == 1, $"Expected a single group, got {groups.Count}. Body={body}");
+            Assert.Equal(3, (groups[0] as JObject)["Count"].ToObject<int>());
+
+            JToken regionToken = (groups[0] as JObject)["SupplierRegion"];
+            Assert.True(regionToken == null || regionToken.Type == JTokenType.Null, $"Unexpected SupplierRegion value: {regionToken}. Body={body}");
+
+            // The excluded CLR member values are not part of the model, so they do not appear in the result.
+            Assert.DoesNotContain("Region-A", body);
+            Assert.DoesNotContain("Region-B", body);
+            Assert.DoesNotContain("Region-C", body);
         }
     }
 }

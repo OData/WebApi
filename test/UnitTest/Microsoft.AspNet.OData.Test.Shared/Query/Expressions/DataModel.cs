@@ -159,4 +159,13 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
     {
         public Dictionary<string, object> ProductProperties { get; set; }
     }
+
+    public class DynamicProductWithExcludedProperty : DynamicProduct
+    {
+        // A public CLR property that is deliberately excluded from the EDM model via [NotMapped].
+        // On an open type, a query segment naming this member must resolve from the dynamic property
+        // container - not bind the excluded CLR member.
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string ExcludedClrProperty { get; set; }
+    }
 }

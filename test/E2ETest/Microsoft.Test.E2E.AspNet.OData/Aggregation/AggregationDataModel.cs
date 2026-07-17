@@ -105,4 +105,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     {
         public string City { get; set; }
     }
+
+    public class OpenAggregationProduct
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        // A CLR property excluded from the EDM model. Because the type is open, a client can name it in
+        // $apply=groupby((...)); the binder resolves it from the dynamic container, not from this CLR
+        // member. See TransformationBinderBase.CreateOpenPropertyAccessExpression.
+        [NotMapped]
+        public string SupplierRegion { get; set; }
+
+        public System.Collections.Generic.IDictionary<string, object> DynamicProperties { get; set; }
+    }
 }

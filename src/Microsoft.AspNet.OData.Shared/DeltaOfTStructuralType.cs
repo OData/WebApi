@@ -403,7 +403,10 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public override IEnumerable<string> GetChangedPropertyNames()
         {
-            return _changedProperties.Intersect(_updatableProperties).Concat(_deltaNestedResources.Keys);
+            // Filter the changed structural properties and the changed nested resources by the updatable
+            // properties in a single pass, so a name removed from UpdatableProperties is excluded whether
+            // it is a structural property or a nested resource.
+            return _changedProperties.Concat(_deltaNestedResources.Keys).Intersect(_updatableProperties);
         }
 
         /// <summary>
@@ -874,6 +877,13 @@ namespace Microsoft.AspNet.OData
             // For nested resources.
             foreach (string nestedResourceName in _deltaNestedResources.Keys)
             {
+                // Skip nested resources that are not in the updatable properties list,
+                // consistent with how the structural properties above are handled.
+                if (!_updatableProperties.Contains(nestedResourceName))
+                {
+                    continue;
+                }
+
                 // Patch for each nested resource changed under this TStructuralType.
                 dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
                 dynamic originalNestedResource = null;

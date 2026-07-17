@@ -575,6 +575,191 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void GetChangedPropertyNames_ExcludesNestedResource_WhenRemovedFromUpdatableProperties()
+        {
+            // Arrange
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+            IDelta ideltaCustomer = deltaCustomer as IDelta;
+            deltaCustomer.FirstName = "Alice";
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaCustomer.Address = deltaAddress;
+
+            // both the scalar and the nested resource are initially reported as changed
+            Assert.Contains("FirstName", ideltaCustomer.GetChangedPropertyNames());
+            Assert.Contains("Address", ideltaCustomer.GetChangedPropertyNames());
+
+            // Act - remove the nested property from the updatable allow-list
+            deltaCustomer.UpdatableProperties.Remove("Address");
+
+            // Assert - the nested resource name is now excluded (previously it was concatenated
+            // unconditionally, bypassing the allow-list)
+            Assert.Contains("FirstName", ideltaCustomer.GetChangedPropertyNames());
+            Assert.DoesNotContain("Address", ideltaCustomer.GetChangedPropertyNames());
+        }
+
+        [Fact]
+        public void Patch_DoesNotCopyNestedResource_WhenNestedPropertyRemovedFromUpdatableProperties()
+        {
+            // Arrange
+            var originalAddress = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = originalAddress };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+            deltaCustomer.FirstName = "Alice";
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaAddress.StreetAddress = "23213 NE 15th Ct";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Remove("Address");
+
+            // Act
+            deltaCustomer.Patch(originalCustomer);
+
+            // Assert - the nested resource is left exactly as it was
+            Assert.Same(originalAddress, originalCustomer.Address);
+            Assert.Equal(1, originalCustomer.Address.ID);
+            Assert.Equal("Redmond", originalCustomer.Address.City);
+            Assert.Equal("WA", originalCustomer.Address.State);
+            Assert.Equal("21110 NE 44th St", originalCustomer.Address.StreetAddress);
+            Assert.Equal(98074, originalCustomer.Address.ZipCode);
+
+            // Assert - properties still in the list are applied
+            Assert.Equal("Alice", originalCustomer.FirstName);
+            Assert.Equal("Smith", originalCustomer.LastName);
+        }
+
+        [Fact]
+        public void Patch_DoesNotSetNestedResource_WhenNestedPropertyRemovedFromUpdatableProperties_AndOriginalIsNull()
+        {
+            // Arrange
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = null };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaAddress.StreetAddress = "23213 NE 15th Ct";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Remove("Address");
+
+            // Act
+            deltaCustomer.Patch(originalCustomer);
+
+            // Assert - the nested resource is not created
+            Assert.Null(originalCustomer.Address);
+        }
+
+        [Fact]
+        public void Patch_DoesNotCopyNestedResource_WhenUpdatablePropertiesCleared()
+        {
+            // Arrange
+            var originalAddress = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = originalAddress };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+            deltaCustomer.FirstName = "Alice";
+            deltaCustomer.LastName = "Johnson";
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Clear();
+
+            // Act
+            deltaCustomer.Patch(originalCustomer);
+
+            // Assert - nothing is copied
+            Assert.Same(originalAddress, originalCustomer.Address);
+            Assert.Equal("Redmond", originalCustomer.Address.City);
+            Assert.Equal("Bob", originalCustomer.FirstName);
+            Assert.Equal("Smith", originalCustomer.LastName);
+        }
+
+        [Fact]
+        public void Patch_CopiesNestedResource_WhenNestedPropertyReAddedToUpdatableProperties()
+        {
+            // Arrange
+            var originalAddress = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = originalAddress };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaAddress.StreetAddress = "23213 NE 15th Ct";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Remove("Address");
+            deltaCustomer.UpdatableProperties.Add("Address");
+
+            // Act
+            deltaCustomer.Patch(originalCustomer);
+
+            // Assert - changed nested values are copied (no over-restriction)
+            Assert.Equal("Sammamish", originalCustomer.Address.City);
+            Assert.Equal("23213 NE 15th Ct", originalCustomer.Address.StreetAddress);
+            // unchanged nested values stay
+            Assert.Equal("WA", originalCustomer.Address.State);
+            Assert.Equal(98074, originalCustomer.Address.ZipCode);
+        }
+
+        [Fact]
+        public void Patch_CopiesOnlyNestedResource_WhenUpdatablePropertiesLimitedToNestedProperty()
+        {
+            // Arrange
+            var originalAddress = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = originalAddress };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+            deltaCustomer.FirstName = "Alice";
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Clear();
+            deltaCustomer.UpdatableProperties.Add("Address");
+
+            // Act
+            deltaCustomer.Patch(originalCustomer);
+
+            // Assert - the nested resource is copied
+            Assert.Equal("Sammamish", originalCustomer.Address.City);
+            // Assert - the scalar property left out of the list is not copied
+            Assert.Equal("Bob", originalCustomer.FirstName);
+        }
+
+        [Fact]
+        public void Put_DoesNotCopyNestedResource_WhenNestedPropertyRemovedFromUpdatableProperties()
+        {
+            // Arrange
+            var originalAddress = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+            var originalCustomer = new CustomerEntity { ID = 7, FirstName = "Bob", LastName = "Smith", Address = originalAddress };
+
+            dynamic deltaCustomer = new Delta<CustomerEntity>();
+            deltaCustomer.FirstName = "Alice";
+
+            dynamic deltaAddress = new Delta<AddressEntity>();
+            deltaAddress.City = "Sammamish";
+            deltaCustomer.Address = deltaAddress;
+
+            deltaCustomer.UpdatableProperties.Remove("Address");
+
+            // Act
+            deltaCustomer.Put(originalCustomer);
+
+            // Assert - the nested resource is left unchanged
+            Assert.Same(originalAddress, originalCustomer.Address);
+            Assert.Equal("Redmond", originalCustomer.Address.City);
+        }
+
+        [Fact]
         public void TestDelta_IgnoresUnmapped()
         {
             //Arrange

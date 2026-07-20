@@ -91,6 +91,64 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
         }
 
         [Fact]
+        public async Task PreferMaxPageSizeZero_DoesNotDisableServerDrivenPaging()
+        {
+            // ServerSidePagingCustomers returns 7 items and the controller sets [EnableQuery(PageSize = 5)].
+            // A client-supplied "Prefer: maxpagesize=0" must not turn off server-driven paging; the
+            // configured server page size (5) stays in effect and the whole collection is not returned.
+            var requestUri = this.BaseAddress + "/prefix/ServerSidePagingCustomers";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.TryAddWithoutValidation("Prefer", "maxpagesize=0");
+
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var value = (JArray)JObject.Parse(content)["value"];
+            Assert.Equal(5, value.Count);
+            Assert.Contains("@odata.nextLink", content);
+            Assert.Contains("/prefix/ServerSidePagingCustomers?$skip=5", content);
+        }
+
+        [Fact]
+        public async Task PreferBareMaxPageSizeToken_DoesNotFaultAndServerDrivenPagingApplies()
+        {
+            // A bare "Prefer: maxpagesize" token (no "=value") must not surface as a 500, and the
+            // configured server page size must still apply.
+            var requestUri = this.BaseAddress + "/prefix/ServerSidePagingCustomers";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.TryAddWithoutValidation("Prefer", "maxpagesize");
+
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var value = (JArray)JObject.Parse(content)["value"];
+            Assert.Equal(5, value.Count);
+            Assert.Contains("@odata.nextLink", content);
+            Assert.Contains("/prefix/ServerSidePagingCustomers?$skip=5", content);
+        }
+
+        [Fact]
+        public async Task PreferPositiveMaxPageSize_IsStillHonored()
+        {
+            // A positive "Prefer: maxpagesize" below the server page size (5) is still honored,
+            // producing that requested page size (regression guard for valid preferences).
+            var requestUri = this.BaseAddress + "/prefix/ServerSidePagingCustomers";
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.TryAddWithoutValidation("Prefer", "maxpagesize=2");
+
+            var response = await this.Client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var value = (JArray)JObject.Parse(content)["value"];
+            Assert.Equal(2, value.Count);
+            Assert.Contains("@odata.nextLink", content);
+            Assert.Contains("/prefix/ServerSidePagingCustomers?$skip=2", content);
+        }
+
+        [Fact]
         public async Task VerifyParametersInNextPageLinkInEdmFunctionResponseBodyAreInSameCaseAsInRequestUrl()
         {
             // Arrange

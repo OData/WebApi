@@ -569,6 +569,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             IEdmStructuredType edmStructuredType;
             IEdmTypeReference edmTypeReference = openNode.Source.TypeReference;
+            if (edmTypeReference == null)
+            {
+                // The source segment is itself an open/dynamic property, so it has no known EDM type
+                // from which to resolve a dynamic-property container (e.g. a nested open path such as
+                // A/B/C where A is dynamic). Surface a clean query error instead of dereferencing a
+                // null type reference, which would otherwise bubble up as a raw ArgumentNullException.
+                throw new ODataException(Error.Format(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name));
+            }
+
             if (edmTypeReference.IsEntity())
             {
                 edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();

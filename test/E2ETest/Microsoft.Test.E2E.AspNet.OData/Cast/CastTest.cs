@@ -29,6 +29,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Cast
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class CastTest : WebHostTestBase
     {
         private static string[] dataSourceTypes = new string[] { "IM", "EF" };// In Memory and Entity Framework

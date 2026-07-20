@@ -21,6 +21,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class IsofFunctionTests : WebHostTestBase
     {
         private static readonly string[] DataSourceTypes = new string[] {"IM", "EF"}; // In Memory or Entity Framework

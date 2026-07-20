@@ -19,6 +19,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
+    [Collection("Singleton")] // Shared static singleton controller state across servers; run serially under parallel execution
     public class SingletonClientTest : WebHostTestBase
     {
         public SingletonClientTest(WebHostTestFixture fixture)

@@ -38,18 +38,31 @@ using Xunit;
 using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 #endif
 
-// Parallelism in the test framework is a feature that is new for (Xunit) version 2. However,
-// since each test will spin up a number of web servers each with a listening port, disabling the
-// parallel test with take a bit long but consume fewer resources with more stable results.
+// Each WebHostTestBase subclass spins up its own self-hosted web server (Kestrel/Katana) on a
+// dynamically reserved port (see PortArranger.Reserve), so distinct test classes are isolated on the
+// wire and can run concurrently. Tests WITHIN a class still run serially against a single shared
+// server (IClassFixture<WebHostTestFixture>), which is the behavior the fixture requires.
 //
-// By default, each test class is a unique test collection. Tests within the same test class will not run
-// in parallel against each other. That means that there may be up to # subclasses of WebHostTestBase
-// web servers running at any point during the test run, currently ~500. Without this, there would be a
-// web server per test case since Xunit 2.0 spawns a new test class instance for each test case.
+// By default xUnit uses one test collection per class and runs collections in parallel, so classes
+// execute concurrently up to MaxParallelThreads. We cap the degree of parallelism (rather than leaving
+// it unbounded / equal to the core count) so we never spin up more than a handful of web servers at
+// once: this keeps memory and socket usage bounded while cutting wall-clock time dramatically versus
+// fully serial execution.
 //
-// Using both Disable and Max Threads per this discussion: https://github.com/xunit/xunit/issues/276
+// Parallel execution is currently enabled only for the AspNetCore 3.x E2E project (NETCORE && !NETCORE2x),
+// which is the configuration validated for concurrency. The classic (.NET Framework) and AspNetCore 2.x
+// projects keep the original fully serial behavior until they are similarly hardened.
 //
+// A moderate cap (4) is deliberate: every EF/database-backed test class shares a single LocalDB instance
+// and drops/recreates its database on start, so running many at once serializes on LocalDB DDL and can
+// deadlock. Those DB-backed classes (and the process-global TimeZoneInfo tests) are grouped into a single
+// serial "Database" xUnit collection so they never run concurrently with one another, while the remaining
+// in-memory test classes still parallelize up to the cap.
+#if NETCORE && !NETCORE2x
+[assembly: CollectionBehavior(MaxParallelThreads = 4)]
+#else
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, MaxParallelThreads = 1)]
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 {

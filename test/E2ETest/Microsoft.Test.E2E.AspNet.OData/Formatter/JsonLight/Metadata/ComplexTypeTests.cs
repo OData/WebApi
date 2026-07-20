@@ -21,6 +21,7 @@ using JsonLightModel = Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metad
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
+    [Collection("JsonLightMetadata")] // Shared static random-data table across servers; run serially under parallel execution
     public class ComplexTypeTests : WebHostTestBase
     {
         public ComplexTypeTests(WebHostTestFixture fixture)

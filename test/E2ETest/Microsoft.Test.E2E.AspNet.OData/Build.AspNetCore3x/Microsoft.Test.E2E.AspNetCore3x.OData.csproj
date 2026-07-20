@@ -1593,6 +1593,9 @@
     <Compile Include="..\ServerSidePaging\ServerSidePagingDataSource.cs">
       <Link>ServerSidePaging\ServerSidePagingDataSource.cs</Link>
     </Compile>
+    <Compile Include="..\DeltaNestedUpdatableProperties\DeltaNestedUpdatablePropertiesTests.cs">
+      <Link>DeltaNestedUpdatableProperties\DeltaNestedUpdatablePropertiesTests.cs</Link>
+    </Compile>
     <Compile Include="..\ServerSidePaging\ServerSidePagingTests.cs">
       <Link>ServerSidePaging\ServerSidePagingTests.cs</Link>
     </Compile>

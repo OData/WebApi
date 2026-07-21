@@ -18,7 +18,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Controlle
         public EntityWithSimplePropertiesController()
             : base("Id")
         {
-            EntityWithSimpleProperties[] entities = MetadataTestHelpers.CreateInstances<EntityWithSimpleProperties[]>();
+            EntityWithSimpleProperties[] entities = MetadataTestHelpers.GetEntityWithSimplePropertiesInstances();
             foreach (var entity in entities)
             {
                 LocalTable.AddOrUpdate(entity.Id, entity, (key, oldEntity) => oldEntity);

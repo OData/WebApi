@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
             string acceptHeader)
         {
             // Arrange
-            EntityWithSimpleProperties[] entities = MetadataTestHelpers.CreateInstances<EntityWithSimpleProperties[]>();
+            EntityWithSimpleProperties[] entities = MetadataTestHelpers.GetEntityWithSimplePropertiesInstances();
             string requestUrl = BaseAddress.ToLowerInvariant() + "/EntityWithSimpleProperties/";
             string expectedContextUrl = BaseAddress.ToLowerInvariant() + "/$metadata#EntityWithSimpleProperties";
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, requestUrl);
@@ -142,7 +142,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
             string edmType)
         {
             // Arrange
-            EntityWithSimpleProperties entity = MetadataTestHelpers.CreateInstances<EntityWithSimpleProperties[]>()
+            EntityWithSimpleProperties entity = MetadataTestHelpers.GetEntityWithSimplePropertiesInstances()
                                                                    .FirstOrDefault();
             Assert.NotNull(entity);
 
@@ -180,7 +180,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         public async Task MetadataIsCorrectForAnEntryWithJustPrimitiveTypeProperties(string acceptHeader)
         {
             // Arrange
-            EntityWithSimpleProperties entity = MetadataTestHelpers.CreateInstances<EntityWithSimpleProperties[]>()
+            EntityWithSimpleProperties entity = MetadataTestHelpers.GetEntityWithSimplePropertiesInstances()
                                                                    .FirstOrDefault();
             Assert.NotNull(entity);
 

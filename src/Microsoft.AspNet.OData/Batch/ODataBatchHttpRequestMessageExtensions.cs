@@ -38,6 +38,7 @@ namespace Microsoft.AspNet.OData.Batch
         private const string ChangeSetIdKey = "ChangesetId";
         private const string ContentIdKey = "ContentId";
         private const string ContentIdMappingKey = "ContentIdMapping";
+        private const string BatchServiceRootKey = "BatchServiceRoot";
         private const string BatchMediaTypeMime = "multipart/mixed";
         private const string BatchMediaTypeJson = "application/json";
         private const string Boundary = "boundary";
@@ -186,6 +187,17 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             request.Properties[ContentIdMappingKey] = contentIdMapping;
+        }
+
+        internal static Uri GetODataBatchServiceRoot(this HttpRequestMessage request)
+        {
+            object serviceRoot;
+            return request.Properties.TryGetValue(BatchServiceRootKey, out serviceRoot) ? serviceRoot as Uri : null;
+        }
+
+        internal static void SetODataBatchServiceRoot(this HttpRequestMessage request, Uri serviceRoot)
+        {
+            request.Properties[BatchServiceRootKey] = serviceRoot;
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]

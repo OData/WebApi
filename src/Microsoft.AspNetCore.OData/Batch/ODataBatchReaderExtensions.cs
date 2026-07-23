@@ -145,6 +145,35 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             request.Method = batchRequest.Method;
+
+            // Each sub-request URL must target the same service as the outer batch request.
+            // Sub-request URIs that specify a different scheme, host, or port are rejected.
+            string outerScheme = originalContext.Request.Scheme;
+            HostString outerHost = originalContext.Request.Host;
+            Uri outerBaseUri = new Uri($"{outerScheme}://{outerHost}/");
+            if (Uri.Compare(requestUri, outerBaseUri, UriComponents.SchemeAndServer, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw Error.InvalidOperation(
+                    SRResources.BatchRequestUriAuthorityMismatch,
+                    requestUri.AbsoluteUri,
+                    $"{outerScheme}://{outerHost}");
+            }
+
+            // Each sub-request path must fall within the OData service root.  Absolute URLs targeting
+            // other paths and Content-ID references that resolve outside the service root via
+            // dot-segment traversal (e.g. $1/../../../other) are both rejected here.  The service
+            // root is derived from the outer batch request's own path (mapped as
+            // "{routePrefix}/$batch") rather than IODataFeature.RoutePrefix, which is not
+            // populated in the conventional (non-endpoint) routing pipeline this code runs in.
+            if (!IsPathWithinServiceRoot(requestUri.AbsolutePath, originalContext.Request.Path, originalContext.Request.PathBase))
+            {
+                string serviceRoot = BuildServiceRootPath(originalContext.Request.Path, originalContext.Request.PathBase);
+                throw Error.InvalidOperation(
+                    SRResources.BatchSubRequestPathNotUnderServiceRoot,
+                    requestUri.AbsoluteUri,
+                    $"{outerScheme}://{outerHost}{serviceRoot}");
+            }
+
             request.CopyAbsoluteUrl(requestUri);
 
             // Not using bufferContentStream. Unlike AspNet, AspNetCore cannot guarantee the disposal
@@ -163,6 +192,15 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 string headerName = header.Key;
                 string headerValue = header.Value;
+
+                // The OData batch spec requires sub-requests to omit authentication and authorization
+                // headers.  In addition, proxy/gateway headers that carry caller identity or origin
+                // signals are excluded so that the synthetic sub-request reflects the outer request's
+                // context rather than values supplied in the batch body.
+                if (ODataBatchRequestHeaders.IsBlocked(headerName))
+                {
+                    continue;
+                }
 
                 if (headerName.Trim().ToLowerInvariant() == "prefer")
                 {
@@ -402,6 +440,48 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 yield return preferences.Substring(preferenceStartIndex).Trim();
             }
+        }
+
+        // Returns true when the sub-request's absolute path falls within the OData service root.
+        // Batch sub-requests are intended to address resources within the same OData service;
+        // this check prevents requests that pass the authority check from reaching unrelated
+        // in-process routes via a same-authority absolute URL or via dot-segment traversal in a
+        // Content-ID reference ($1/../../../other), which the .NET Uri constructor normalises.
+        private static bool IsPathWithinServiceRoot(string requestPath, PathString batchRequestPath, PathString pathBase)
+        {
+            string serviceRoot = BuildServiceRootPath(batchRequestPath, pathBase);
+
+            // A "/" service root means the service is mounted at the host root (no route prefix
+            // and no PathBase), so every path is by definition within scope.
+            if (serviceRoot == "/")
+            {
+                return true;
+            }
+
+            // The request path must equal the service root exactly OR begin with the service root
+            // followed by '/' (a child resource).  The trailing-slash requirement prevents a prefix
+            // like '/odata' from accidentally matching '/odata-admin'.
+            return string.Equals(requestPath, serviceRoot, StringComparison.OrdinalIgnoreCase)
+                || requestPath.StartsWith(serviceRoot + "/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Builds the expected path prefix for the OData service root, combining the ASP.NET Core
+        // path base (for apps mounted under a sub-path) with the OData route prefix.  The route
+        // prefix is derived from the outer batch request's own path, which is always mapped as
+        // "{routePrefix}/$batch" (see ODataRouteBuilderExtensions.MapODataServiceRoute), rather
+        // than IODataFeature.RoutePrefix, which is not populated by the conventional (non-endpoint)
+        // routing pipeline this code runs in.
+        private static string BuildServiceRootPath(PathString batchRequestPath, PathString pathBase)
+        {
+            string basePart = pathBase.HasValue ? pathBase.Value.TrimEnd('/') : string.Empty;
+
+            string batchPath = batchRequestPath.HasValue ? batchRequestPath.Value : string.Empty;
+            string trimmedBatchPath = batchPath.TrimEnd('/');
+            int lastSlash = trimmedBatchPath.LastIndexOf('/');
+            string routePrefixPart = lastSlash > 0 ? trimmedBatchPath.Substring(0, lastSlash) : string.Empty;
+
+            string combined = basePart + routePrefixPart;
+            return string.IsNullOrEmpty(combined) ? "/" : combined;
         }
     }
 }

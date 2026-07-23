@@ -43,7 +43,14 @@ namespace Microsoft.AspNet.OData.Batch
             if (contentIdToLocationMapping != null)
             {
                 string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(request.RequestUri.OriginalString, contentIdToLocationMapping);
-                request.RequestUri = new Uri(resolvedRequestUrl);
+                Uri resolvedRequestUri = new Uri(resolvedRequestUrl);
+                Uri serviceRoot = request.GetODataBatchServiceRoot();
+                if (serviceRoot != null)
+                {
+                    ODataBatchReaderExtensions.ValidateRequestUri(resolvedRequestUri, serviceRoot);
+                }
+
+                request.RequestUri = resolvedRequestUri;
 
                 request.SetODataContentIdMapping(contentIdToLocationMapping);
             }

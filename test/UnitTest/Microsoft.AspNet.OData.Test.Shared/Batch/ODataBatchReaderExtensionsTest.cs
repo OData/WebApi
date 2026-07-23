@@ -7,6 +7,7 @@
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -82,6 +83,82 @@ namespace Microsoft.AspNet.OData.Test.Batch
                 () => ODataBatchReaderExtensions.ReadChangeSetOperationRequestAsync(reader.CreateODataBatchReader(),
                     Guid.NewGuid(), Guid.NewGuid(), false, CancellationToken.None),
                 "The current batch reader state 'Initial' is invalid. The expected state is 'Operation'.");
+        }
+
+        [Fact]
+        public async Task ParseBatchRequestsAsync_DoesNotCopyBlockedHeaders()
+        {
+            string batchBoundary = "batch_" + Guid.NewGuid();
+            string batchContent = $@"
+--{batchBoundary}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET http://localhost/odata/Customers HTTP/1.1
+Host: other.example.com
+Authorization: Bearer test-token
+X-Forwarded-For: 10.0.0.1
+X-MS-Client-Principal-Id: test-user-id
+X-Custom-Header: retained
+
+
+--{batchBoundary}--
+";
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost/$batch");
+            batchRequest.Content = new StringContent(batchContent);
+            batchRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchBoundary}");
+            batchRequest.EnableHttpDependencyInjectionSupport();
+
+            DefaultODataBatchHandler handler = new DefaultODataBatchHandler(new System.Web.Http.HttpServer());
+            IList<ODataBatchRequestItem> requests = await handler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None);
+
+            HttpRequestMessage subRequest = Assert.IsType<OperationRequestItem>(Assert.Single(requests)).Request;
+            Assert.Null(subRequest.Headers.Host);
+            Assert.False(subRequest.Headers.Contains("Authorization"));
+            Assert.False(subRequest.Headers.Contains("X-Forwarded-For"));
+            Assert.False(subRequest.Headers.Contains("X-MS-Client-Principal-Id"));
+            Assert.Equal("retained", Assert.Single(subRequest.Headers.GetValues("X-Custom-Header")));
+        }
+
+        [Fact]
+        public void ValidateRequestUri_Throws_WhenAuthorityDiffers()
+        {
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => ODataBatchReaderExtensions.ValidateRequestUri(
+                    new Uri("https://other.example.com/odata/Customers"),
+                    new Uri("http://localhost/odata/")),
+                "The batch sub-request URI 'https://other.example.com/odata/Customers' has a different authority",
+                partialMatch: true);
+        }
+
+        [Fact]
+        public void ValidateRequestUri_Throws_WhenPathIsOutsideServiceRoot()
+        {
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => ODataBatchReaderExtensions.ValidateRequestUri(
+                    new Uri("http://localhost/odata-admin/Customers"),
+                    new Uri("http://localhost/odata/")),
+                "The batch sub-request URI 'http://localhost/odata-admin/Customers' targets a path that is not within the OData service root",
+                partialMatch: true);
+        }
+
+        [Fact]
+        public async Task SendMessageAsync_Throws_WhenContentIdResolutionEscapesServiceRoot()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "$1/../../../admin/control");
+            request.SetODataBatchServiceRoot(new Uri("http://localhost/odata/"));
+            IDictionary<string, string> contentIdMapping = new Dictionary<string, string>
+            {
+                { "1", "http://localhost/odata/Orders(1)" }
+            };
+
+            using (HttpMessageInvoker invoker = new HttpMessageInvoker(new HttpClientHandler()))
+            {
+                await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                    () => ODataBatchRequestItem.SendMessageAsync(invoker, request, CancellationToken.None, contentIdMapping),
+                    "targets a path that is not within the OData service root",
+                    partialMatch: true);
+            }
         }
 
         private static ODataMessageQuotas _odataMessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = ODataMessageSizeOptions.DefaultMaxReceivedMessageSize };

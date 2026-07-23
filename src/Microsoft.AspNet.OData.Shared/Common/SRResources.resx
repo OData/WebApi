@@ -571,6 +571,12 @@
   <data name="BatchRequestMissingContent" xml:space="preserve">
     <value>The 'Content' property on the batch request cannot be null.</value>
   </data>
+  <data name="BatchRequestUriAuthorityMismatch" xml:space="preserve">
+    <value>The batch sub-request URI '{0}' has a different authority (scheme, host, or port) than the outer batch request '{1}'. Batch sub-requests must target the same service as the outer batch request.</value>
+  </data>
+  <data name="BatchSubRequestPathNotUnderServiceRoot" xml:space="preserve">
+    <value>The batch sub-request URI '{0}' targets a path that is not within the OData service root '{1}'. Batch sub-requests must address resources within the OData service.</value>
+  </data>
   <data name="InvalidExpansionDepthValue" xml:space="preserve">
     <value>'{0}' should be less than or equal to '{1}'.</value>
   </data>

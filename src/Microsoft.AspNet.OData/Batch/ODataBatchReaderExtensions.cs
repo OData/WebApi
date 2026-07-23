@@ -25,6 +25,8 @@ namespace Microsoft.AspNet.OData.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataBatchReaderExtensions
     {
+        private static readonly UriComponents RequestAuthority = UriComponents.SchemeAndServer;
+
         /// <summary>
         /// Reads a ChangeSet request.
         /// </summary>
@@ -157,11 +159,17 @@ namespace Microsoft.AspNet.OData.Batch
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = new HttpMethod(batchRequest.Method);
             Uri requestUri = batchRequest.Url;
+            Uri serviceRoot = batchRequest.Container.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
 
             if (!requestUri.IsAbsoluteUri)
             {
-                Uri baseUri = batchRequest.Container.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
-                requestUri = new Uri(baseUri, requestUri);
+                requestUri = new Uri(serviceRoot, requestUri);
+            }
+
+            if (serviceRoot != null)
+            {
+                ValidateRequestUri(requestUri, serviceRoot);
+                request.SetODataBatchServiceRoot(serviceRoot);
             }
 
             request.RequestUri = requestUri;
@@ -186,6 +194,11 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 string headerName = header.Key;
                 string headerValue = header.Value;
+                if (ODataBatchRequestHeaders.IsBlocked(headerName))
+                {
+                    continue;
+                }
+
                 if (!request.Headers.TryAddWithoutValidation(headerName, headerValue))
                 {
                     request.Content.Headers.TryAddWithoutValidation(headerName, headerValue);
@@ -201,6 +214,34 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             return request;
+        }
+
+        internal static void ValidateRequestUri(Uri requestUri, Uri serviceRoot)
+        {
+            if (Uri.Compare(requestUri, serviceRoot, RequestAuthority, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw Error.InvalidOperation(
+                    SRResources.BatchRequestUriAuthorityMismatch,
+                    requestUri.AbsoluteUri,
+                    serviceRoot.GetLeftPart(UriPartial.Authority));
+            }
+
+            string serviceRootPath = serviceRoot.AbsolutePath.TrimEnd('/');
+            if (serviceRootPath.Length == 0)
+            {
+                serviceRootPath = "/";
+            }
+
+            string requestPath = requestUri.AbsolutePath;
+            if (serviceRootPath != "/"
+                && !string.Equals(requestPath, serviceRootPath, StringComparison.OrdinalIgnoreCase)
+                && !requestPath.StartsWith(serviceRootPath + "/", StringComparison.OrdinalIgnoreCase))
+            {
+                throw Error.InvalidOperation(
+                    SRResources.BatchSubRequestPathNotUnderServiceRoot,
+                    requestUri.AbsoluteUri,
+                    serviceRoot.AbsoluteUri);
+            }
         }
     }
 }

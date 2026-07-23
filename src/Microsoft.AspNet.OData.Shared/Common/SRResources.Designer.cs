@@ -246,6 +246,28 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The batch sub-request URI &apos;{0}&apos; has a different authority (scheme, host, or port) than the outer batch request &apos;{1}&apos;. Batch sub-requests must target the same service as the outer batch request..
+        /// </summary>
+        internal static string BatchRequestUriAuthorityMismatch
+        {
+            get
+            {
+                return ResourceManager.GetString("BatchRequestUriAuthorityMismatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The batch sub-request URI &apos;{0}&apos; targets a path that is not within the OData service root &apos;{1}&apos;. Batch sub-requests must address resources within the OData service..
+        /// </summary>
+        internal static string BatchSubRequestPathNotUnderServiceRoot
+        {
+            get
+            {
+                return ResourceManager.GetString("BatchSubRequestPathNotUnderServiceRoot", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The batch request must have a &quot;Content-Type&quot; header..
         /// </summary>
         internal static string BatchRequestMissingContentType

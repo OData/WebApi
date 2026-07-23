@@ -790,6 +790,349 @@ Prefer: return=representation
 
             // TODO: assert somehow?
         }
+
+        // ─── Security tests ──────────────────────────────────────────────────────
+        // Sub-request URLs and headers in the batch body are untrusted input. These tests
+        // verify that the batch middleware validates sub-request authority and path scope,
+        // and strips trust/forwarding headers, before dispatching each synthetic request.
+
+        [Fact]
+        public async Task SendAsync_Throws_WhenSubRequestUriHasDifferentHost()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET https://other.example.com/admin/diagnostics HTTP/1.1
+Host: other.example.com
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            InvalidOperationException exception = await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => client.SendAsync(batchRequest));
+            Assert.Contains("has a different authority", exception.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_Throws_WhenSubRequestUriHasDifferentScheme()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET https://localhost/BatchTestCustomers HTTP/1.1
+Host: localhost
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            InvalidOperationException exception = await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => client.SendAsync(batchRequest));
+            Assert.Contains("has a different authority", exception.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_Throws_WhenSubRequestUriHasDifferentPort()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET http://localhost:9090/BatchTestCustomers HTTP/1.1
+Host: localhost:9090
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            InvalidOperationException exception = await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => client.SendAsync(batchRequest));
+            Assert.Contains("has a different authority", exception.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_Succeeds_WhenSubRequestUriHasSameAuthority()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestCustomers HTTP/1.1
+Host: localhost
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+        }
+
+        [Fact]
+        public async Task SendAsync_Throws_WhenSubRequestPathEscapesODataRoutePrefix()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+
+                // Mount the OData service under the "odata" route prefix.
+                config.MapODataServiceRoute("odata", "odata", builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/odata/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/admin/diagnostics HTTP/1.1
+Host: localhost
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            InvalidOperationException exception = await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => client.SendAsync(batchRequest));
+            Assert.Contains("not within the OData service root", exception.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_Throws_WhenContentIdTraversalEscapesODataServiceRoot()
+        {
+            // A Content-ID relative reference with dot-segment traversal inside a changeset.
+            // The reference "$1/../../../admin/control" is resolved by the .NET Uri constructor
+            // before the sub-request URL is applied: with base http://localhost/odata/ the path
+            // normalises to /admin/control, which is outside the /odata service root.
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+                builder.EntitySet<BatchTestOrder>("BatchTestOrders");
+
+                config.MapODataServiceRoute("odata", "odata", builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var createOrderPayload = @"{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":3,""Amount"":10}";
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/odata/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: multipart/mixed; boundary={changesetRef}
+
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 1
+
+POST {endpoint}/odata/BatchTestOrders HTTP/1.1
+Content-Type: application/json
+
+{createOrderPayload}
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 2
+
+POST $1/../../../admin/control HTTP/1.1
+Content-Type: application/json
+
+{{}}
+--{changesetRef}--
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            InvalidOperationException exception = await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => client.SendAsync(batchRequest));
+            Assert.Contains("not within the OData service root", exception.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_DoesNotCopyBlockedTrustHeadersFromSubRequest()
+        {
+            // Sub-request carries X-Forwarded-For and X-MS-Client-Principal-Id headers. Per the
+            // OData batch spec these must not be copied onto the synthetic sub-request; the
+            // sub-request must inherit the outer request's context for these values instead.
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestSecurityHeaderCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestSecurityHeaderCustomer>("BatchTestSecurityHeaderCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestSecurityHeaderCustomers HTTP/1.1
+Host: localhost
+X-Forwarded-For: 10.0.0.1
+X-MS-Client-Principal-Id: test-user-id
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.Contains("XForwardedFor=,PrincipalId=", responseContent);
+        }
+
+        [Fact]
+        public async Task SendAsync_DoesNotOverrideHostFromSubRequestHostHeader()
+        {
+            // CopyAbsoluteUrl sets Request.Host from the validated sub-request URI; a Host
+            // header present in the batch body must not override that value.
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestSecurityHeaderCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestSecurityHeaderCustomer>("BatchTestSecurityHeaderCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestSecurityHeaderCustomers HTTP/1.1
+Host: other.example.com
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.Contains($"Host={new Uri(endpoint).Authority}", responseContent);
+        }
 #endif
 
         [Fact]
@@ -935,6 +1278,22 @@ Prefer: return=representation
     }
 
     public class BatchTestHeadersCustomer
+    {
+        public int Id { get; set; }
+    }
+
+    public class BatchTestSecurityHeaderCustomersController : TestODataController
+    {
+        public string Get()
+        {
+            string xForwardedFor = HttpContext.Request.Headers["X-Forwarded-For"].ToString();
+            string principalId = HttpContext.Request.Headers["X-MS-Client-Principal-Id"].ToString();
+            string host = HttpContext.Request.Host.Value;
+            return $"XForwardedFor={xForwardedFor},PrincipalId={principalId},Host={host}";
+        }
+    }
+
+    public class BatchTestSecurityHeaderCustomer
     {
         public int Id { get; set; }
     }

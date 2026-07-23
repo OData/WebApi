@@ -142,7 +142,31 @@ namespace Microsoft.AspNet.OData.Query
                 }
                 else if (edmProperty.Type.IsEnum())
                 {
-                    ODataEnumValue enumValue = new ODataEnumValue(value.ToString(), value.GetType().FullName);
+                    IEdmEnumType enumDefinition = edmProperty.Type.AsEnum().EnumDefinition();
+
+                    // Use the EDM type name (e.g. "MyNamespace.Color") rather than the CLR
+                    // FullName (e.g. "MyNamespace+OuterClass+Color"). The CLR nested-type
+                    // separator ('+') is not valid OData syntax and causes
+                    // ODataUriUtils.ConvertFromUriLiteral to fail when parsing the skiptoken
+                    // value back on the next page request, silently breaking enum-ordered paging.
+                    string edmTypeName = enumDefinition.FullName();
+
+                    // Prefer the EDM member name (which reflects any [EnumMember(Value="...")]
+                    // alias) over the CLR member name returned by value.ToString(). Without this,
+                    // an aliased enum member would generate a token containing the CLR name, which
+                    // does not match the EDM-aliased name and fails to parse back.
+                    string memberName = value.ToString();
+                    ClrEnumMemberAnnotation clrEnumMemberAnnotation = model.GetClrEnumMemberAnnotation(enumDefinition);
+                    if (clrEnumMemberAnnotation != null && value is Enum enumValueForAnnotation)
+                    {
+                        IEdmEnumMember edmMember = clrEnumMemberAnnotation.GetEdmEnumMember(enumValueForAnnotation);
+                        if (edmMember != null)
+                        {
+                            memberName = edmMember.Name;
+                        }
+                    }
+
+                    ODataEnumValue enumValue = new ODataEnumValue(memberName, edmTypeName);
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V401, model);
                 }
                 else if(edmProperty.Type.IsDateTimeOffset() && value is DateTime)

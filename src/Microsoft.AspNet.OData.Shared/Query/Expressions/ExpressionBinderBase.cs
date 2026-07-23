@@ -127,10 +127,48 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             ExpressionType binaryExpressionType;
 
+            // When one operand is object-typed (open/dynamic property access) and the other is
+            // strongly typed, insert Expression.Convert to coerce the runtime-boxed CLR value to
+            // the nullable form of the declared type. Using the nullable form ensures that rows
+            // where the dynamic property is absent (null) do not cause a NullReferenceException
+            // at query execution time. Null constants are excluded: they are the sentinel value
+            // used for OData "null" literals and are handled correctly by the existing baseline
+            // logic without conversion.
+            if (left.Type == typeof(object) && right.Type != typeof(object)
+                && !(left is ConstantExpression leftConstant && leftConstant.Value == null))
+            {
+                left = Expression.Convert(left, ToNullable(right.Type));
+            }
+            else if (right.Type == typeof(object) && left.Type != typeof(object)
+                && !(right is ConstantExpression rightConstant && rightConstant.Value == null))
+            {
+                right = Expression.Convert(right, ToNullable(left.Type));
+            }
+
             // When comparing an enum to a string, parse the string, convert both to the enum underlying type, and compare the values
             // When comparing an enum to an enum with the same type, convert both to the underlying type, and compare the values
             Type leftUnderlyingType = Nullable.GetUnderlyingType(left.Type) ?? left.Type;
             Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
+
+            // bool/bool? has no ordering operators in .NET expression trees.
+            // For gt, ge, lt, le: convert to int (false -> 0, true -> 1) so standard integer
+            // comparison applies and preserves the expected false < true ordering.
+            if (leftUnderlyingType == typeof(bool) && rightUnderlyingType == typeof(bool) &&
+                (binaryOperator == BinaryOperatorKind.GreaterThan ||
+                 binaryOperator == BinaryOperatorKind.GreaterThanOrEqual ||
+                 binaryOperator == BinaryOperatorKind.LessThan ||
+                 binaryOperator == BinaryOperatorKind.LessThanOrEqual))
+            {
+                // Only widen to int? when at least one side is nullable; Expression.MakeBinary
+                // rejects mismatched int/int? operands, and forcing int? unconditionally would
+                // make a lifted comparison (bool?) out of two non-nullable bool operands, which
+                // is not a valid predicate for LINQ's Where.
+                bool isNullable = IsNullable(left.Type) || IsNullable(right.Type);
+                left = BoolToIntExpression(left, isNullable);
+                right = BoolToIntExpression(right, isNullable);
+                leftUnderlyingType = typeof(int);
+                rightUnderlyingType = typeof(int);
+            }
 
             // Convert to integers unless Enum type is required
             if ((TypeHelper.IsEnum(leftUnderlyingType) || TypeHelper.IsEnum(rightUnderlyingType)) && binaryOperator != BinaryOperatorKind.Has)
@@ -1059,6 +1097,40 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return expression;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="bool"/> or <see cref="Nullable{Boolean}"/> expression to an integer
+        /// expression using the mapping <c>false -> 0</c>, <c>true -> 1</c> (and <c>null -> null</c> for
+        /// the nullable form). This is needed because .NET expression trees do not define ordering
+        /// operators for <see cref="bool"/>, yet OData allows <c>$orderby</c> on boolean properties with
+        /// the conventional ordering <c>false &lt; true</c>.
+        /// </summary>
+        /// <param name="boolExpr">The bool or bool? expression to convert.</param>
+        /// <param name="forceNullable">
+        /// When <c>true</c>, always returns <see cref="Nullable{Int32}"/> even for a non-nullable
+        /// <paramref name="boolExpr"/>, so that it can be paired with a nullable counterpart -
+        /// Expression.MakeBinary rejects mismatched int/int? operands. When <c>false</c> and
+        /// <paramref name="boolExpr"/> is non-nullable, returns a plain <see cref="Int32"/> so the
+        /// resulting comparison is not lifted to <c>bool?</c>, which would not be a valid predicate
+        /// for LINQ's Where.
+        /// </param>
+        private static Expression BoolToIntExpression(Expression boolExpr, bool forceNullable)
+        {
+            if (Nullable.GetUnderlyingType(boolExpr.Type) == null)
+            {
+                // false -> 0, true -> 1
+                Expression intExpr = Expression.Condition(boolExpr, Expression.Constant(1), Expression.Constant(0));
+                return forceNullable ? Expression.Convert(intExpr, typeof(int?)) : intExpr;
+            }
+
+            // null -> null (int?), false -> 0 (int?), true -> 1 (int?)
+            Expression hasValue = Expression.Property(boolExpr, "HasValue");
+            Expression value = Expression.Property(boolExpr, "Value");
+            Expression intValue = Expression.Convert(
+                Expression.Condition(value, Expression.Constant(1), Expression.Constant(0)),
+                typeof(int?));
+            return Expression.Condition(hasValue, intValue, Expression.Constant(null, typeof(int?)));
         }
 
         internal static bool IsIQueryable(Type type)

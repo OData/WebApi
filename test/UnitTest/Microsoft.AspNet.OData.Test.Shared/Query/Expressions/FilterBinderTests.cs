@@ -3022,6 +3022,77 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
+        [InlineData("BoolProp gt false", true)]
+        [InlineData("BoolProp gt true", false)]
+        [InlineData("BoolProp lt true", false)]
+        [InlineData("BoolProp ge true", true)]
+        [InlineData("BoolProp le false", false)]
+        public void FilterWithOrderingOperators_OnNonNullableBoolProperty_DoesNotThrow(string filter, bool expectedResult)
+        {
+            // .NET expression trees do not define gt/ge/lt/le operators for bool. Before the fix,
+            // CreateBinaryExpression would let these reach Expression.MakeBinary unconverted, which
+            // throws InvalidOperationException("The binary operator GreaterThan is not defined for
+            // the types 'System.Boolean' and 'System.Boolean'.").
+            var filters = VerifyQueryDeserialization<DataTypes>(filter);
+
+            RunFilters(
+                filters,
+                new DataTypes { BoolProp = true },
+                new { WithNullPropagation = expectedResult, WithoutNullPropagation = expectedResult });
+        }
+
+        [Theory]
+        [InlineData("NullableBoolProp gt false", true)]
+        [InlineData("NullableBoolProp lt true", false)]
+        public void FilterWithOrderingOperators_OnNullableBoolProperty_DoesNotThrow(string filter, bool expectedResult)
+        {
+            var filters = VerifyQueryDeserialization<DataTypes>(filter);
+
+            RunFilters(
+                filters,
+                new DataTypes { NullableBoolProp = true },
+                new { WithNullPropagation = expectedResult, WithoutNullPropagation = expectedResult });
+        }
+
+        [Theory]
+        [InlineData(BinaryOperatorKind.GreaterThan, true, false, true)]
+        [InlineData(BinaryOperatorKind.GreaterThan, false, true, false)]
+        [InlineData(BinaryOperatorKind.LessThan, false, true, true)]
+        [InlineData(BinaryOperatorKind.LessThan, true, false, false)]
+        [InlineData(BinaryOperatorKind.GreaterThanOrEqual, true, true, true)]
+        [InlineData(BinaryOperatorKind.LessThanOrEqual, false, false, true)]
+        public void CreateBinaryExpression_WithLiftToNullTrue_OnNonNullableBoolOperands_DoesNotProduceNullableBoolResult(
+            BinaryOperatorKind binaryOperator, bool leftValue, bool rightValue, bool expectedResult)
+        {
+            // This is the exact scenario flagged in review: DefaultSkipTokenHandler.ApplyToCore
+            // passes liftToNull: !propertyIsNullable, so a non-nullable bool ordering property is
+            // compared with liftToNull: true. If BoolToIntExpression unconditionally widened both
+            // operands to int?, the GreaterThan/LessThan comparison would be *lifted* (since both
+            // operands would then be nullable), producing a bool? result. A bool?-typed expression
+            // cannot be used as the body of a Func<T, bool> predicate (e.g. for LINQ's Where, as
+            // DefaultSkipTokenHandler does via Expression.Lambda(where, param)).
+            //
+            // Verified independently that Expression.MakeBinary(GreaterThan, int, int, liftToNull:
+            // true) => type Boolean, while (int?, int?) => type Nullable<Boolean>, and mismatched
+            // (int, int?) throws - which is why only-nullable-when-needed widening is required.
+            FilterBinder binder = new FilterBinder(
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False },
+                WebApiAssembliesResolverFactory.Create(),
+                GetModel<DataTypes>());
+
+            Expression left = Expression.Constant(leftValue, typeof(bool));
+            Expression right = Expression.Constant(rightValue, typeof(bool));
+
+            // Act
+            Expression result = binder.CreateBinaryExpression(binaryOperator, left, right, liftToNull: true);
+
+            // Assert
+            Assert.Equal(typeof(bool), result.Type);
+            Expression<Func<bool>> lambda = Expression.Lambda<Func<bool>>(result);
+            Assert.Equal(expectedResult, lambda.Compile().Invoke());
+        }
+
+        [Theory]
         [InlineData(new[] { 1, 2, 42 }, true)]
         [InlineData(new[] { 1, 2 }, false)]
         public void InOnPrimitiveCollectionPropertyOnRHS(int[] alternateIds, bool withNullPropagation)

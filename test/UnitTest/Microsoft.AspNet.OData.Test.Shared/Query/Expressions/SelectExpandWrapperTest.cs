@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Common;
@@ -166,6 +167,133 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             bool result = wrapper.TryGetPropertyValue("SampleNotPresentProperty", out value);
 
             Assert.False(result);
+        }
+
+        [Fact]
+        public void TryGetValue_ReturnsFalse_ForClrPropertyNotDeclaredInEdmModel()
+        {
+            // Arrange: an open entity type that declares "Id" and "Name" but intentionally omits
+            // "PasswordHash", even though the backing CLR class has it.
+            EdmModel model = new EdmModel();
+            EdmEntityType entityType = new EdmEntityType("NS", "AccountEntity", null, false, isOpen: true);
+            entityType.AddKeys(entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(AccountEntity)));
+
+            SelectExpandWrapper<AccountEntity> wrapper = new SelectExpandWrapper<AccountEntity>
+            {
+                ModelID = ModelContainer.GetModelID(model),
+                InstanceType = "NS.AccountEntity",
+                Instance = new AccountEntity { Id = 1, Name = "Alice", PasswordHash = "clr-only-value" },
+                UseInstanceForProperties = true,
+            };
+
+            // Act: request the CLR-only property that is not declared in the EDM model.
+            object value;
+            bool result = wrapper.TryGetPropertyValue("PasswordHash", out value);
+
+            // Assert: the CLR fallback must not resolve the undeclared property.
+            Assert.False(result);
+            Assert.Null(value);
+        }
+
+        [Fact]
+        public void TryGetValue_ReturnsTrue_ForClrPropertyDeclaredInEdmModel_OnOpenType()
+        {
+            // Arrange: same open entity type as above, but requesting the declared "Name" property
+            // must continue to work via the CLR instance fallback.
+            EdmModel model = new EdmModel();
+            EdmEntityType entityType = new EdmEntityType("NS", "AccountEntity", null, false, isOpen: true);
+            entityType.AddKeys(entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(AccountEntity)));
+
+            SelectExpandWrapper<AccountEntity> wrapper = new SelectExpandWrapper<AccountEntity>
+            {
+                ModelID = ModelContainer.GetModelID(model),
+                InstanceType = "NS.AccountEntity",
+                Instance = new AccountEntity { Id = 1, Name = "Alice", PasswordHash = "clr-only-value" },
+                UseInstanceForProperties = true,
+            };
+
+            // Act
+            object value;
+            bool result = wrapper.TryGetPropertyValue("Name", out value);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal("Alice", value);
+        }
+
+        [Fact]
+        public void TryGetValue_ReturnsTrue_ForDynamicPropertyDictionary_OnOpenType()
+        {
+            // Arrange: an open entity type whose dynamic-property container ("DynamicProperties")
+            // is annotated on the model. Undeclared property names stored inside this bag must
+            // still be reachable through the container/dictionary lookup, not through CLR reflection
+            // of the "PasswordHash" property.
+            EdmModel model = new EdmModel();
+            EdmEntityType entityType = new EdmEntityType("NS", "AccountEntity", null, false, isOpen: true);
+            entityType.AddKeys(entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(AccountEntity)));
+            model.SetAnnotationValue(
+                entityType,
+                new DynamicPropertyDictionaryAnnotation(typeof(AccountEntity).GetProperty("DynamicProperties")));
+
+            SelectExpandWrapper<AccountEntity> wrapper = new SelectExpandWrapper<AccountEntity>
+            {
+                ModelID = ModelContainer.GetModelID(model),
+                InstanceType = "NS.AccountEntity",
+                Instance = new AccountEntity { Id = 1, Name = "Alice", PasswordHash = "clr-only-value" },
+                UseInstanceForProperties = true,
+            };
+
+            // Act: request the container property itself (not an arbitrary undeclared name).
+            object value;
+            bool result = wrapper.TryGetPropertyValue("DynamicProperties", out value);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void TryGetValue_ReturnsFalse_ForNavigationPropertyNotInContainer_OnOpenType()
+        {
+            // Arrange: an open entity type that declares "Manager" as a *navigation* property.
+            // Navigation properties are not structural, so a declared navigation property that is
+            // absent from the container must not reach the CLR reflection fallback.
+            EdmModel model = new EdmModel();
+            EdmEntityType entityType = new EdmEntityType("NS", "AccountEntity", null, false, isOpen: true);
+            entityType.AddKeys(entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            entityType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
+            {
+                Name = "Manager",
+                TargetMultiplicity = EdmMultiplicity.ZeroOrOne,
+                Target = entityType,
+            });
+            model.AddElement(entityType);
+            model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(AccountEntity)));
+
+            SelectExpandWrapper<AccountEntity> wrapper = new SelectExpandWrapper<AccountEntity>
+            {
+                ModelID = ModelContainer.GetModelID(model),
+                InstanceType = "NS.AccountEntity",
+                Instance = new AccountEntity { Id = 1, Name = "Alice", Manager = new AccountEntity { Id = 2, Name = "Bob" } },
+                UseInstanceForProperties = true,
+            };
+
+            // Act: request the declared navigation property that is not present in the container.
+            object value;
+            bool result = wrapper.TryGetPropertyValue("Manager", out value);
+
+            // Assert: the CLR fallback must not resolve the navigation property.
+            Assert.False(result);
+            Assert.Null(value);
         }
 
         [Fact]
@@ -342,6 +470,22 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         private class DerivedEntity : TestEntity
         {
+        }
+
+        // CLR class backing an open EDM entity type used to verify that CLR properties
+        // excluded from the EDM model (e.g. via [NotMapped] or .Ignore()) are not resolved
+        // through the SelectExpandWrapper CLR reflection fallback.
+        private class AccountEntity
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
+
+            // Declared as a navigation property in the EDM model (not a structural property).
+            public AccountEntity Manager { get; set; }
+
+            // Intentionally omitted from the EDM model in the tests above.
+            public string PasswordHash { get; set; }
         }
 
         [DataContract(Namespace = "NS", Name = "Customer")]

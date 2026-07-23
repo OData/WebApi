@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -86,15 +87,43 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // fall back to the instance.
             if (UseInstanceForProperties && UntypedInstance != null)
             {
-                if (GetEdmType() is IEdmComplexTypeReference)
+                IEdmTypeReference edmTypeReference = GetEdmType();
+                IEdmModel model = GetModel();
+
+                // Restrict the CLR fallback to properties that are declared as *structural* properties
+                // in the EDM model or are the open-type dynamic-property container
+                // (IDictionary<string,object> bag). Property names not found in the container that are
+                // neither an EDM-declared structural property nor the dynamic container have no basis
+                // for CLR resolution and are returned as not found. Navigation properties are excluded
+                // so that a declared navigation property that is absent from the container cannot reach
+                // the CLR fallback.
+                if (edmTypeReference is IEdmStructuredTypeReference structuredTypeRef && model != null)
+                {
+                    IEdmStructuralProperty structuralProperty =
+                        structuredTypeRef.FindProperty(propertyName) as IEdmStructuralProperty;
+
+                    if (structuralProperty == null)
+                    {
+                        PropertyInfo dynamicContainerProp =
+                            EdmLibHelpers.GetDynamicPropertyDictionary(structuredTypeRef.StructuredDefinition(), model);
+                        if (dynamicContainerProp == null || dynamicContainerProp.Name != propertyName)
+                        {
+                            value = null;
+                            return false;
+                        }
+                    }
+                }
+
+                IEdmComplexTypeReference complexTypeReference = edmTypeReference as IEdmComplexTypeReference;
+                if (complexTypeReference != null)
                 {
                     _typedEdmStructuredObject = _typedEdmStructuredObject ??
-                    new TypedEdmComplexObject(UntypedInstance, GetEdmType() as IEdmComplexTypeReference, GetModel());
+                    new TypedEdmComplexObject(UntypedInstance, complexTypeReference, model);
                 }
                 else
                 {
                     _typedEdmStructuredObject = _typedEdmStructuredObject ??
-                    new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, GetModel());
+                    new TypedEdmEntityObject(UntypedInstance, edmTypeReference as IEdmEntityTypeReference, model);
                 }
 
                 return _typedEdmStructuredObject.TryGetPropertyValue(propertyName, out value);

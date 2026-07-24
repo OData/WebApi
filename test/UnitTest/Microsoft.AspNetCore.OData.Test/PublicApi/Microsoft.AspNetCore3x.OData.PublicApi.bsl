@@ -578,6 +578,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	AllowedQueryOptions AllowedQueryOptions  { public get; public set; }
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
+	bool EnableQueryValidationErrorLogging  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
@@ -707,8 +708,10 @@ public class Microsoft.AspNet.OData.ODataOptions {
 
 	CompatibilityOptions CompatibilityOptions  { public get; public set; }
 	bool EnableContinueOnErrorHeader  { public get; public set; }
+	bool EnableQueryValidationErrorLogging  { public get; public set; }
 	long MaxReceivedMessageSize  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
+	Microsoft.Extensions.Logging.LogLevel QueryValidationErrorLogLevel  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
 }
 

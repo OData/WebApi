@@ -340,6 +340,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataSingletonRoutingTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataVersionConstraintTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CapturingLoggerProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\ThrowingLoggerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CustomersModelWithInheritance.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\Models\SampleEdmModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\TestControllerBase.cs" />

@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -44,6 +46,26 @@ namespace Microsoft.AspNet.OData
         // and those of the v3 assembly.  Concern is reduced here due to addition of user type name but prefix
         // also clearly ties the property to code in this assembly.
         private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
+
+        private bool? _enableQueryValidationErrorLogging;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether diagnostic details are recorded when an incoming query
+        /// fails validation. When enabled, the endpoint's route template, the queried type, the attempted
+        /// <c>$select</c> and <c>$expand</c> options, and the failure reason are written, together with the
+        /// validation exception, to an <see cref="ILogger{TCategoryName}"/> resolved from the request services
+        /// and categorized for <see cref="EnableQueryAttribute"/>. This information is captured from the request
+        /// even when the query options cannot be fully parsed. When this property is not set on the attribute,
+        /// the value of <see cref="ODataOptions.EnableQueryValidationErrorLogging"/> is used, so the behavior can be
+        /// configured once for all actions; setting it here overrides that global value for this action. The
+        /// diagnostic is written at the level from <see cref="ODataOptions.QueryValidationErrorLogLevel"/>
+        /// (default <see cref="LogLevel.Warning"/>). The default value is <c>false</c>.
+        /// </summary>
+        public bool EnableQueryValidationErrorLogging
+        {
+            get => _enableQueryValidationErrorLogging ?? false;
+            set => _enableQueryValidationErrorLogging = value;
+        }
 
         /// <summary>
         /// Performs query validations before action is executed.
@@ -199,18 +221,21 @@ namespace Microsoft.AspNet.OData
             catch (ArgumentOutOfRangeException e)
             {
                 context.Result = CreateBadRequestResult(
+                    context.HttpContext,
                     Error.Format(SRResources.QueryParameterNotSupported, e.Message),
                     e);
             }
             catch (NotImplementedException e)
             {
                 context.Result = CreateBadRequestResult(
+                    context.HttpContext,
                     Error.Format(SRResources.UriQueryStringInvalid, e.Message),
                     e);
             }
             catch (NotSupportedException e)
             {
                 context.Result = CreateBadRequestResult(
+                    context.HttpContext,
                     Error.Format(SRResources.UriQueryStringInvalid, e.Message),
                     e);
             }
@@ -218,6 +243,7 @@ namespace Microsoft.AspNet.OData
             {
                 // Will also catch ODataException here because ODataException derives from InvalidOperationException.
                 context.Result = CreateBadRequestResult(
+                    context.HttpContext,
                     Error.Format(SRResources.UriQueryStringInvalid, e.Message),
                     e);
             }
@@ -290,7 +316,7 @@ namespace Microsoft.AspNet.OData
                         (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
                         (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
                         (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
-                        (statusCode, message, exception) => actionExecutedContext.Result = CreateBadRequestResult(message, exception));
+                        (statusCode, message, exception) => actionExecutedContext.Result = CreateBadRequestResult(actionExecutedContext.HttpContext, message, exception));
 
                     if (queryResult != null)
                     {
@@ -341,6 +367,13 @@ namespace Microsoft.AspNet.OData
 
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
+            if (requestQueryData != null)
+            {
+                // Capture the options so diagnostics on the post-action validation path can report the element
+                // type and the attempted query, consistent with the pre-action path.
+                requestQueryData.ProcessedQueryOptions = queryOptions;
+            }
+
             ValidateQuery(request, queryOptions);
 
             return queryOptions;
@@ -390,13 +423,65 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Create a BadRequestObjectResult.
         /// </summary>
+        /// <param name="httpContext">The <see cref="HttpContext"/> for the current request.</param>
         /// <param name="message">The error message.</param>
         /// <param name="exception">The exception.</param>
         /// <returns>A BadRequestObjectResult.</returns>
-        private static BadRequestObjectResult CreateBadRequestResult(string message, Exception exception)
+        private BadRequestObjectResult CreateBadRequestResult(HttpContext httpContext, string message, Exception exception)
         {
+            LogQueryValidationError(httpContext, exception);
+
             SerializableError error = CreateErrorResponse(message, exception);
             return new BadRequestObjectResult(error);
+        }
+
+        /// <summary>
+        /// Records diagnostic details about a query that failed validation, using the request state that is
+        /// available even when the query options could not be fully parsed. Does nothing unless logging is
+        /// enabled for the action — either on the attribute or through the global
+        /// <see cref="ODataOptions.EnableQueryValidationErrorLogging"/> value — and a logger is available. The
+        /// diagnostic is written at the level from the global <see cref="ODataOptions.QueryValidationErrorLogLevel"/>
+        /// (default <see cref="LogLevel.Warning"/>). This never changes the response produced for the failed query.
+        /// </summary>
+        /// <param name="httpContext">The <see cref="HttpContext"/> for the current request.</param>
+        /// <param name="exception">The exception raised while validating the query.</param>
+        private void LogQueryValidationError(HttpContext httpContext, Exception exception)
+        {
+            if (httpContext == null)
+            {
+                return;
+            }
+
+            // When the attribute does not set the flag, fall back to the global value from ODataOptions so the
+            // behavior can be configured once for all actions. An explicit value on the attribute takes precedence.
+            ODataOptions odataOptions = httpContext.RequestServices?.GetService<ODataOptions>();
+            bool loggingEnabled = _enableQueryValidationErrorLogging ?? odataOptions?.EnableQueryValidationErrorLogging ?? false;
+            if (!loggingEnabled)
+            {
+                return;
+            }
+
+            ILogger logger = httpContext.RequestServices?.GetService<ILogger<EnableQueryAttribute>>();
+            if (logger == null)
+            {
+                return;
+            }
+
+            // The global level from ODataOptions applies, defaulting to Warning when it is not configured.
+            LogLevel logLevel = odataOptions?.QueryValidationErrorLogLevel ?? LogLevel.Warning;
+
+            // The processed query options are captured before validation runs; they carry the raw values that were
+            // normalized during parsing, so the requested set is reported regardless of whether the request used the
+            // '$' prefix. They may be null when the query options could not be built, in which case the element type
+            // and requested options are omitted.
+            ODataQueryOptions processedQueryOptions = null;
+            if (httpContext.Items.TryGetValue(nameof(RequestQueryData), out object item) &&
+                item is RequestQueryData requestQueryData)
+            {
+                processedQueryOptions = requestQueryData.ProcessedQueryOptions;
+            }
+
+            QueryValidationErrorLogger.LogQueryValidationFailure(logger, logLevel, httpContext, processedQueryOptions, exception);
         }
 
         /// <summary>

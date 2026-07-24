@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
@@ -23,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Xunit;
@@ -340,6 +342,398 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuting(null), "context");
         }
+
+        #region Query validation error logging (opt-in diagnostics)
+
+        [Fact]
+        public void EnableQueryValidationErrorLogging_DefaultsToFalse()
+        {
+            // Arrange & Act
+            var attribute = new EnableQueryAttribute();
+
+            // Assert
+            Assert.False(attribute.EnableQueryValidationErrorLogging);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_UnknownSelect_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Warning, entry.Level);
+            Assert.Equal(typeof(EnableQueryAttribute).FullName, entry.Category);
+            Assert.Contains("Customer", entry.GetFieldValue("QueryType"));
+            Assert.Equal("$select=NoSuchProperty", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+            Assert.Contains("NoSuchProperty", entry.Exception.Message);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_UnknownExpand_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$expand=NoSuchNavigation", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Warning, entry.Level);
+            Assert.Equal("$expand=NoSuchNavigation", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchNavigation", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_ReportsFullRequestedSelectSet()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=Name,NoSuchProperty", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("$select=Name,NoSuchProperty", entry.GetFieldValue("QueryOptions"));
+        }
+
+        [Fact]
+        public void OnActionExecuting_DefaultConfiguration_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute();
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_GlobalOptionEnabled_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute();
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: true));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Warning, entry.Level);
+            Assert.Contains("NoSuchProperty", entry.GetFieldValue("Reason"));
+        }
+
+        [Fact]
+        public void OnActionExecuting_GlobalEnabled_AttributeOptOut_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = false };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: true));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_GlobalDisabled_AttributeEnabled_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: false));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Single(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_AttributeDisabled_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = false };
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_ValidSelect_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=Name", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.Null(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NoQueryOptions_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(string.Empty, BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.Null(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NoLoggerRegistered_DoesNotThrow_AndReturnsBadRequest()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddSingleton(new ODataOptions());
+            IServiceProvider requestServices = services.BuildServiceProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", requestServices);
+
+            // Act & Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuting(context));
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_WarningLevelDisabled_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServices(loggerProvider, minimumLevel: LogLevel.Error));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_CustomLogLevel_WritesAtConfiguredLevel()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: false, globalLevel: LogLevel.Error));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Error, entry.Level);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_InformationLevel_WritesAtInformation()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: false, globalLevel: LogLevel.Information));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Information, entry.Level);
+        }
+
+        [Fact]
+        public void OnActionExecuting_GlobalEnabled_UsesGlobalLogLevel()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute();
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: true, globalLevel: LogLevel.Debug));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Debug, entry.Level);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_CustomLevelDisabled_WritesNothing()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildLoggerServicesWithGlobalOption(loggerProvider, globalEnable: false, globalLevel: LogLevel.Information, minimumLevel: LogLevel.Warning));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            Assert.Empty(loggerProvider.Entries);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_LoggerThrows_ResponseUnchanged()
+        {
+            // Arrange
+            var throwingProvider = new ThrowingLoggerProvider(typeof(EnableQueryAttribute).FullName);
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$select=NoSuchProperty",
+                BuildThrowingLoggerServices(throwingProvider));
+
+            // Act & Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuting(context));
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+        }
+
+        private static IEdmModel GetLoggingCustomerModel()
+        {
+            return new ODataModelBuilder().Add_Customers_EntitySet().GetEdmModel();
+        }
+
+        private static IServiceProvider BuildLoggerServices(CapturingLoggerProvider loggerProvider)
+        {
+            return BuildLoggerServices(loggerProvider, LogLevel.Trace, null);
+        }
+
+        private static IServiceProvider BuildLoggerServices(CapturingLoggerProvider loggerProvider, LogLevel minimumLevel)
+        {
+            return BuildLoggerServices(loggerProvider, minimumLevel, null);
+        }
+
+        private static IServiceProvider BuildLoggerServices(CapturingLoggerProvider loggerProvider, LogLevel minimumLevel, ODataOptions odataOptions)
+        {
+            var services = new ServiceCollection();
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(minimumLevel);
+                builder.AddProvider(loggerProvider);
+            });
+            services.AddSingleton(odataOptions ?? new ODataOptions());
+            return services.BuildServiceProvider();
+        }
+
+        private static IServiceProvider BuildLoggerServicesWithGlobalOption(CapturingLoggerProvider loggerProvider, bool globalEnable, LogLevel? globalLevel = null, LogLevel minimumLevel = LogLevel.Trace)
+        {
+            var odataOptions = new ODataOptions
+            {
+                EnableQueryValidationErrorLogging = globalEnable
+            };
+            if (globalLevel.HasValue)
+            {
+                odataOptions.QueryValidationErrorLogLevel = globalLevel.Value;
+            }
+
+            return BuildLoggerServices(loggerProvider, minimumLevel, odataOptions);
+        }
+
+        private static IServiceProvider BuildThrowingLoggerServices(ThrowingLoggerProvider loggerProvider)
+        {
+            var services = new ServiceCollection();
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddProvider(loggerProvider);
+            });
+            services.AddSingleton(new ODataOptions());
+            return services.BuildServiceProvider();
+        }
+
+        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices)
+        {
+            var routeName = "querylogging";
+            IEdmModel model = GetLoggingCustomerModel();
+
+            var customers = model.EntityContainer.FindEntitySet("Customers");
+            var path = new ODataPath(new Microsoft.OData.UriParser.EntitySetSegment(customers));
+
+            var request = RequestFactory.CreateFromModel(model, "http://localhost/odata/Customers" + queryString, routeName, path);
+
+            // Enable $select and $expand so the requested clause is bound during validation (which then reports the
+            // unknown property) instead of being rejected outright as a disallowed option.
+            var configuration = RoutingConfigurationFactory.Create();
+            configuration.Select().Expand().Filter().OrderBy().Count();
+            IServiceProvider odataContainer = GetServiceProvider(configuration, model, routeName);
+            request.ODataFeature().RequestContainer = odataContainer;
+
+            HttpContext httpContext = request.HttpContext;
+            httpContext.RequestServices = requestServices;
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            return new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object>(), controller: new object());
+        }
+
+        #endregion
 #endif
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.

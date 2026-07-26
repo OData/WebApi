@@ -360,12 +360,9 @@ namespace Microsoft.AspNet.OData
 
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
-            if (requestQueryData != null)
-            {
-                // Capture the options so diagnostics on the post-action validation path can report the element
-                // type and the attempted query, consistent with the pre-action path.
-                requestQueryData.ProcessedQueryOptions = queryOptions;
-            }
+            // Capture the options so diagnostics on the post-action validation path can report the element
+            // type and the attempted query, consistent with the pre-action path.
+            requestQueryData.ProcessedQueryOptions = queryOptions;
 
             ValidateQuery(request, queryOptions);
 

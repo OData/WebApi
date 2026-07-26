@@ -416,6 +416,47 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
+        public void OnActionExecuting_LoggingEnabled_UnknownExpandWithSelect_ReportsCombinedQueryOptions()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=Name&$expand=NoSuchNavigation", BuildLoggerServices(loggerProvider));
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("$select=Name&$expand=NoSuchNavigation", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchNavigation", entry.GetFieldValue("Reason"));
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_RoutedEndpoint_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var endpoint = new RouteEndpoint(
+                ctx => System.Threading.Tasks.Task.CompletedTask,
+                Microsoft.AspNetCore.Routing.Patterns.RoutePatternFactory.Parse("odata/Customers({key})"),
+                order: 0,
+                metadata: EndpointMetadataCollection.Empty,
+                displayName: "Customers");
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), endpoint);
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers({key})", entry.GetFieldValue("Endpoint"));
+        }
+
+        [Fact]
         public void OnActionExecuting_DefaultConfiguration_WritesNothing()
         {
             // Arrange
@@ -709,7 +750,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             return services.BuildServiceProvider();
         }
 
-        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices)
+        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices, Endpoint routeEndpoint = null)
         {
             var routeName = "querylogging";
             IEdmModel model = GetLoggingCustomerModel();
@@ -728,6 +769,11 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             HttpContext httpContext = request.HttpContext;
             httpContext.RequestServices = requestServices;
+
+            if (routeEndpoint != null)
+            {
+                httpContext.SetEndpoint(routeEndpoint);
+            }
 
             var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
             return new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object>(), controller: new object());

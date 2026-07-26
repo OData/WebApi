@@ -17,10 +17,8 @@ using Microsoft.AspNetCore.Routing;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Writes structured diagnostics about a query that failed validation, using request state that is available
-    /// even when the query options could not be fully parsed. This is shared by the controller
-    /// (<see cref="EnableQueryAttribute"/>) validation paths so they report the same information. It never changes
-    /// the response produced for the failed query.
+    /// Writes structured diagnostics about a query that failed validation. Shared by the
+    /// <see cref="EnableQueryAttribute"/> validation paths, and never changes the response produced for the query.
     /// </summary>
     internal static class QueryValidationErrorLogger
     {
@@ -80,8 +78,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Builds a compact description of the requested query options that reference properties, including only
-        /// the options that were supplied so empty options are not reported.
+        /// Builds a compact description of the supplied <c>$select</c>/<c>$expand</c> options, omitting empty ones.
         /// </summary>
         /// <param name="rawValues">The raw query option values, or <c>null</c> when unavailable.</param>
         /// <returns>The requested query options, or an empty string when none apply.</returns>

@@ -50,21 +50,16 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether diagnostic details are recorded when an incoming query
-        /// fails validation for actions annotated with <see cref="EnableQueryAttribute"/>. When enabled, the
-        /// endpoint's route template, the queried type, the requested <c>$select</c> and <c>$expand</c>, and the failure
-        /// reason are written. This value provides the default for every such action, allowing the behavior to be
-        /// configured once instead of on each attribute; an individual <see cref="EnableQueryAttribute"/> overrides it
-        /// by setting <see cref="EnableQueryAttribute.EnableQueryValidationErrorLogging"/> explicitly. The default
-        /// value is <c>false</c>.
+        /// Gets or sets a value indicating whether diagnostic details are logged when a query fails validation,
+        /// for actions annotated with <see cref="EnableQueryAttribute"/>. Provides the default for every such
+        /// action; an individual <see cref="EnableQueryAttribute.EnableQueryValidationErrorLogging"/> overrides it.
+        /// The default value is <c>false</c>.
         /// </summary>
         public bool EnableQueryValidationErrorLogging { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="LogLevel"/> at which query validation diagnostics are written for actions
-        /// annotated with <see cref="EnableQueryAttribute"/> when <see cref="EnableQueryValidationErrorLogging"/> is
-        /// enabled. This value applies to every such action, so the level can be configured once. The default value is
-        /// <see cref="LogLevel.Warning"/>.
+        /// Gets or sets the <see cref="LogLevel"/> at which query validation diagnostics are written when
+        /// <see cref="EnableQueryValidationErrorLogging"/> is enabled. The default value is <see cref="LogLevel.Warning"/>.
         /// </summary>
         public LogLevel QueryValidationErrorLogLevel { get; set; } = LogLevel.Warning;
 

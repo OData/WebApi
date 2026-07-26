@@ -697,6 +697,56 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.IsType<BadRequestObjectResult>(context.Result);
         }
 
+        [Fact]
+        public void OnActionExecuted_LoggingEnabled_PostActionValidationFailure_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+
+            // Seed the per-request state, but clear the OData path so the pre-action validation is skipped and the
+            // query is instead validated after the action runs - the path taken for IActionResult/SingleResult
+            // actions whose element type is only known once the result is produced.
+            var executingContext = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider));
+            executingContext.HttpContext.Request.ODataFeature().Path = null;
+            attribute.OnActionExecuting(executingContext);
+            Assert.Null(executingContext.Result);
+            Assert.Empty(loggerProvider.Entries);
+
+            // The controller result whose element type (Customer) becomes known only now drives post-action
+            // validation. The element type must match the model registered on the request (the logging model is
+            // built from the TestModels Customer), so the query is validated against that type instead of falling
+            // back to a model built from the action descriptor.
+            HttpContext httpContext = executingContext.HttpContext;
+            ActionDescriptor actionDescriptor = ControllerDescriptorFactory
+                .Create(RoutingConfigurationFactory.Create(), "CustomersController", typeof(CustomersController))
+                .First(descriptor => descriptor.ActionName.StartsWith("Get", StringComparison.OrdinalIgnoreCase));
+            var customers = new List<Microsoft.AspNet.OData.Test.Builder.TestModels.Customer>
+            {
+                new Microsoft.AspNet.OData.Test.Builder.TestModels.Customer { Name = "Anne" }
+            }.AsQueryable();
+            var executedContext = new ActionExecutedContext(
+                new ActionContext(httpContext, new RouteData(), actionDescriptor),
+                new List<IFilterMetadata>(),
+                new CustomersController())
+            {
+                Result = new ObjectResult(customers) { StatusCode = 200 }
+            };
+
+            // Act
+            attribute.OnActionExecuted(executedContext);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(executedContext.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Warning, entry.Level);
+            Assert.Equal(typeof(EnableQueryAttribute).FullName, entry.Category);
+            Assert.Contains("Customer", entry.GetFieldValue("QueryType"));
+            Assert.Equal("$select=NoSuchProperty", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
         private static IEdmModel GetLoggingCustomerModel()
         {
             return new ODataModelBuilder().Add_Customers_EntitySet().GetEdmModel();

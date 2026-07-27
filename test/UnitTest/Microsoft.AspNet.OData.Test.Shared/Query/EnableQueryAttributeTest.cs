@@ -572,6 +572,96 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 #endif
 
+#if !NETCOREAPP2_1
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NavigationAfterKey_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var endpoint = new RouteEndpoint(
+                ctx => System.Threading.Tasks.Task.CompletedTask,
+                Microsoft.AspNetCore.Routing.Patterns.RoutePatternFactory.Parse("odata/Customers({key})/Orders"),
+                order: 0,
+                metadata: EndpointMetadataCollection.Empty,
+                displayName: "CustomerOrders");
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), endpoint);
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers({key})/Orders", entry.GetFieldValue("Endpoint"));
+        }
+#endif
+
+#if NETCOREAPP2_1
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NavigationAfterKey_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var model = GetLoggingCustomerOrdersModel();
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), model: model);
+            var odataFeature = context.HttpContext.ODataFeature();
+            odataFeature.Path = BuildCustomersOrdersPath(model, includeOrderKey: false);
+            odataFeature.RoutePrefix = "odata";
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers({key})/Orders", entry.GetFieldValue("Endpoint"));
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_KeyOnNavigation_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var model = GetLoggingCustomerOrdersModel();
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), model: model);
+            var odataFeature = context.HttpContext.ODataFeature();
+            odataFeature.Path = BuildCustomersOrdersPath(model, includeOrderKey: true);
+            odataFeature.RoutePrefix = "odata";
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers({key})/Orders({key})", entry.GetFieldValue("Endpoint"));
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NoRoutePrefix_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var model = GetLoggingCustomerOrdersModel();
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), model: model);
+            var odataFeature = context.HttpContext.ODataFeature();
+            odataFeature.Path = BuildCustomersOrdersPath(model, includeOrderKey: false);
+            odataFeature.RoutePrefix = null;
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("Customers({key})/Orders", entry.GetFieldValue("Endpoint"));
+        }
+#endif
+
         [Fact]
         public void OnActionExecuting_DefaultConfiguration_WritesNothing()
         {
@@ -870,9 +960,8 @@ namespace Microsoft.AspNet.OData.Test.Query
 
         private static IEdmModel GetLoggingCustomerOrdersModel()
         {
-            // A model where Customer.Orders is a valid, bound navigation property to the Orders entity set. This lets
-            // the outer $expand/$filter clause bind successfully so that only the nested clause (a $select/$filter on
-            // Order, or an any/all lambda over Orders) is what fails validation, exercising the nested query paths.
+            // Customer.Orders is a bound navigation to the Orders set, so the outer clause binds and only the nested
+            // clause (a $select/$filter on Order, or an any/all lambda over Orders) fails validation.
             return new ODataModelBuilder()
                 .Add_Order_EntityType()
                 .Add_Customers_EntitySet()
@@ -881,6 +970,34 @@ namespace Microsoft.AspNet.OData.Test.Query
                 .Add_CustomerOrders_Binding()
                 .GetEdmModel();
         }
+
+#if NETCOREAPP2_1
+        // Builds a multi-segment OData path (Customers(1)/Orders[(5)]) for endpoint-template reconstruction tests.
+        private static ODataPath BuildCustomersOrdersPath(IEdmModel model, bool includeOrderKey)
+        {
+            var customers = model.EntityContainer.FindEntitySet("Customers");
+            var orders = model.EntityContainer.FindEntitySet("Orders");
+            var ordersProperty = customers.EntityType().FindProperty("Orders") as IEdmNavigationProperty;
+
+            var entitySetSegment = new Microsoft.OData.UriParser.EntitySetSegment(customers);
+            var customerKeySegment = new Microsoft.OData.UriParser.KeySegment(
+                new[] { new KeyValuePair<string, object>("CustomerId", 1) },
+                customers.EntityType(),
+                customers);
+            var ordersSegment = new Microsoft.OData.UriParser.NavigationPropertySegment(ordersProperty, orders);
+
+            if (includeOrderKey)
+            {
+                var orderKeySegment = new Microsoft.OData.UriParser.KeySegment(
+                    new[] { new KeyValuePair<string, object>("OrderId", 5) },
+                    orders.EntityType(),
+                    orders);
+                return new ODataPath(entitySetSegment, customerKeySegment, ordersSegment, orderKeySegment);
+            }
+
+            return new ODataPath(entitySetSegment, customerKeySegment, ordersSegment);
+        }
+#endif
 
         private static IServiceProvider BuildLoggerServices(CapturingLoggerProvider loggerProvider)
         {

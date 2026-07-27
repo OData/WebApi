@@ -13,16 +13,17 @@ using Microsoft.OData.Edm;
 #if !NETSTANDARD2_0
 using Microsoft.AspNetCore.Routing;
 #else
-using System.Collections.Generic;
+using System.Text;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif
 
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Writes structured diagnostics about a query that failed validation. Shared by the
-    /// <see cref="EnableQueryAttribute"/> validation paths, and never changes the response produced for the query.
+    /// Writes structured diagnostics for a query that failed validation, without changing the response.
     /// </summary>
     internal static class QueryValidationErrorLogger
     {
@@ -30,8 +31,7 @@ namespace Microsoft.AspNet.OData
             "OData query validation failed. Endpoint: {Endpoint}, Type: {QueryType}, Query options: {QueryOptions}. {Reason}";
 
         /// <summary>
-        /// Writes the diagnostic entry for a failed query validation at the specified level. Does nothing when no
-        /// logger is available or the level is not enabled.
+        /// Writes the diagnostic for a failed query validation, or does nothing when the logger or level is disabled.
         /// </summary>
         /// <param name="logger">The logger to write to, or <c>null</c> when none is available.</param>
         /// <param name="logLevel">The level at which the diagnostic is written.</param>
@@ -50,10 +50,7 @@ namespace Microsoft.AspNet.OData
             try
             {
                 // Record the matched endpoint's route template (for example, "odata/Customers({key})") rather than
-                // the concrete request path. The template identifies the endpoint and keeps the route prefix while
-                // representing entity keys as placeholders, so the same endpoint is reported consistently across
-                // requests. It is null when the request is not served by a routed endpoint, in which case it is
-                // omitted.
+                // the concrete request path, so the same endpoint is reported consistently. Null when not routed.
                 string endpoint = null;
 #if NETSTANDARD2_0
                 endpoint = BuildRoutedEndpointTemplate(httpContext);
@@ -85,52 +82,49 @@ namespace Microsoft.AspNet.OData
 
 #if NETSTANDARD2_0
         /// <summary>
-        /// Builds a route-template-like identifier for the matched OData endpoint on targets that predate ASP.NET
-        /// Core endpoint routing. Reconstructs the template from the parsed OData path segments, preserving entity
-        /// set, singleton, navigation, and property names while representing entity keys as the "{key}" placeholder,
-        /// so the same endpoint is reported consistently regardless of the concrete key value. This mirrors the value
-        /// produced from the endpoint's route pattern on endpoint-routing targets (for example, "odata/Customers({key})").
+        /// Reconstructs the matched OData endpoint's route template from the parsed path on targets without endpoint
+        /// routing, using "{key}" placeholders for entity keys (for example, "odata/Customers({key})").
         /// </summary>
         /// <param name="httpContext">The <see cref="HttpContext"/> for the current request.</param>
-        /// <returns>
-        /// The endpoint template, or <c>null</c> when the request is not served by a routed OData endpoint.
-        /// </returns>
+        /// <returns>The endpoint template, or <c>null</c> when the request is not served by a routed OData endpoint.</returns>
         private static string BuildRoutedEndpointTemplate(HttpContext httpContext)
         {
-            var odataFeature = httpContext.ODataFeature();
-            var path = odataFeature?.Path;
+            IODataFeature odataFeature = httpContext.ODataFeature();
+            ODataPath path = odataFeature?.Path;
             if (path == null || path.Segments.Count == 0)
             {
                 return null;
             }
 
-            List<string> parts = new List<string>(path.Segments.Count);
+            StringBuilder template = new StringBuilder();
             foreach (ODataPathSegment segment in path.Segments)
             {
                 if (segment is KeySegment)
                 {
-                    // Represent the key as a placeholder and, matching the endpoint-routing template shape,
-                    // attach it to the preceding segment (for example, "Customers({key})").
-                    if (parts.Count > 0)
-                    {
-                        parts[parts.Count - 1] = parts[parts.Count - 1] + "({key})";
-                    }
-                    else
-                    {
-                        parts.Add("{key}");
-                    }
+                    // Attach the key placeholder to the preceding segment (for example, "Customers({key})"). A
+                    // routed OData path never starts with a key; the bare placeholder is a defensive fallback.
+                    template.Append(template.Length == 0 ? "{key}" : "({key})");
                 }
                 else
                 {
-                    // ODataPathSegment.Identifier is the segment's name (entity set, singleton, navigation
-                    // property, property, operation, $count, $value, ...), so the framework's own naming is reused.
-                    parts.Add(segment.Identifier);
+                    // ODataPathSegment.Identifier is the segment's own name (entity set, navigation property, etc.).
+                    if (template.Length != 0)
+                    {
+                        template.Append('/');
+                    }
+
+                    template.Append(segment.Identifier);
                 }
             }
 
-            string template = string.Join("/", parts);
             string prefix = odataFeature.RoutePrefix;
-            return string.IsNullOrEmpty(prefix) ? template : string.Concat(prefix, "/", template);
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                // The route prefix precedes the first segment (for example, "odata/Customers({key})").
+                template.Insert(0, '/').Insert(0, prefix);
+            }
+
+            return template.ToString();
         }
 #endif
 

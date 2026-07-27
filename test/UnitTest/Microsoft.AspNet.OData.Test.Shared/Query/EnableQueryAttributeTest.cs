@@ -433,6 +433,101 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Contains("NoSuchNavigation", entry.GetFieldValue("Reason"));
         }
 
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NestedExpandSelect_UnknownProperty_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$expand=Orders($select=NoSuchOrderProperty)",
+                BuildLoggerServices(loggerProvider),
+                collectionEndpoint: true,
+                model: GetLoggingCustomerOrdersModel());
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal(LogLevel.Warning, entry.Level);
+            Assert.Equal("odata/Customers", entry.GetFieldValue("Endpoint"));
+            Assert.Equal("$expand=Orders($select=NoSuchOrderProperty)", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchOrderProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_NestedExpandFilter_UnknownProperty_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$expand=Orders($filter=NoSuchOrderProperty eq 1)",
+                BuildLoggerServices(loggerProvider),
+                collectionEndpoint: true,
+                model: GetLoggingCustomerOrdersModel());
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers", entry.GetFieldValue("Endpoint"));
+            Assert.Equal("$expand=Orders($filter=NoSuchOrderProperty eq 1)", entry.GetFieldValue("QueryOptions"));
+            Assert.Contains("NoSuchOrderProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_AnyLambdaFilter_UnknownProperty_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$filter=Orders/any(o: o/NoSuchOrderProperty eq 1)",
+                BuildLoggerServices(loggerProvider),
+                collectionEndpoint: true,
+                model: GetLoggingCustomerOrdersModel());
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers", entry.GetFieldValue("Endpoint"));
+            Assert.Contains("NoSuchOrderProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_AllLambdaFilter_UnknownProperty_WritesDiagnostic()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext(
+                "?$filter=Orders/all(o: o/NoSuchOrderProperty eq 1)",
+                BuildLoggerServices(loggerProvider),
+                collectionEndpoint: true,
+                model: GetLoggingCustomerOrdersModel());
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers", entry.GetFieldValue("Endpoint"));
+            Assert.Contains("NoSuchOrderProperty", entry.GetFieldValue("Reason"));
+            Assert.NotNull(entry.Exception);
+        }
+
 #if !NETCOREAPP2_1
         [Fact]
         public void OnActionExecuting_LoggingEnabled_RoutedEndpoint_ReportsRouteTemplate()
@@ -447,6 +542,25 @@ namespace Microsoft.AspNet.OData.Test.Query
                 metadata: EndpointMetadataCollection.Empty,
                 displayName: "Customers");
             var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), endpoint);
+
+            // Act
+            attribute.OnActionExecuting(context);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+            var entry = Assert.Single(loggerProvider.Entries);
+            Assert.Equal("odata/Customers({key})", entry.GetFieldValue("Endpoint"));
+        }
+#endif
+
+#if NETCOREAPP2_1
+        [Fact]
+        public void OnActionExecuting_LoggingEnabled_RoutedEndpoint_ReportsRouteTemplate()
+        {
+            // Arrange
+            var loggerProvider = new CapturingLoggerProvider();
+            var attribute = new EnableQueryAttribute { EnableQueryValidationErrorLogging = true };
+            var context = CreateQueryValidationActionExecutingContext("?$select=NoSuchProperty", BuildLoggerServices(loggerProvider), routedEndpoint: true);
 
             // Act
             attribute.OnActionExecuting(context);
@@ -754,6 +868,20 @@ namespace Microsoft.AspNet.OData.Test.Query
             return new ODataModelBuilder().Add_Customers_EntitySet().GetEdmModel();
         }
 
+        private static IEdmModel GetLoggingCustomerOrdersModel()
+        {
+            // A model where Customer.Orders is a valid, bound navigation property to the Orders entity set. This lets
+            // the outer $expand/$filter clause bind successfully so that only the nested clause (a $select/$filter on
+            // Order, or an any/all lambda over Orders) is what fails validation, exercising the nested query paths.
+            return new ODataModelBuilder()
+                .Add_Order_EntityType()
+                .Add_Customers_EntitySet()
+                .Add_Orders_EntitySet()
+                .Add_CustomerOrders_Relationship()
+                .Add_CustomerOrders_Binding()
+                .GetEdmModel();
+        }
+
         private static IServiceProvider BuildLoggerServices(CapturingLoggerProvider loggerProvider)
         {
             return BuildLoggerServices(loggerProvider, LogLevel.Trace, null);
@@ -803,13 +931,13 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
 #if NETCOREAPP2_1
-        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices)
+        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices, bool routedEndpoint = false, bool collectionEndpoint = false, IEdmModel model = null)
 #else
-        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices, Endpoint routeEndpoint = null)
+        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices, Endpoint routeEndpoint = null, bool collectionEndpoint = false, IEdmModel model = null)
 #endif
         {
             var routeName = "querylogging";
-            IEdmModel model = GetLoggingCustomerModel();
+            model = model ?? GetLoggingCustomerModel();
 
             var customers = model.EntityContainer.FindEntitySet("Customers");
             var path = new ODataPath(new Microsoft.OData.UriParser.EntitySetSegment(customers));
@@ -830,6 +958,37 @@ namespace Microsoft.AspNet.OData.Test.Query
             if (routeEndpoint != null)
             {
                 httpContext.SetEndpoint(routeEndpoint);
+            }
+            else if (collectionEndpoint)
+            {
+                // Collection endpoint (no key). Attach a routed endpoint whose route pattern is the collection
+                // template so the diagnostic reports "odata/Customers" for a query over the Customers collection.
+                httpContext.SetEndpoint(new RouteEndpoint(
+                    ctx => System.Threading.Tasks.Task.CompletedTask,
+                    Microsoft.AspNetCore.Routing.Patterns.RoutePatternFactory.Parse("odata/Customers"),
+                    order: 0,
+                    metadata: EndpointMetadataCollection.Empty,
+                    displayName: "Customers"));
+            }
+#else
+            if (routedEndpoint)
+            {
+                // Targets that predate endpoint routing expose the matched OData endpoint through the request's
+                // ODataFeature rather than an Endpoint object. Populate the parsed path (entity set + key) and the
+                // route prefix the way the classic OData router does, so the diagnostic reconstructs the same
+                // "odata/Customers({key})" template produced from the endpoint route pattern on later targets.
+                var keySegment = new Microsoft.OData.UriParser.KeySegment(
+                    new[] { new KeyValuePair<string, object>("CustomerId", 1) },
+                    customers.EntityType(),
+                    customers);
+                request.ODataFeature().Path = new ODataPath(new Microsoft.OData.UriParser.EntitySetSegment(customers), keySegment);
+                request.ODataFeature().RoutePrefix = "odata";
+            }
+            else if (collectionEndpoint)
+            {
+                // Collection endpoint (no key). Keep the entity-set (keyless) path and just set the route prefix, so
+                // the diagnostic reconstructs the collection template "odata/Customers" for the same request.
+                request.ODataFeature().RoutePrefix = "odata";
             }
 #endif
 

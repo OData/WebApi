@@ -12,6 +12,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OData.Edm;
 #if !NETSTANDARD2_0
 using Microsoft.AspNetCore.Routing;
+#else
+using System.Collections.Generic;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.UriParser;
 #endif
 
 namespace Microsoft.AspNet.OData
@@ -51,7 +55,9 @@ namespace Microsoft.AspNet.OData
                 // requests. It is null when the request is not served by a routed endpoint, in which case it is
                 // omitted.
                 string endpoint = null;
-#if !NETSTANDARD2_0
+#if NETSTANDARD2_0
+                endpoint = BuildRoutedEndpointTemplate(httpContext);
+#else
                 endpoint = (httpContext.GetEndpoint() as RouteEndpoint)?.RoutePattern?.RawText;
 #endif
 
@@ -76,6 +82,57 @@ namespace Microsoft.AspNet.OData
                 // the exception raised for the failed query are preserved unchanged.
             }
         }
+
+#if NETSTANDARD2_0
+        /// <summary>
+        /// Builds a route-template-like identifier for the matched OData endpoint on targets that predate ASP.NET
+        /// Core endpoint routing. Reconstructs the template from the parsed OData path segments, preserving entity
+        /// set, singleton, navigation, and property names while representing entity keys as the "{key}" placeholder,
+        /// so the same endpoint is reported consistently regardless of the concrete key value. This mirrors the value
+        /// produced from the endpoint's route pattern on endpoint-routing targets (for example, "odata/Customers({key})").
+        /// </summary>
+        /// <param name="httpContext">The <see cref="HttpContext"/> for the current request.</param>
+        /// <returns>
+        /// The endpoint template, or <c>null</c> when the request is not served by a routed OData endpoint.
+        /// </returns>
+        private static string BuildRoutedEndpointTemplate(HttpContext httpContext)
+        {
+            var odataFeature = httpContext.ODataFeature();
+            var path = odataFeature?.Path;
+            if (path == null || path.Segments.Count == 0)
+            {
+                return null;
+            }
+
+            List<string> parts = new List<string>(path.Segments.Count);
+            foreach (ODataPathSegment segment in path.Segments)
+            {
+                if (segment is KeySegment)
+                {
+                    // Represent the key as a placeholder and, matching the endpoint-routing template shape,
+                    // attach it to the preceding segment (for example, "Customers({key})").
+                    if (parts.Count > 0)
+                    {
+                        parts[parts.Count - 1] = parts[parts.Count - 1] + "({key})";
+                    }
+                    else
+                    {
+                        parts.Add("{key}");
+                    }
+                }
+                else
+                {
+                    // ODataPathSegment.Identifier is the segment's name (entity set, singleton, navigation
+                    // property, property, operation, $count, $value, ...), so the framework's own naming is reused.
+                    parts.Add(segment.Identifier);
+                }
+            }
+
+            string template = string.Join("/", parts);
+            string prefix = odataFeature.RoutePrefix;
+            return string.IsNullOrEmpty(prefix) ? template : string.Concat(prefix, "/", template);
+        }
+#endif
 
         /// <summary>
         /// Builds a compact description of the supplied <c>$select</c>/<c>$expand</c> options, omitting empty ones.

@@ -433,6 +433,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Contains("NoSuchNavigation", entry.GetFieldValue("Reason"));
         }
 
+#if !NETCOREAPP2_1
         [Fact]
         public void OnActionExecuting_LoggingEnabled_RoutedEndpoint_ReportsRouteTemplate()
         {
@@ -455,6 +456,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var entry = Assert.Single(loggerProvider.Entries);
             Assert.Equal("odata/Customers({key})", entry.GetFieldValue("Endpoint"));
         }
+#endif
 
         [Fact]
         public void OnActionExecuting_DefaultConfiguration_WritesNothing()
@@ -800,7 +802,11 @@ namespace Microsoft.AspNet.OData.Test.Query
             return services.BuildServiceProvider();
         }
 
+#if NETCOREAPP2_1
+        private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices)
+#else
         private ActionExecutingContext CreateQueryValidationActionExecutingContext(string queryString, IServiceProvider requestServices, Endpoint routeEndpoint = null)
+#endif
         {
             var routeName = "querylogging";
             IEdmModel model = GetLoggingCustomerModel();
@@ -820,10 +826,12 @@ namespace Microsoft.AspNet.OData.Test.Query
             HttpContext httpContext = request.HttpContext;
             httpContext.RequestServices = requestServices;
 
+#if !NETCOREAPP2_1
             if (routeEndpoint != null)
             {
                 httpContext.SetEndpoint(routeEndpoint);
             }
+#endif
 
             var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
             return new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object>(), controller: new object());

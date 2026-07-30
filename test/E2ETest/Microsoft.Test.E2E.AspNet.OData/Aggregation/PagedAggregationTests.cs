@@ -17,6 +17,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class PagedAggregationTests : WebHostTestBase
     {
         private const string AggregationTestBaseUrl = "{0}/pagedaggregation/Customers";

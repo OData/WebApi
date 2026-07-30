@@ -19,7 +19,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         public static int Reserve()
         {
             int attempts = 0;
-            while (attempts++ < 10)
+            // Scan a generous number of candidate ports before giving up. Under parallel test
+            // execution many servers start at once and batch/DoS tests leave numerous sockets in
+            // TIME_WAIT, so short runs of consecutive ports can all appear busy; a small retry
+            // budget (the original was 10) intermittently threw "Cannot get an available port".
+            while (attempts++ < 200)
             {
                 int port = Interlocked.Increment(ref nextPort);
                 if (port >= 65535)

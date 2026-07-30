@@ -101,6 +101,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class CUDBatchTests : WebHostTestBase
     {
         public CUDBatchTests(WebHostTestFixture fixture)
@@ -458,6 +459,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class QueryBatchTests : WebHostTestBase
     {
         public QueryBatchTests(WebHostTestFixture fixture)
@@ -522,6 +524,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class ErrorsBatchTests : WebHostTestBase
     {
         public ErrorsBatchTests(WebHostTestFixture fixture)
@@ -583,6 +586,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class LinksBatchTests : WebHostTestBase
     {
         public LinksBatchTests(WebHostTestFixture fixture)
@@ -629,6 +633,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class ContinueOnErrorBatchTests : WebHostTestBase
     {
         public ContinueOnErrorBatchTests(WebHostTestFixture fixture)

@@ -21,6 +21,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class ForeignKeyTest : WebHostTestBase
     {
         public ForeignKeyTest(WebHostTestFixture fixture)

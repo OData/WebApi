@@ -69,7 +69,10 @@ extends:
             publishPackageMetadata: true
         steps:
         - checkout: self
-        - template: pipelines/task-group-policheck-v1.yml@self
+
+        - template: pipelines/templates/ensure-nuget-config.yml@self
+
+        - template: pipelines/templates/task-group-policheck-v1.yml@self
 
         - task: NuGetAuthenticate@1
           displayName: 'Authenticate to the feed'
@@ -184,7 +187,7 @@ extends:
           inputs:
             script: |
               mkdir $(Build.ArtifactStagingDirectory)\sbom
-        - task: EsrpCodeSigning@5
+        - task: EsrpCodeSigning@6
           displayName: ESRP CodeSign - WebApi Product Signing
           inputs:
             ConnectedServiceName: $(ODataEsrpConnectionServiceName)
@@ -289,7 +292,7 @@ extends:
           inputs:
             command: custom
             arguments: pack $(Build.SourcesDirectory)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.Nightly.nuspec -NonInteractive -OutputDirectory $(Build.ArtifactStagingDirectory)\Nuget -Properties Configuration=$(BuildConfiguration);ProductRoot=$(ProductBinPath);SourcesRoot=$(Build.SourcesDirectory);VersionFullSemantic=$(VersionFullSemantic);NightlyBuildVersion=$(VersionNugetNightlyBuild);VersionNuGetSemantic=$(VersionNuGetSemantic);AspNetCorePackageDependency="$(AspNetCorePackageDependency)";DependencyInjection2PackageDependency="$(DependencyInjection2PackageDependency)";ODataLibPackageDependency="$(ODataLibPackageDependency)";NewtonsoftJsonPackageDependency="$(NewtonsoftJsonPackageDependency)";VersionNugetNightlyBuild=$(VersionNugetNightlyBuild) -Verbosity Detailed -Symbols  -SymbolPackageFormat snupkg
-        - task: EsrpCodeSigning@5
+        - task: EsrpCodeSigning@6
           displayName: ESRP CodeSigning Nuget Packages
           inputs:
             ConnectedServiceName: $(ODataEsrpConnectionServiceName)
@@ -319,3 +322,7 @@ extends:
                       "toolVersion": "1.0"
                   }
               ]
+        - task: NuGetToolInstaller@1
+          displayName: 'Use NuGet 7.x (minimum 7.6.0) for package publishing'
+          inputs:
+            versionSpec: '>=7.6.0 <8.0.0'

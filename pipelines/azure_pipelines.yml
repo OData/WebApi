@@ -44,7 +44,10 @@ extends:
         steps:
         - checkout: self
           fetchTags: false
-        - template: pipelines/task-group-policheck-v1.yml@self
+
+        - template: pipelines/templates/ensure-nuget-config.yml@self
+
+        - template: pipelines/templates/task-group-policheck-v1.yml@self
 
         - task: NuGetAuthenticate@1
           displayName: 'Authenticate to the feed'

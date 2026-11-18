@@ -1,0 +1,30 @@
+steps:
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    $nugetConfigPaths = @(
+        "$(Build.SourcesDirectory)\nuget.config"
+        "$(Build.SourcesDirectory)\sln\.nuget\NuGet.Config"
+    )
+    $config = @"
+    <?xml version="1.0" encoding="utf-8"?>
+    <configuration>
+      <packageSources>
+        <clear />
+        <add key="ODataMsrcFeed" value="$(AZURE_ARTIFACTS_FEED)" />
+      </packageSources>
+    </configuration>
+    "@
+
+    # Preserve checked-in configs; generate defaults only for missing files.
+    foreach ($nugetConfig in $nugetConfigPaths) {
+        if (Test-Path -LiteralPath $nugetConfig) {
+            Write-Host "NuGet configuration already exists at: $nugetConfig"
+        }
+        else {
+            $configDirectory = Split-Path -Parent $nugetConfig
+            New-Item -ItemType Directory -Path $configDirectory -Force | Out-Null
+            $config | Set-Content -Encoding utf8 -LiteralPath $nugetConfig
+            Write-Host "Created NuGet configuration at: $nugetConfig"
+        }
+    }
+  displayName: 'Ensure NuGet configuration exists'

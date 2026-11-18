@@ -25,6 +25,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class SelectExpandEFTests : WebHostTestBase
     {
         public SelectExpandEFTests(WebHostTestFixture fixture)

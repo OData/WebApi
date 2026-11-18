@@ -17,6 +17,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class ODataCountTest : WebHostTestBase
     {
         public ODataCountTest(WebHostTestFixture fixture)

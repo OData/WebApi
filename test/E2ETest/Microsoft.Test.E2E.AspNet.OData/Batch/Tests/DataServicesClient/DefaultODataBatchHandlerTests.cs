@@ -108,6 +108,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class DefaultBatchHandlerCUDBatchTests : WebHostTestBase
     {
         public DefaultBatchHandlerCUDBatchTests(WebHostTestFixture fixture)
@@ -569,6 +570,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class DefaultBatchHandlerQueryBatchTests : WebHostTestBase
     {
         public DefaultBatchHandlerQueryBatchTests(WebHostTestFixture fixture)
@@ -638,6 +640,7 @@ Content-Type: application/json;odata.metadata=minimal
     }
 
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class DefaultBatchHandlerErrorsBatchTests : WebHostTestBase
     {
         public DefaultBatchHandlerErrorsBatchTests(WebHostTestFixture fixture)
@@ -705,6 +708,7 @@ Content-Type: application/json;odata.metadata=minimal
     }
 
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class DefaultBatchHandlerLinksBatchTests : WebHostTestBase
     {
         public DefaultBatchHandlerLinksBatchTests(WebHostTestFixture fixture)
@@ -758,6 +762,7 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
+    [Collection("Batch")] // Shared static in-memory data store across servers; run serially under parallel execution
     public class DefaultBatchHandlerContinueOnErrorBatchTests : WebHostTestBase
     {
         public DefaultBatchHandlerContinueOnErrorBatchTests(WebHostTestFixture fixture)

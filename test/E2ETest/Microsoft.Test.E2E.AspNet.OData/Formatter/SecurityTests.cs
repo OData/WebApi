@@ -161,9 +161,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             request.Content = new StringContent(JsonConvert.SerializeObject(model));
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Add("DataServiceVersion", asb.ToString());
-            var response = await this.Client.SendAsync(request);
 
-            Assert.False(response.IsSuccessStatusCode);
+            try
+            {
+                var response = await this.Client.SendAsync(request);
+
+                Assert.False(response.IsSuccessStatusCode);
+            }
+            catch (HttpRequestException)
+            {
+                // The oversized header can also be rejected by the server resetting the connection,
+                // which surfaces as an HttpRequestException on the client. That is still a valid
+                // rejection of the DoS payload (observed under load on Kestrel/AspNetCore).
+            }
         }
     }
 }

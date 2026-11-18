@@ -22,6 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.CombinedTest
         public string Name { get; set; }
 
         [Expand(ExpandType = SelectExpandType.Disabled)]
+        [Page(MaxTop = 2)]
         public Order Order { get; set; }
 
         public Order AutoExpandOrder { get; set; }
@@ -50,6 +51,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.CombinedTest
     [Filter]
     [OrderBy("Id", Disabled = true)]
     [OrderBy]
+    // Pin an explicit MaxTop instead of relying on the default. The default $top limit comes from the
+    // process-global ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop, which other tests
+    // mutate concurrently once the E2E suite runs in parallel, making the $top assertions below flaky.
+    [Page(MaxTop = 2)]
     public class Order
     {
         public int Id { get; set; }
@@ -108,10 +113,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.CombinedTest
                 .Count();
             builder.EntityType<Customer>()
                 .HasOptional(p => p.Order)
-                .Expand(SelectExpandType.Disabled);
+                .Expand(SelectExpandType.Disabled)
+                .Page(2, null);
 
             builder.EntitySet<Order>("Orders")
                 .EntityType.Expand(6)
+                .Page(2, null)
                 .Expand(SelectExpandType.Disabled, "NoExpandCustomers")
                 .Count()
                 .Filter()

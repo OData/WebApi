@@ -22,6 +22,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class AggregationTestsEFClassic: AggregationTests
     {
         public AggregationTestsEFClassic(WebHostTestFixture fixture)
@@ -59,6 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 
 #if NETCORE
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class AggregationTestsEFCoreInMemory : AggregationTests
     {
         public AggregationTestsEFCoreInMemory(WebHostTestFixture fixture)
@@ -73,6 +75,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
     }
 
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class AggregationTestsEFCoreSql : AggregationTests
     {
         public AggregationTestsEFCoreSql(WebHostTestFixture fixture)
@@ -90,6 +93,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
 
 #if !NETCORE
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class LinqToSqlAggregationTests : WebHostTestBase
     {
         protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
@@ -784,6 +788,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
     }
 
+    [Collection("Database")] // Shared static AggregationContext state; serialized with all DB-backed E2E tests in the "Database" collection
     public class NestedComplexPropertyAggregationTests : WebHostTestBase
     {
         private string AggregationTestBaseUrl => "{0}/aggregation/Employees";

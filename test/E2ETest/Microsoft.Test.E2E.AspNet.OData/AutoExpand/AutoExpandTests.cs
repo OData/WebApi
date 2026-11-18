@@ -19,6 +19,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class AutoExpandTests : WebHostTestBase
     {
         private const string AutoExpandTestBaseUrl = "{0}/autoexpand/Customers(5)";

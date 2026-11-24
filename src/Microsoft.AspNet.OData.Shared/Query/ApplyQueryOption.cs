@@ -13,6 +13,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -54,8 +55,7 @@ namespace Microsoft.AspNet.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            // TODO: Implement and add validator
-            //Validator = new FilterQueryValidator();
+            Validator = ApplyQueryValidator.GetApplyQueryValidator(context);
             _queryOptionParser = queryOptionParser;
             ResultClrType = Context.ElementClrType;
         }
@@ -90,6 +90,28 @@ namespace Microsoft.AspNet.OData.Query
         ///  Gets the raw $apply value.
         /// </summary>
         public string RawValue { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the $apply query validator.
+        /// </summary>
+        public ApplyQueryValidator Validator { get; set; }
+
+        /// <summary>
+        /// Validates the $apply query based on the given validation settings.
+        /// </summary>
+        /// <param name="validationSettings">The validation settings.</param>
+        public void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
+            }
+        }
 
         /// <summary>
         /// Apply the apply query to the given IQueryable.

@@ -222,6 +222,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\OrderByOpenPropertyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ParameterAliasNodeTranslator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ApplyQueryValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\QueryNodeRestrictionValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\OrderByModelLimitationsValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestPreferenceHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FunctionImportComparer.cs" />

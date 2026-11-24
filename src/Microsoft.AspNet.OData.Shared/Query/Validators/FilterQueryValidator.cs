@@ -675,6 +675,11 @@ namespace Microsoft.AspNet.OData.Query.Validators
         {
             ValidateQueryNode(unaryOperatorNode.Operand, settings);
 
+            ValidateUnaryOperatorAllowed(unaryOperatorNode, settings);
+        }
+
+        internal static void ValidateUnaryOperatorAllowed(UnaryOperatorNode unaryOperatorNode, ODataValidationSettings settings)
+        {
             switch (unaryOperatorNode.OperatorKind)
             {
                 case UnaryOperatorKind.Negate:
@@ -769,7 +774,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
                 : context.RequestContainer.GetRequiredService<FilterQueryValidator>();
         }
 
-        private void EnterLambda(ODataValidationSettings validationSettings)
+        internal void EnterLambda(ODataValidationSettings validationSettings)
         {
             if (_currentAnyAllExpressionDepth >= validationSettings.MaxAnyAllExpressionDepth)
             {
@@ -779,13 +784,13 @@ namespace Microsoft.AspNet.OData.Query.Validators
             _currentAnyAllExpressionDepth++;
         }
 
-        private void ExitLambda()
+        internal void ExitLambda()
         {
             Contract.Assert(_currentAnyAllExpressionDepth > 0);
             _currentAnyAllExpressionDepth--;
         }
 
-        private void EnterFunctionCall(ODataValidationSettings validationSettings)
+        internal void EnterFunctionCall(ODataValidationSettings validationSettings)
         {
             if (_currentFunctionCallDepth >= validationSettings.MaxFunctionCallDepth)
             {
@@ -795,13 +800,13 @@ namespace Microsoft.AspNet.OData.Query.Validators
             _currentFunctionCallDepth++;
         }
 
-        private void ExitFunctionCall()
+        internal void ExitFunctionCall()
         {
             Contract.Assert(_currentFunctionCallDepth > 0);
             _currentFunctionCallDepth--;
         }
 
-        private void IncrementNodeCount(ODataValidationSettings validationSettings)
+        internal void IncrementNodeCount(ODataValidationSettings validationSettings)
         {
             if (_currentNodeCount >= validationSettings.MaxNodeCount)
             {
@@ -932,7 +937,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
             }
         }
 
-        private static void ValidateFunction(string functionName, ODataValidationSettings settings)
+        internal static void ValidateFunction(string functionName, ODataValidationSettings settings)
         {
             AllowedFunctions convertedFunction = ToODataFunction(functionName);
             if ((settings.AllowedFunctions & convertedFunction) != convertedFunction)

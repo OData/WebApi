@@ -9,11 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -58,6 +61,103 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
                 {
                     { AllowedQueryOptions.DeltaToken, "$deltatoken=__delta__", "DeltaToken" },
                 };
+            }
+        }
+
+        [Fact]
+        public void Validate_InvokesApplyValidator()
+        {
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$apply=groupby((Name))");
+            var option = new ODataQueryOptions(_context, message);
+            var applyValidator = new Mock<ApplyQueryValidator>();
+            option.Apply.Validator = applyValidator.Object;
+            var settings = new ODataValidationSettings();
+
+            _validator.Validate(option, settings);
+
+            applyValidator.Verify(v => v.Validate(option.Apply, settings), Times.Once());
+        }
+
+        [Theory]
+        [InlineData("filter(NotFilterableProperty eq 'restricted')")]
+        [InlineData("filter(NonFilterableProperty eq 'restricted')")]
+        [InlineData("filter(NotFilterableNavigationProperty/Name eq 'restricted')")]
+        [InlineData("filter(NonFilterableNavigationProperty/Name eq 'restricted')")]
+        [InlineData("groupby((NotFilterableProperty))")]
+        [InlineData("aggregate(NotFilterableProperty with countdistinct as R)")]
+        [InlineData("groupby((Id),aggregate(NotFilterableProperty with countdistinct as R))")]
+        [InlineData("compute(length(NotFilterableProperty) as L)")]
+        [InlineData("compute(NotFilterableProperty eq 'restricted' as F)")]
+        public void Validate_EnforcesApplyPropertyRestrictions(string apply)
+        {
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$apply=" + apply);
+            message.GetRequestContainer().GetRequiredService<DefaultQuerySettings>().EnableFilter = true;
+            var option = new ODataQueryOptions(_context, message);
+
+            string property = (apply.Contains("NonFilterable") ? "NonFilterable" : "NotFilterable") + (apply.Contains("NavigationProperty") ? "NavigationProperty" : "Property");
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, new ODataValidationSettings()), "The property '" + property + "' cannot be used in the $filter query option.");
+        }
+
+        [Theory]
+        [InlineData("groupby((Name))")]
+        [InlineData("filter(Name eq 'allowed')")]
+        [InlineData("aggregate(AmountSpent with sum as Total)")]
+        [InlineData("aggregate($count as Total)")]
+        [InlineData("compute(AmountSpent mul 2 as Double)")]
+        [InlineData("groupby((Name),aggregate(AmountSpent with sum as Total))/filter(Total gt 0)")]
+        public void Validate_AllowsUnrestrictedApplyExpressions(string apply)
+        {
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$apply=" + apply);
+            message.GetRequestContainer().GetRequiredService<DefaultQuerySettings>().EnableFilter = true;
+            var option = new ODataQueryOptions(_context, message);
+
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, new ODataValidationSettings()));
+        }
+
+        [Theory]
+        [InlineData("$apply=groupby((NotSortableProperty))", false)]
+        [InlineData("$apply=filter(Name eq 'allowed')/groupby((NotSortableProperty))", false)]
+        [InlineData("$apply=groupby((Name))", true)]
+        [InlineData("$select=NotSortableProperty", false)]
+        [InlineData("$select=Name", true)]
+        public void Validate_EnforcesModelBoundSelectRestrictions_WithRegressionAnchors(string query, bool allowed)
+        {
+            var entityType = _context.Model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == nameof(QueryCompositionCustomer));
+            var querySettings = new ModelBoundQuerySettings();
+            querySettings.SelectConfigurations.Add(nameof(QueryCompositionCustomer.NotSortableProperty), SelectExpandType.Disabled);
+            _context.Model.SetAnnotationValue(entityType, querySettings);
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
+            var defaultSettings = message.GetRequestContainer().GetRequiredService<DefaultQuerySettings>();
+            defaultSettings.EnableFilter = true;
+            defaultSettings.EnableSelect = true;
+            var option = new ODataQueryOptions(_context, message);
+
+            if (allowed)
+            {
+                ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+            }
+            else
+            {
+                ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()), "The property 'NotSortableProperty' cannot be used in the $select query option.");
+            }
+        }
+
+        [Theory]
+        [InlineData("$filter=Name eq 'allowed'", true)]
+        [InlineData("$filter=NotFilterableProperty eq 'restricted'", false)]
+        public void Validate_WithoutApply_PreservesFilterValidation(string query, bool allowed)
+        {
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
+            message.GetRequestContainer().GetRequiredService<DefaultQuerySettings>().EnableFilter = true;
+            var option = new ODataQueryOptions(_context, message);
+
+            if (allowed)
+            {
+                ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+            }
+            else
+            {
+                ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()), "The property 'NotFilterableProperty' cannot be used in the $filter query option.");
             }
         }
 

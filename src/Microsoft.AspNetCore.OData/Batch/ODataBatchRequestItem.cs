@@ -10,8 +10,13 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+#if !NETSTANDARD2_0
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+#endif
 
 namespace Microsoft.AspNet.OData.Batch
 {
@@ -38,6 +43,10 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("context");
             }
 
+#if !NETSTANDARD2_0
+            context.Features.Set<IEndpointFeature>(new ODataEndpointFeature(context));
+#endif
+
             if (contentIdToLocationMapping != null)
             {
                 string encodedUrl = context.Request.GetEncodedUrl();
@@ -46,7 +55,14 @@ namespace Microsoft.AspNet.OData.Batch
                 if (!string.IsNullOrEmpty(resolvedRequestUrl)
                     && Uri.TryCreate(resolvedRequestUrl, UriKind.Absolute, out resolvedUri)
                     && IsSameAuthority(resolvedUri, context.Request))
-                { 
+                {
+                    string serviceRoot = context.Request.GetODataBatchServiceRoot();
+                    if (serviceRoot != null && !ODataBatchReaderExtensions.IsPathWithinServiceRoot(resolvedUri.AbsolutePath, serviceRoot))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                        return;
+                    }
+
                     context.Request.CopyAbsoluteUrl(resolvedUri);
                 }
 
@@ -107,6 +123,40 @@ namespace Microsoft.AspNet.OData.Batch
             Uri requestBaseUri = new Uri($"{request.Scheme}://{request.Host}/");
             return Uri.Compare(resolvedUri, requestBaseUri, UriComponents.SchemeAndServer, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0;
         }
+
+#if !NETSTANDARD2_0
+        private sealed class ODataEndpointFeature : IEndpointFeature
+        {
+            private static readonly Endpoint RejectedEndpoint = new Endpoint(
+                context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return Task.CompletedTask;
+                },
+                EndpointMetadataCollection.Empty,
+                "OData batch endpoint validation failure");
+
+            private readonly HttpContext _context;
+            private Endpoint _endpoint;
+
+            public ODataEndpointFeature(HttpContext context)
+            {
+                _context = context;
+            }
+
+            public Endpoint Endpoint
+            {
+                get => _endpoint;
+                set
+                {
+                    ActionDescriptor selectedAction = value?.Metadata.GetMetadata<ActionDescriptor>();
+                    ActionDescriptor oDataAction = _context.ODataFeature().ActionDescriptor;
+                    bool isODataEndpoint = selectedAction != null && object.ReferenceEquals(selectedAction, oDataAction);
+                    _endpoint = value == null || isODataEndpoint ? value : RejectedEndpoint;
+                }
+            }
+        }
+#endif
 
         /// <summary>
         /// Routes the request.

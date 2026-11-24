@@ -22,6 +22,8 @@ namespace Microsoft.AspNet.OData.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpRequestExtensions
     {
+        private static readonly object BatchServiceRootKey = new object();
+
         /// <summary>
         /// Gets the <see cref="IODataBatchFeature"/> from the services container.
         /// </summary>
@@ -95,6 +97,17 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw new ArgumentNullException("batchRequest");
             }
+        }
+
+        internal static string GetODataBatchServiceRoot(this HttpRequest request)
+        {
+            object serviceRoot;
+            return request.HttpContext.Items.TryGetValue(BatchServiceRootKey, out serviceRoot) ? serviceRoot as string : null;
+        }
+
+        internal static void SetODataBatchServiceRoot(this HttpRequest request, string serviceRoot)
+        {
+            request.HttpContext.Items[BatchServiceRootKey] = serviceRoot;
         }
     }
 }

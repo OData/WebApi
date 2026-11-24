@@ -57,8 +57,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
+#if NETCOREAPP3_1
+using Microsoft.AspNetCore.Mvc.Abstractions;
+#endif
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Batch
@@ -100,6 +104,90 @@ namespace Microsoft.AspNet.OData.Test.Batch
             // Assert
             Assert.Equal("/odata/Customers(42)/Orders", context.Request.Path.ToString());
         }
+
+        [Fact]
+        public async Task SendRequestAsync_ReturnsBadRequestWithoutCallingHandler_WhenResolvedPathIsOutsideServiceRoot()
+        {
+            DefaultHttpContext context = new DefaultHttpContext();
+            bool handlerCalled = false;
+            RequestDelegate handler = (c) =>
+            {
+                handlerCalled = true;
+                return Task.CompletedTask;
+            };
+            Dictionary<string, string> contentIdLocationMappings = new Dictionary<string, string>
+            {
+                { "1", "http://localhost:12345/odata/Customers(42)" }
+            };
+            context.Request.CopyAbsoluteUrl(new Uri("http://localhost:12345/odata/?$1/../../../control/resource"));
+            context.Request.SetODataBatchServiceRoot("/odata");
+
+            await ODataBatchRequestItem.SendRequestAsync(handler, context, contentIdLocationMappings);
+
+            Assert.False(handlerCalled);
+            Assert.Equal(StatusCodes.Status400BadRequest, context.Response.StatusCode);
+        }
+
+#if NETCOREAPP3_1
+        [Fact]
+        public async Task SendRequestAsync_RejectsResolvedNonODataEndpoint()
+        {
+            DefaultHttpContext context = new DefaultHttpContext();
+            bool endpointCalled = false;
+            RequestDelegate endpointHandler = (c) =>
+            {
+                endpointCalled = true;
+                return Task.CompletedTask;
+            };
+            RequestDelegate handler = async (c) =>
+            {
+                c.SetEndpoint(new Endpoint(endpointHandler, EndpointMetadataCollection.Empty, "Non-OData endpoint"));
+                await c.GetEndpoint().RequestDelegate(c);
+            };
+            Dictionary<string, string> contentIdLocationMappings = new Dictionary<string, string>
+            {
+                { "1", "http://localhost:12345/odata/Customers(42)" }
+            };
+            context.Request.CopyAbsoluteUrl(new Uri("http://localhost:12345/odata/?$1/../control/resource"));
+            context.Request.SetODataBatchServiceRoot("/odata");
+
+            await ODataBatchRequestItem.SendRequestAsync(handler, context, contentIdLocationMappings);
+
+            Assert.False(endpointCalled);
+            Assert.Equal(StatusCodes.Status400BadRequest, context.Response.StatusCode);
+            Assert.Equal("/odata/control/resource", context.Request.Path.ToString());
+        }
+
+        [Fact]
+        public async Task SendRequestAsync_AllowsResolvedODataEndpoint()
+        {
+            DefaultHttpContext context = new DefaultHttpContext();
+            bool endpointCalled = false;
+            ActionDescriptor action = new ActionDescriptor();
+            context.ODataFeature().ActionDescriptor = action;
+            RequestDelegate endpointHandler = (c) =>
+            {
+                endpointCalled = true;
+                return Task.CompletedTask;
+            };
+            RequestDelegate handler = async (c) =>
+            {
+                c.SetEndpoint(new Endpoint(endpointHandler, new EndpointMetadataCollection(action), "OData endpoint"));
+                await c.GetEndpoint().RequestDelegate(c);
+            };
+            Dictionary<string, string> contentIdLocationMappings = new Dictionary<string, string>
+            {
+                { "1", "http://localhost:12345/odata/Customers(42)" }
+            };
+            context.Request.CopyAbsoluteUrl(new Uri("http://localhost:12345/odata/?$1"));
+            context.Request.SetODataBatchServiceRoot("/odata");
+
+            await ODataBatchRequestItem.SendRequestAsync(handler, context, contentIdLocationMappings);
+
+            Assert.True(endpointCalled);
+            Assert.Equal("/odata/Customers(42)", context.Request.Path.ToString());
+        }
+#endif
     }
 }
 #endif

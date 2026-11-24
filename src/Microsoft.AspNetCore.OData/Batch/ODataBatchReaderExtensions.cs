@@ -165,9 +165,9 @@ namespace Microsoft.AspNet.OData.Batch
             // root is derived from the outer batch request's own path (mapped as
             // "{routePrefix}/$batch") rather than IODataFeature.RoutePrefix, which is not
             // populated in the conventional (non-endpoint) routing pipeline this code runs in.
-            if (!IsPathWithinServiceRoot(requestUri.AbsolutePath, originalContext.Request.Path, originalContext.Request.PathBase))
+            string serviceRoot = BuildServiceRootPath(originalContext.Request.Path, originalContext.Request.PathBase);
+            if (!IsPathWithinServiceRoot(requestUri.AbsolutePath, serviceRoot))
             {
-                string serviceRoot = BuildServiceRootPath(originalContext.Request.Path, originalContext.Request.PathBase);
                 throw Error.InvalidOperation(
                     SRResources.BatchSubRequestPathNotUnderServiceRoot,
                     requestUri.AbsoluteUri,
@@ -175,6 +175,7 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             request.CopyAbsoluteUrl(requestUri);
+            request.SetODataBatchServiceRoot(serviceRoot);
 
             // Not using bufferContentStream. Unlike AspNet, AspNetCore cannot guarantee the disposal
             // of the stream in the context of execution so there is no choice but to copy the stream
@@ -447,10 +448,8 @@ namespace Microsoft.AspNet.OData.Batch
         // this check prevents requests that pass the authority check from reaching unrelated
         // in-process routes via a same-authority absolute URL or via dot-segment traversal in a
         // Content-ID reference ($1/../../../other), which the .NET Uri constructor normalises.
-        private static bool IsPathWithinServiceRoot(string requestPath, PathString batchRequestPath, PathString pathBase)
+        internal static bool IsPathWithinServiceRoot(string requestPath, string serviceRoot)
         {
-            string serviceRoot = BuildServiceRootPath(batchRequestPath, pathBase);
-
             // A "/" service root means the service is mounted at the host root (no route prefix
             // and no PathBase), so every path is by definition within scope.
             if (serviceRoot == "/")

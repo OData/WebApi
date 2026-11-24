@@ -8,18 +8,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Extensions;
+using Microsoft.AspNet.OData.Test.Query.Validators;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Address = Microsoft.AspNet.OData.Test.Builder.TestModels.Address;
@@ -28,6 +33,411 @@ namespace Microsoft.AspNet.OData.Test.Query
 {
     public class ApplyQueryOptionTest
     {
+        [Fact]
+        public void Constructor_ChecksArguments_AndParsesApplyClause()
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            const string rawValue = "groupby((Name))";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource, new Dictionary<string, string> { { "$apply", rawValue } });
+
+            Assert.Equal("rawValue", Assert.Throws<ArgumentException>(() => new ApplyQueryOption(null, context, parser)).ParamName);
+            Assert.Equal("rawValue", Assert.Throws<ArgumentException>(() => new ApplyQueryOption(string.Empty, context, parser)).ParamName);
+            ExceptionAssert.ThrowsArgumentNull(() => new ApplyQueryOption(rawValue, null, parser), "context");
+            ExceptionAssert.ThrowsArgumentNull(() => new ApplyQueryOption(rawValue, context, null), "queryOptionParser");
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            Assert.Equal(rawValue, option.RawValue);
+            Assert.Single(option.ApplyClause.Transformations);
+            Assert.Same(option.ApplyClause, option.ApplyClause);
+        }
+
+        [Fact]
+        public void Validate_CanBeOverridden_WithOrWithoutBaseEnforcement()
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            const string rawValue = "groupby((NotFilterableProperty))";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource, new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings();
+            var validator = new Mock<ApplyQueryValidator> { CallBase = true };
+            option.Validator = validator.Object;
+
+            Assert.Same(validator.Object, option.Validator);
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings), "The property 'NotFilterableProperty' cannot be used in the $filter query option.");
+            validator.Verify(v => v.Validate(option, settings), Times.Once());
+
+            validator.CallBase = false;
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
+            validator.Verify(v => v.Validate(option, settings), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void Validate_UsesDefaultValidator_AndChecksArguments()
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            const string rawValue = "groupby((Name))";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            Assert.IsType<ApplyQueryValidator>(option.Validator);
+            ExceptionAssert.ThrowsArgumentNull(() => option.Validate(null), "validationSettings");
+            ExceptionAssert.ThrowsArgumentNull(() => option.Validator.Validate(null, new ODataValidationSettings()), "applyQueryOption");
+            ExceptionAssert.ThrowsArgumentNull(() => option.Validator.Validate(option, null), "validationSettings");
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+
+            option.Validator = null;
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+            ExceptionAssert.ThrowsArgumentNull(() => option.Validate(null), "validationSettings");
+        }
+
+        [Fact]
+        public void Validate_UsesValidatorFromRequestContainer()
+        {
+            var validator = new Mock<ApplyQueryValidator>();
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            context.RequestContainer = new MockContainer(builder => builder.AddService<ApplyQueryValidator>(
+                ServiceLifetime.Singleton, services => validator.Object));
+            const string rawValue = "groupby((NotFilterableProperty))";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } }, context.RequestContainer);
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings();
+
+            option.Validate(settings);
+
+            Assert.Same(validator.Object, option.Validator);
+            validator.Verify(v => v.Validate(option, settings), Times.Once());
+        }
+
+        [Fact]
+        public void Validate_FilterTransformation_UsesConfiguredFilterValidator()
+        {
+            var validator = new Mock<FilterQueryValidator>(new DefaultQuerySettings());
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            context.RequestContainer = new MockContainer(builder => builder.AddService<FilterQueryValidator>(
+                ServiceLifetime.Scoped, services => validator.Object));
+            const string rawValue = "filter(NotFilterableProperty eq 'restricted')";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } }, context.RequestContainer);
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings();
+            var filterClause = ((Microsoft.OData.UriParser.Aggregation.FilterTransformationNode)
+                option.ApplyClause.Transformations.Single()).FilterClause;
+
+            option.Validate(settings);
+
+            validator.Verify(v => v.Validate(It.Is<FilterQueryOption>(
+                filter => filter.Context == context && filter.FilterClause == filterClause), settings), Times.Once());
+        }
+
+        [Theory]
+        [InlineData("groupby((NotFilterableProperty))", "NotFilterableProperty")]
+        [InlineData("groupby((NonFilterableProperty))", "NonFilterableProperty")]
+        [InlineData("groupby((Id,NotFilterableProperty))", "NotFilterableProperty")]
+        [InlineData("groupby((Address/NotFilterableProperty))", "NotFilterableProperty")]
+        [InlineData("groupby((Id,Address/NotFilterableProperty))", "NotFilterableProperty")]
+        [InlineData("aggregate(NotFilterableProperty with countdistinct as R)", "NotFilterableProperty")]
+        [InlineData("aggregate(NonFilterableProperty with countdistinct as R)", "NonFilterableProperty")]
+        [InlineData("groupby((Id),aggregate(NotFilterableProperty with countdistinct as R))", "NotFilterableProperty")]
+        [InlineData("aggregate(Contacts(NotFilterableProperty with countdistinct as R))", "NotFilterableProperty")]
+        [InlineData("aggregate(Contacts/$count($filter=NotFilterableProperty eq 'x') with sum as R)", "NotFilterableProperty")]
+        [InlineData("compute(length(NotFilterableProperty) as L)", "NotFilterableProperty")]
+        [InlineData("compute(NotFilterableProperty eq 'x' as F)", "NotFilterableProperty")]
+        [InlineData("compute(Name eq 'a' or NotFilterableProperty eq 'b' as F)", "NotFilterableProperty")]
+        [InlineData("compute(Address/NotFilterableProperty eq 'x' as F)", "NotFilterableProperty")]
+        [InlineData("compute(Contacts/$count($filter=NotFilterableProperty eq 'x') as C)", "NotFilterableProperty")]
+        [InlineData("compute(RelationshipManager/NotFilterableProperty eq 'x' as F)", "NotFilterableProperty")]
+        [InlineData("compute(NotFilterableNavigationProperty/Name eq 'x' as F)", "NotFilterableNavigationProperty")]
+        [InlineData("compute(Contacts/any(c:c/NotFilterableProperty ne null) as F)", "NotFilterableProperty")]
+        [InlineData("compute(Contacts/all(c:c/NotFilterableProperty ne null) as F)", "NotFilterableProperty")]
+        [InlineData("compute(length(Name) as L)/groupby((NotFilterableProperty))", "NotFilterableProperty")]
+        [InlineData("filter(Name eq 'x')/groupby((NotFilterableProperty))", "NotFilterableProperty")]
+        public void Validate_RejectsRestrictedProperties_InApplyExpressions(string rawValue, string property)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            context.DefaultQuerySettings.EnableFilter = rawValue.StartsWith("filter(", StringComparison.Ordinal);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()),
+                "The property '" + property + "' cannot be used in the $filter query option.");
+        }
+
+        [Theory]
+        [InlineData("groupby((Name))")]
+        [InlineData("groupby((Id))")]
+        [InlineData("groupby((Name,Id))")]
+        [InlineData("groupby((Address/City))")]
+        [InlineData("groupby((Name),aggregate(AmountSpent with sum as Total))")]
+        [InlineData("aggregate(AmountSpent with sum as Total)")]
+        [InlineData("aggregate($count as Count)")]
+        [InlineData("aggregate(Contacts/$count($filter=Name eq 'x') with sum as R)")]
+        [InlineData("aggregate(Contacts(Name with countdistinct as R))")]
+        [InlineData("compute(AmountSpent mul 2 as Double)")]
+        [InlineData("compute(length(Name) as L)")]
+        [InlineData("compute(Name eq 'a' as F)")]
+        [InlineData("compute(Address/City eq 'a' as F)")]
+        [InlineData("compute(Contacts/any(c:c/Name ne null) as F)")]
+        [InlineData("compute(Contacts/all(c:c/Name ne null) as F)")]
+        [InlineData("compute(RelationshipManager/Name eq 'x' as F)")]
+        [InlineData("compute(Contacts/$count as C)")]
+        [InlineData("compute(Contacts/$count($filter=Name eq 'x') as C)")]
+        [InlineData("compute(Contacts/$count($search=red AND blue) as C)")]
+        [InlineData("compute(Contacts/$count($filter=Name eq 'x';$search=red AND blue) as C)")]
+        public void Validate_AllowsUnrestrictedExpressions_WithGlobalFilterAndSelectDisabled(string rawValue)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            context.DefaultQuerySettings.EnableFilter = false;
+            context.DefaultQuerySettings.EnableSelect = false;
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+        }
+
+        [Theory]
+        [InlineData("groupby((Name))")]
+        [InlineData("aggregate(Name with countdistinct as R)")]
+        [InlineData("compute(length(Name) as L)")]
+        [InlineData("compute(Contacts/$count($filter=Name eq 'x') as C)")]
+        public void Validate_RejectsModelBoundPropertyRestrictions(string rawValue)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var entityType = context.Model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == nameof(QueryCompositionCustomer));
+            var querySettings = new ModelBoundQuerySettings();
+            querySettings.SelectConfigurations.Add("Name", SelectExpandType.Disabled);
+            context.Model.SetAnnotationValue(entityType, querySettings);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()),
+                "The property 'Name' cannot be used in the $select query option.");
+
+            querySettings.SelectConfigurations.Clear();
+            querySettings.FilterConfigurations.Add("Name", false);
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()),
+                "The property 'Name' cannot be used in the $filter query option.");
+
+            querySettings.FilterConfigurations.Clear();
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Validate_FilterTransformation_MatchesFilterEnableSwitch(bool enableFilter)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            context.DefaultQuerySettings.EnableFilter = enableFilter;
+            const string rawValue = "filter(Name eq 'x')";
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            if (enableFilter)
+            {
+                ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+            }
+            else
+            {
+                ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings()),
+                    "The property 'Name' cannot be used in the $filter query option.");
+            }
+        }
+
+        [Theory]
+        [InlineData("compute(length(Name) as L)", AllowedFunctions.Length, "length")]
+        [InlineData("aggregate(length(Name) with max as L)", AllowedFunctions.Length, "length")]
+        [InlineData("compute(Contacts/any(c:c/Name ne null) as F)", AllowedFunctions.Any, "any")]
+        [InlineData("compute(Contacts/all(c:c/Name ne null) as F)", AllowedFunctions.All, "all")]
+        [InlineData("compute(Contacts/$count($filter=length(Name) gt 1) as C)", AllowedFunctions.Length, "length")]
+        public void Validate_EnforcesFunctionAllowList(string rawValue, AllowedFunctions excluded, string functionName)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings { AllowedFunctions = AllowedFunctions.AllFunctions & ~excluded };
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings),
+                "Function '" + functionName + "' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
+            settings.AllowedFunctions = AllowedFunctions.AllFunctions;
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
+        }
+
+        [Theory]
+        [InlineData("compute(AmountSpent mul 2 as D)")]
+        [InlineData("aggregate(AmountSpent mul 2 with sum as Total)")]
+        [InlineData("compute(Contacts/$count($filter=AmountSpent mul 2 gt 10) as C)")]
+        public void Validate_EnforcesArithmeticOperatorAllowList(string rawValue)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings { AllowedArithmeticOperators = AllowedArithmeticOperators.All & ~AllowedArithmeticOperators.Multiply };
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings),
+                "Arithmetic operator 'Multiply' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            settings.AllowedArithmeticOperators = AllowedArithmeticOperators.All;
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
+        }
+
+        [Theory]
+        [InlineData("compute(Name eq 'x' as F)", AllowedLogicalOperators.Equal, "Logical operator 'Equal'")]
+        [InlineData("compute(not (Name eq 'x') as F)", AllowedLogicalOperators.Not, "Logical operator 'Not'")]
+        [InlineData("compute(-AmountSpent as N)", AllowedLogicalOperators.Not, "Logical operator 'Negate'")]
+        [InlineData("compute(Contacts/$count($filter=Name eq 'x') as C)", AllowedLogicalOperators.Equal, "Logical operator 'Equal'")]
+        public void Validate_EnforcesLogicalOperatorAllowList(string rawValue, AllowedLogicalOperators excluded, string message)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+            var settings = new ODataValidationSettings { AllowedLogicalOperators = AllowedLogicalOperators.All & ~excluded };
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings),
+                message + " is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            settings.AllowedLogicalOperators = AllowedLogicalOperators.All;
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
+        }
+
+        [Theory]
+        [InlineData("groupby((Name))")]
+        [InlineData("aggregate(AmountSpent with sum as Total)")]
+        [InlineData("compute(AmountSpent mul 2 as D)")]
+        public void Validate_EnforcesNodeCountLimit(string rawValue)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(new ODataValidationSettings { MaxNodeCount = 1 }),
+                "The node count limit of '1' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on EnableQueryAttribute or ODataValidationSettings.");
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+        }
+
+        [Theory]
+        [InlineData("compute(length(trim(Name)) as L)", "compute(Contacts/any(c:c/Contacts/all(d:d/Name ne null)) as F)")]
+        [InlineData("compute(Contacts/$count($filter=length(trim(Name)) gt 1) as C)", "compute(Contacts/any(c:c/Contacts/$count($filter=Contacts/any(d:d/Name ne null)) gt 0) as C)")]
+        public void Validate_EnforcesFunctionAndLambdaDepthLimits(string functions, string lambdas)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var functionParser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", functions } });
+            var functionOption = new ApplyQueryOption(functions, context, functionParser);
+            var lambdaParser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", lambdas } });
+            var lambdaOption = new ApplyQueryOption(lambdas, context, lambdaParser);
+
+            ExceptionAssert.Throws<ODataException>(() => functionOption.Validate(new ODataValidationSettings { MaxFunctionCallDepth = 1 }),
+                "The function call depth limit of '1' has been exceeded. 'MaxFunctionCallDepth' can be configured on ODataValidationSettings, ODataQuerySettings or EnableQueryAttribute.");
+            ExceptionAssert.DoesNotThrow(() => functionOption.Validate(new ODataValidationSettings { MaxFunctionCallDepth = 2 }));
+            ExceptionAssert.Throws<ODataException>(() => lambdaOption.Validate(new ODataValidationSettings { MaxAnyAllExpressionDepth = 1 }),
+                "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or EnableQueryAttribute.");
+            ExceptionAssert.DoesNotThrow(() => lambdaOption.Validate(new ODataValidationSettings { MaxAnyAllExpressionDepth = 2 }));
+        }
+
+        [Theory]
+        [InlineData("compute(Contacts/$count($filter=Name eq 'x') as C)")]
+        [InlineData("compute(Contacts/$count($search=red AND blue) as C)")]
+        public void Validate_EnforcesNodeCountLimit_InCountClause(string rawValue)
+        {
+            var context = ValidationTestHelper.CreateCustomerContext(false);
+            var parser = new ODataQueryOptionParser(context.Model, context.ElementType, context.NavigationSource, new Dictionary<string, string> { { "$apply", rawValue } });
+            var option = new ApplyQueryOption(rawValue, context, parser);
+
+            // The count, collection navigation and range variable alone fit within this limit.
+            ExceptionAssert.Throws<ODataException>(
+                () => option.Validate(new ODataValidationSettings { MaxNodeCount = 3 }),
+                "The node count limit of '3' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on EnableQueryAttribute or ODataValidationSettings.");
+            ExceptionAssert.DoesNotThrow(() => option.Validate(new ODataValidationSettings()));
+        }
+
+        [Theory]
+        [InlineData(false, "$apply=filter(NotFilterableProperty eq 'R1')", "The property 'NotFilterableProperty' cannot be used in the $filter query option.")]
+        [InlineData(false, "$apply=groupby((NotSortableProperty))", "The property 'NotSortableProperty' cannot be used in the $select query option.")]
+        [InlineData(false, "$apply=aggregate(AmountSpent with max as MaxRestricted)", "The property 'AmountSpent' cannot be used in the $filter query option.")]
+        [InlineData(false, "$apply=aggregate(Contacts(AmountSpent with sum as SumRestricted))", "The property 'AmountSpent' cannot be used in the $filter query option.")]
+        [InlineData(false, "$apply=compute(NotFilterableProperty eq 'R1' as Flag)", "The property 'NotFilterableProperty' cannot be used in the $filter query option.")]
+        [InlineData(false, "$filter=NotFilterableProperty eq 'R1'", "The property 'NotFilterableProperty' cannot be used in the $filter query option.")]
+        [InlineData(false, "$select=NotSortableProperty", "The property 'NotSortableProperty' cannot be used in the $select query option.")]
+        [InlineData(true, "$apply=compute(trim(Name) as L)", "Function 'trim' is not allowed.")]
+        [InlineData(true, "$apply=compute(Id mul 2 as D)", "Arithmetic operator 'Multiply' is not allowed.")]
+        [InlineData(true, "$apply=aggregate(Id mul 2 with sum as D)", "Arithmetic operator 'Multiply' is not allowed.")]
+        public async Task Validate_ControllerRejectsRestrictedPropertiesAndLimits(bool restrictedLimits, string query, string error)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<QueryCompositionCustomer>("QueryCompositionCustomer");
+            builder.EntitySet<QueryCompositionCustomer>("QueryCompositionCustomerValidation");
+            var model = builder.GetEdmModel();
+            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == nameof(QueryCompositionCustomer));
+            var querySettings = new ModelBoundQuerySettings();
+            querySettings.SelectConfigurations.Add(nameof(QueryCompositionCustomer.NotSortableProperty), SelectExpandType.Disabled);
+            querySettings.FilterConfigurations.Add(nameof(QueryCompositionCustomer.AmountSpent), false);
+            model.SetAnnotationValue(entityType, querySettings);
+            var controllers = new[] { typeof(QueryCompositionCustomerController), typeof(QueryCompositionCustomerValidationController) };
+
+            using (var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.Filter().Select();
+                config.MapODataServiceRoute("odata", "odata", model);
+            }))
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (var response = await client.GetAsync("http://localhost/odata/" + (restrictedLimits ? "QueryCompositionCustomerValidation" : "QueryCompositionCustomer") + "?" + query))
+            {
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                Assert.Contains(error, await response.Content.ReadAsStringAsync());
+            }
+        }
+
+        [Theory]
+        [InlineData(false, "$apply=filter(Name eq 'Lowest')", 1)]
+        [InlineData(false, "$apply=groupby((Name))", 4)]
+        [InlineData(false, "$apply=aggregate(Id with sum as TotalAmount)", 1)]
+        [InlineData(false, "$apply=filter(Contacts/any())/aggregate(Contacts(Id with sum as SumAmount))", 1)]
+        [InlineData(false, "$apply=aggregate($count as Total)", 1)]
+        [InlineData(false, "$apply=compute(Id mul 2 as DoubleAmount)", 4)]
+        [InlineData(false, "$apply=groupby((Name),aggregate(Id with sum as Total))/filter(Total gt 0)", 4)]
+        [InlineData(true, "$apply=compute(Name eq 'Lowest' as Flag)", 4)]
+        [InlineData(true, "$apply=aggregate(Id with sum as TotalAmount)", 1)]
+        [InlineData(true, "$apply=groupby((Name))", 4)]
+        public async Task Validate_ControllerAllowsUnrestrictedPropertiesAndLimits(bool restrictedLimits, string query, int count)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<QueryCompositionCustomer>("QueryCompositionCustomer");
+            builder.EntitySet<QueryCompositionCustomer>("QueryCompositionCustomerValidation");
+            var model = builder.GetEdmModel();
+            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Single(t => t.Name == nameof(QueryCompositionCustomer));
+            var querySettings = new ModelBoundQuerySettings();
+            querySettings.SelectConfigurations.Add(nameof(QueryCompositionCustomer.NotSortableProperty), SelectExpandType.Disabled);
+            querySettings.FilterConfigurations.Add(nameof(QueryCompositionCustomer.AmountSpent), false);
+            model.SetAnnotationValue(entityType, querySettings);
+            var controllers = new[] { typeof(QueryCompositionCustomerController), typeof(QueryCompositionCustomerValidationController) };
+
+            using (var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.Filter().Select();
+                config.MapODataServiceRoute("odata", "odata", model);
+            }))
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (var response = await client.GetAsync("http://localhost/odata/" + (restrictedLimits ? "QueryCompositionCustomerValidation" : "QueryCompositionCustomer") + "?" + query))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+#if NETCORE
+                var result = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(count, Assert.IsType<JArray>(result["value"]).Count);
+#else
+                var result = await response.Content.ReadAsObject<JArray>();
+                Assert.Equal(count, result.Count);
+#endif
+            }
+        }
+
         // Legal apply queries usable against CustomerApplyTestData.
         // Tuple is: apply, expected number
         public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestApplies

@@ -56,6 +56,13 @@ namespace Microsoft.AspNet.OData.Query
             _queryOptionParser = queryOptionParser;
         }
 
+        internal FilterQueryOption(ODataQueryContext context, FilterClause filterClause)
+        {
+            Context = context;
+            _filterClause = filterClause;
+            Validator = FilterQueryValidator.GetFilterQueryValidator(context);
+        }
+
         // This constructor is intended for unit testing only.
         internal FilterQueryOption(string rawValue, ODataQueryContext context)
         {

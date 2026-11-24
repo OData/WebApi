@@ -2595,8 +2595,10 @@ public class Microsoft.AspNet.OData.Query.ApplyQueryOption {
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
 	System.Type ResultClrType  { public get; }
+	ApplyQueryValidator Validator  { public get; public set; }
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
+	public void Validate (ODataValidationSettings validationSettings)
 }
 
 public class Microsoft.AspNet.OData.Query.CountQueryOption {
@@ -3883,6 +3885,12 @@ public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionB
 	public virtual System.Linq.Expressions.Expression BindSingleResourceCastNode (Microsoft.OData.UriParser.SingleResourceCastNode node)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
+}
+
+public class Microsoft.AspNet.OData.Query.Validators.ApplyQueryValidator {
+	public ApplyQueryValidator ()
+
+	public virtual void Validate (ApplyQueryOption applyQueryOption, ODataValidationSettings validationSettings)
 }
 
 public class Microsoft.AspNet.OData.Query.Validators.CountQueryValidator {

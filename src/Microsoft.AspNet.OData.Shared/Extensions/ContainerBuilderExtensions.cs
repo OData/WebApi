@@ -46,6 +46,7 @@ namespace Microsoft.AspNet.OData.Extensions
             });
 
             // QueryValidators.
+            builder.AddService<ApplyQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<CountQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<FilterQueryValidator>(ServiceLifetime.Scoped);
             builder.AddService<ODataQueryValidator>(ServiceLifetime.Singleton);

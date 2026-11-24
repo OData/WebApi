@@ -147,24 +147,29 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
                 case QueryNodeKind.Count:
                     // aggregate($count as ...) has the same kind but no underlying property.
-                    CountNode count = node as CountNode;
-                    if (count != null)
-                    {
-                        if (count.FilterClause != null)
-                        {
-                            ValidateQueryNode(count.FilterClause.Expression, settings);
-                        }
-
-                        if (count.SearchClause != null)
-                        {
-                            ValidateQueryNode(count.SearchClause.Expression, settings);
-                        }
-
-                        ValidateQueryNode(count.Source, settings);
-                    }
-
+                    ValidateCountExpression(node as CountNode, settings);
                     break;
             }
+        }
+
+        private void ValidateCountExpression(CountNode count, ODataValidationSettings settings)
+        {
+            if (count == null)
+            {
+                return;
+            }
+
+            if (count.FilterClause != null)
+            {
+                ValidateQueryNode(count.FilterClause.Expression, settings);
+            }
+
+            if (count.SearchClause != null)
+            {
+                ValidateQueryNode(count.SearchClause.Expression, settings);
+            }
+
+            ValidateQueryNode(count.Source, settings);
         }
 
         private void ValidateFunctionCall(string functionName, IEnumerable<QueryNode> parameters,

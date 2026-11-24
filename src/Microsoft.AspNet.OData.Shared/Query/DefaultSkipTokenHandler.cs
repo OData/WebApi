@@ -14,6 +14,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Text;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -257,14 +258,25 @@ namespace Microsoft.AspNet.OData.Query
                 directionMap = new Dictionary<string, OrderByDirection>();
             }
 
-            IDictionary<string, Tuple<object, Type>> propertyValuePairs = PopulatePropertyValuePairs(skipTokenRawValue, context);
+            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+            IList<IEdmProperty> tokenProperties = entityType == null ? null :
+                GetPropertiesForSkipToken(entityType, orderByNodes)?.ToList();
+            if (tokenProperties == null || tokenProperties.Count == 0)
+            {
+                throw new ODataException(SRResources.SkipTokenParseError);
+            }
+
+            IDictionary<IEdmProperty, Tuple<object, Type>> propertyValuePairs =
+                PopulatePropertyValuePairs(skipTokenRawValue, context, tokenProperties);
 
             if (propertyValuePairs.Count == 0)
             {
-                throw Error.InvalidOperation(SRResources.SkipTokenProcessingError);
+                throw new ODataException(SRResources.SkipTokenProcessingError);
             }
 
-            ExpressionBinderBase binder = new FilterBinder(context.RequestContainer);
+            ExpressionBinderBase binder = context.RequestContainer == null ?
+                new FilterBinder(querySettings, WebApiAssembliesResolver.Default, context.Model) :
+                new FilterBinder(context.RequestContainer);
             bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(context.ElementClrType);
             Expression where = null;
@@ -278,14 +290,22 @@ namespace Microsoft.AspNet.OData.Query
             Expression lastEquality = null;
             bool firstProperty = true;
 
-            foreach (KeyValuePair<string, Tuple<object, Type>> item in propertyValuePairs)
+            foreach (IEdmProperty edmProperty in tokenProperties)
             {
-                string key = item.Key;
-                MemberExpression property = Expression.Property(param, key);
+                string key = edmProperty.Name;
+                string clrPropertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, context.Model);
+                var clrProperty = clrPropertyName == null ? null : context.ElementClrType.GetProperty(clrPropertyName);
+                if (clrProperty == null || !clrProperty.CanRead || clrProperty.GetIndexParameters().Length != 0)
+                {
+                    throw new ODataException(SRResources.SkipTokenParseError);
+                }
 
-                object value = item.Value.Item1;
+                MemberExpression property = Expression.Property(param, clrProperty);
+                Tuple<object, Type> propertyValue = propertyValuePairs[edmProperty];
 
-                Type propertyType = item.Value.Item2 ?? value.GetType();
+                object value = propertyValue.Item1;
+
+                Type propertyType = propertyValue.Item2;
                 bool propertyIsNullable = TypeHelper.IsNullable(property.Type);
 
                 Expression compare = null;
@@ -387,44 +407,53 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
-        /// Generates a dictionary with property name and property values specified in the skiptoken value.
+        /// Generates a dictionary with modeled properties and property values specified in the skiptoken value.
         /// </summary>
         /// <param name="value">The skiptoken string value.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        /// <returns>Dictionary with property name and property value in the skiptoken value.</returns>
-        private static IDictionary<string, Tuple<object, Type>> PopulatePropertyValuePairs(string value, ODataQueryContext context)
+        /// <param name="tokenProperties">The ordered properties used to generate the skiptoken.</param>
+        /// <returns>Dictionary with modeled properties and property values in the skiptoken value.</returns>
+        private static IDictionary<IEdmProperty, Tuple<object, Type>> PopulatePropertyValuePairs(string value, ODataQueryContext context,
+            IList<IEdmProperty> tokenProperties)
         {
             Contract.Assert(context != null);
 
-            IDictionary<string, Tuple<object, Type>> propertyValuePairs = new Dictionary<string, Tuple<object, Type>>();
+            IDictionary<IEdmProperty, Tuple<object, Type>> propertyValuePairs = new Dictionary<IEdmProperty, Tuple<object, Type>>();
             IList<string> keyValuesPairs = ParseValue(value, CommaDelimiter);
 
             IEdmStructuredType type = context.ElementType as IEdmStructuredType;
             Debug.Assert(type != null);
 
-            foreach (string pair in keyValuesPairs)
+            if (keyValuesPairs.Count != tokenProperties.Count)
             {
-                string[] pieces = pair.Split(new char[] { propertyDelimiter }, 2);
-                if (pieces.Length > 1 && !String.IsNullOrWhiteSpace(pieces[0]))
-                {
-                    object propValue = null;
+                throw new ODataException(SRResources.SkipTokenParseError);
+            }
 
-                    IEdmTypeReference propertyType = null;
-                    IEdmProperty property = type.FindProperty(pieces[0]);
-                    Type propertyClrType = null;
-                    if (property != null)
-                    {
-                        propertyType = property.Type;
-                        propertyClrType = EdmLibHelpers.GetClrType(propertyType, context.Model);
-                    }
-
-                    propValue = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, context.Model, propertyType);
-                    propertyValuePairs.Add(pieces[0], Tuple.Create(propValue, propertyClrType));
-                }
-                else
+            // Token names must match the server's modeled ordering, never arbitrary CLR members.
+            for (int i = 0; i < keyValuesPairs.Count; i++)
+            {
+                string[] pieces = keyValuesPairs[i].Split(new char[] { propertyDelimiter }, 2);
+                IEdmProperty property = tokenProperties[i];
+                if (pieces.Length != 2 || !String.Equals(pieces[0], property.Name, StringComparison.Ordinal) ||
+                    type.FindProperty(property.Name) != property)
                 {
-                    throw Error.InvalidOperation(SRResources.SkipTokenParseError);
+                    throw new ODataException(SRResources.SkipTokenParseError);
                 }
+            }
+
+            for (int i = 0; i < keyValuesPairs.Count; i++)
+            {
+                string[] pieces = keyValuesPairs[i].Split(new char[] { propertyDelimiter }, 2);
+                IEdmProperty property = tokenProperties[i];
+                Type propertyClrType = EdmLibHelpers.GetClrType(property.Type, context.Model);
+                object propValue = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, context.Model, property.Type);
+                if (propertyClrType == null ||
+                    ((propValue == null || propValue is ODataNullValue) && !property.Type.IsNullable))
+                {
+                    throw new ODataException(SRResources.SkipTokenParseError);
+                }
+
+                propertyValuePairs.Add(property, Tuple.Create(propValue, propertyClrType));
             }
 
             return propertyValuePairs;
@@ -487,6 +516,11 @@ namespace Microsoft.AspNet.OData.Query
                 return null;
             }
 
+            return GetPropertiesForSkipToken(entity, orderByNodes);
+        }
+
+        private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(IEdmEntityType entity, IList<OrderByNode> orderByNodes)
+        {
             IEnumerable<IEdmProperty> key = entity.Key();
             if (orderByNodes != null)
             {

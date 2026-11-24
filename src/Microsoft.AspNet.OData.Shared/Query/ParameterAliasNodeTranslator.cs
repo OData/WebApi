@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -19,7 +19,10 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     public class ParameterAliasNodeTranslator : QueryNodeVisitor<QueryNode>
     {
+        internal const int MaxParameterAliasExpansionCount = 100;
+
         private IDictionary<string, SingleValueNode> _parameterAliasNode;
+        private int _parameterAliasExpansionCount;
 
         /// <summary>
         /// Initialize a new instance of <see cref="ParameterAliasNodeTranslator"/>.
@@ -267,16 +270,20 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The translated node.</returns>
         public override QueryNode Visit(ParameterAliasNode nodeIn)
         {
-            SingleValueNode node = ODataPathSegmentTranslator.TranslateParameterAlias(nodeIn, _parameterAliasNode);
-
-            if (node == null)
+            SingleValueNode node;
+            if (!_parameterAliasNode.TryGetValue(nodeIn.Alias, out node) || node == null)
             {
                 return new ConstantNode(null);
             }
-            else
+
+            _parameterAliasExpansionCount++;
+            if (_parameterAliasExpansionCount > MaxParameterAliasExpansionCount)
             {
-                return node.Accept(this);
+                throw new ODataException(Error.Format(
+                    SRResources.ParameterAliasExpansionLimitExceeded, MaxParameterAliasExpansionCount));
             }
+
+            return node.Accept(this);
         }
 
         /// <summary>

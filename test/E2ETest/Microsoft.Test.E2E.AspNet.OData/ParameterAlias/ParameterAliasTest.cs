@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 {
     public class ParameterAliasTest : WebHostTestBase
     {
+        private const int AcceptedBranchingDepth = 6;
+        private const int RejectedBranchingDepth = 7;
+
         public ParameterAliasTest(WebHostTestFixture fixture)
             :base(fixture)
         {
@@ -139,6 +143,60 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal("Corn", (string)json["value"]);
+        }
+
+        [Fact]
+        public async Task FilterWithBranchingParameterAliasesWithinLimit_ReturnsOk()
+        {
+            var queryParts = new List<string> { "$filter=@p0 gt 0" };
+            AddBranchingAliases(queryParts, "p", AcceptedBranchingDepth);
+            string query = "/Trades?" + string.Join("&", queryParts).Replace(" ", "%20");
+
+            HttpResponseMessage response = await this.Client.GetAsync(this.BaseAddress + query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task FilterWithBranchingParameterAliasesBeyondLimit_ReturnsBadRequest()
+        {
+            var queryParts = new List<string> { "$filter=@p0 gt 0" };
+            AddBranchingAliases(queryParts, "p", RejectedBranchingDepth);
+            string query = "/Trades?" + string.Join("&", queryParts).Replace(" ", "%20");
+
+            HttpResponseMessage response = await this.Client.GetAsync(this.BaseAddress + query);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains(
+                "The parameter alias expansion count exceeds the maximum allowed value of '100'.",
+                await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task OrderByWithCombinedBranchingParameterAliasesBeyondLimit_ReturnsBadRequest()
+        {
+            var queryParts = new List<string> { "$orderby=@a0,@b0" };
+            AddBranchingAliases(queryParts, "a", AcceptedBranchingDepth);
+            AddBranchingAliases(queryParts, "b", AcceptedBranchingDepth);
+            string query = "/Trades?" + string.Join("&", queryParts).Replace(" ", "%20");
+
+            HttpResponseMessage response = await this.Client.GetAsync(this.BaseAddress + query);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains(
+                "The parameter alias expansion count exceeds the maximum allowed value of '100'.",
+                await response.Content.ReadAsStringAsync());
+        }
+
+        private static void AddBranchingAliases(ICollection<string> queryParts, string prefix, int depth)
+        {
+            for (int i = 0; i < depth - 1; i++)
+            {
+                queryParts.Add(
+                    "@" + prefix + i + "=@" + prefix + (i + 1) + " add @" + prefix + (i + 1));
+            }
+
+            queryParts.Add("@" + prefix + (depth - 1) + "=TradeID");
         }
         #endregion
     }

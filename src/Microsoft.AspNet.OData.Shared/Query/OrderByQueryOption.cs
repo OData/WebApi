@@ -160,8 +160,8 @@ namespace Microsoft.AspNet.OData.Query
             {
                 if (_orderByClause == null)
                 {
-                    _orderByClause = _queryOptionParser.ParseOrderBy();
-                    _orderByClause = TranslateParameterAlias(_orderByClause);
+                    OrderByClause orderByClause = _queryOptionParser.ParseOrderBy();
+                    _orderByClause = TranslateParameterAlias(orderByClause);
                 }
 
                 return _orderByClause;
@@ -324,17 +324,25 @@ namespace Microsoft.AspNet.OData.Query
 
         private OrderByClause TranslateParameterAlias(OrderByClause orderBy)
         {
+            ParameterAliasNodeTranslator translator = new ParameterAliasNodeTranslator(
+                _queryOptionParser.ParameterAliasNodes);
+            return TranslateParameterAlias(orderBy, translator);
+        }
+
+        private static OrderByClause TranslateParameterAlias(
+            OrderByClause orderBy,
+            ParameterAliasNodeTranslator translator)
+        {
             if (orderBy == null)
             {
                 return null;
             }
 
-            SingleValueNode orderByExpression = orderBy.Expression.Accept(
-                new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes)) as SingleValueNode;
+            SingleValueNode orderByExpression = orderBy.Expression.Accept(translator) as SingleValueNode;
             orderByExpression = orderByExpression ?? new ConstantNode(null, "null");
 
             return new OrderByClause(
-                TranslateParameterAlias(orderBy.ThenBy),
+                TranslateParameterAlias(orderBy.ThenBy, translator),
                 orderByExpression,
                 orderBy.Direction,
                 orderBy.RangeVariable);

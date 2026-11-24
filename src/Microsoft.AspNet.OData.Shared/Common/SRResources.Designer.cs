@@ -2457,6 +2457,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The parameter alias expansion count exceeds the maximum allowed value of &apos;{0}&apos;..
+        /// </summary>
+        internal static string ParameterAliasExpansionLimitExceeded
+        {
+            get
+            {
+                return ResourceManager.GetString("ParameterAliasExpansionLimitExceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; of the parameter &apos;{1}&apos; must be a collection..
         /// </summary>
         internal static string ParameterTypeIsNotCollection

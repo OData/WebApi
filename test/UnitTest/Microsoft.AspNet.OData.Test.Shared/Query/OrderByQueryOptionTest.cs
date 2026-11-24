@@ -608,6 +608,41 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal(1, results[2].CustomerId);
         }
 
+        [Fact]
+        public void OrderByClause_ThrowsOnEveryAccess_WhenCombinedParameterAliasExpansionExceedsLimit()
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
+            var queryOptions = new Dictionary<string, string> { { "$orderby", "@a0,@b0" } };
+            AddBranchingParameterAliases(queryOptions, "a", 6);
+            AddBranchingParameterAliases(queryOptions, "b", 6);
+
+            var parser = new ODataQueryOptionParser(
+                model,
+                model.FindType("Microsoft.AspNet.OData.Test.Builder.TestModels.Customer"),
+                model.FindDeclaredNavigationSource("Default.Container.Customers"),
+                queryOptions);
+            var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
+            var orderByOption = new OrderByQueryOption("@a0,@b0", context, parser);
+
+            const string expectedMessage =
+                "The parameter alias expansion count exceeds the maximum allowed value of '100'.";
+            ExceptionAssert.Throws<ODataException>(() => orderByOption.OrderByClause, expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => orderByOption.OrderByClause, expectedMessage);
+        }
+
+        private static void AddBranchingParameterAliases(
+            IDictionary<string, string> queryOptions,
+            string prefix,
+            int depth)
+        {
+            for (int i = 0; i < depth - 1; i++)
+            {
+                queryOptions.Add("@" + prefix + i, "@" + prefix + (i + 1) + " add @" + prefix + (i + 1));
+            }
+
+            queryOptions.Add("@" + prefix + (depth - 1), "CustomerId");
+        }
+
         [Theory]
         [InlineData("Orders/$count")]
         [InlineData("Addresses/$count")]

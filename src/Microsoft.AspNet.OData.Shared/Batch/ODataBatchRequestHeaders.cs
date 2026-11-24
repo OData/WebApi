@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.OData.Batch
         private static readonly HashSet<string> blockedHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "Authorization",
+            "Cookie",
             "Proxy-Authorization",
             "Host",
             "Forwarded",
@@ -26,9 +27,12 @@ namespace Microsoft.AspNet.OData.Batch
             "X-Real-IP",
             "X-ARR-ClientCert",
             "X-ARR-LOG-ID",
+            "X-MS-Client-Principal",
             "X-MS-Client-Principal-Id",
             "X-MS-Client-Principal-Name",
             "X-MS-Client-Principal-IdP",
+            "X-MS-API-ROLE",
+            "X-MS-REQ-AUTHENTICATED",
         };
 
         internal static bool IsBlocked(string headerName)

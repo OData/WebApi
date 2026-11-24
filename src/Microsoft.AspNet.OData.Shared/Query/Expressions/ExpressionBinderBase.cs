@@ -1876,7 +1876,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
-            //add argument that must be ECMAScript compatible regex
+            TimeSpan? matchTimeout = QuerySettings.MatchesPatternTimeout;
+            if (matchTimeout.HasValue)
+            {
+                arguments = new[] { arguments[0], arguments[1], Expression.Constant(RegexOptions.ECMAScript), Expression.Constant(matchTimeout.Value) };
+                return MakeFunctionCall(ClrCanonicalFunctions.MatchesPatternWithTimeout, arguments);
+            }
+
             arguments = new[] { arguments[0], arguments[1], Expression.Constant(RegexOptions.ECMAScript) };
 
             return MakeFunctionCall(ClrCanonicalFunctions.MatchesPattern, arguments);

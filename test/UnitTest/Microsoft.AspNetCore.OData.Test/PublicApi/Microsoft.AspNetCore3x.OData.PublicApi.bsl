@@ -582,6 +582,8 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
+	System.Nullable`1[[System.TimeSpan]] MatchesPatternTimeout  { public get; public set; }
+	int MatchesPatternTimeoutMilliseconds  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
 	int MaxFunctionCallDepth  { public get; public set; }
@@ -3084,6 +3086,7 @@ public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
+	System.Nullable`1[[System.TimeSpan]] MatchesPatternTimeout  { public get; public set; }
 	int MaxFunctionCallDepth  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
 }

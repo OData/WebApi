@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -100,6 +102,36 @@ namespace Microsoft.AspNet.OData
             {
                 _querySettings.EnableConstantParameterization = value;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the timeout for each matchesPattern evaluation. The default is 250 milliseconds.
+        /// Null or non-positive values disable the limit. Use MatchesPatternTimeoutMilliseconds in attributes.
+        /// </summary>
+        public TimeSpan? MatchesPatternTimeout
+        {
+            get => _querySettings.MatchesPatternTimeout;
+            set => _querySettings.MatchesPatternTimeout = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the timeout in milliseconds for each matchesPattern evaluation.
+        /// The default is 250; non-positive values disable the limit. The getter truncates fractions.
+        /// </summary>
+        public int MatchesPatternTimeoutMilliseconds
+        {
+            get
+            {
+                TimeSpan? timeout = _querySettings.MatchesPatternTimeout;
+                if (!timeout.HasValue)
+                {
+                    return 0;
+                }
+
+                double milliseconds = timeout.Value.TotalMilliseconds;
+                return milliseconds >= int.MaxValue ? int.MaxValue : (int)milliseconds;
+            }
+            set => _querySettings.MatchesPatternTimeout = value <= 0 ? null : (TimeSpan?)TimeSpan.FromMilliseconds(value);
         }
 
         /// <summary>
@@ -469,6 +501,14 @@ namespace Microsoft.AspNet.OData
                         HttpStatusCode.BadRequest,
                         Error.Format(SRResources.QueryParameterNotSupported, e.Message),
                         e);
+                }
+                catch (RegexMatchTimeoutException e)
+                {
+                    createErrorAction(HttpStatusCode.BadRequest, Error.Format(SRResources.UriQueryStringInvalid, e.Message), e);
+                }
+                catch (TargetInvocationException e) when (e.InnerException is RegexMatchTimeoutException)
+                {
+                    createErrorAction(HttpStatusCode.BadRequest, Error.Format(SRResources.UriQueryStringInvalid, e.InnerException.Message), e.InnerException);
                 }
                 catch (NotImplementedException e)
                 {

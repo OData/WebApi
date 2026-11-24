@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Query
@@ -15,10 +16,13 @@ namespace Microsoft.AspNet.OData.Query
     public class ODataQuerySettings
     {
         internal const int DefaultMaxFunctionCallDepth = 15;// the depth of function call expressions recursively in a query, such as 'length(tolower(name)) eq 5', the depth is 2.
+        internal static readonly TimeSpan DefaultMatchesPatternTimeout = TimeSpan.FromMilliseconds(250);
+        internal static readonly TimeSpan MaxMatchesPatternTimeout = TimeSpan.FromMilliseconds(int.MaxValue - 1);
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int? _pageSize;
         private int? _modelBoundPageSize;
         private int _maxFunctionCallDepth = DefaultMaxFunctionCallDepth;
+        private TimeSpan? _matchesPatternTimeout = DefaultMatchesPatternTimeout;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -149,6 +153,30 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         public bool HandleReferenceNavigationPropertyExpandFilter { get; set; }
 
+        /// <summary>
+        /// Gets or sets the timeout for each matchesPattern evaluation. The default is 250 milliseconds.
+        /// Null or non-positive values disable the limit; values above the regex maximum are clamped.
+        /// </summary>
+        /// <remarks>
+        /// The bound is per evaluation, not per request. Timeouts return Bad Request only when results
+        /// are materialized during query execution, rather than later during response serialization.
+        /// </remarks>
+        public TimeSpan? MatchesPatternTimeout
+        {
+            get => _matchesPatternTimeout;
+            set
+            {
+                if (!value.HasValue || value.Value <= TimeSpan.Zero)
+                {
+                    _matchesPatternTimeout = null;
+                }
+                else
+                {
+                    _matchesPatternTimeout = value.Value > MaxMatchesPatternTimeout ? MaxMatchesPatternTimeout : value.Value;
+                }
+            }
+        }
+
         internal void CopyFrom(ODataQuerySettings settings)
         {
             EnsureStableOrdering = settings.EnsureStableOrdering;
@@ -159,6 +187,7 @@ namespace Microsoft.AspNet.OData.Query
             HandleReferenceNavigationPropertyExpandFilter = settings.HandleReferenceNavigationPropertyExpandFilter;
             EnableCorrelatedSubqueryBuffering = settings.EnableCorrelatedSubqueryBuffering;
             MaxFunctionCallDepth = settings.MaxFunctionCallDepth;
+            MatchesPatternTimeout = settings.MatchesPatternTimeout;
         }
     }
 }

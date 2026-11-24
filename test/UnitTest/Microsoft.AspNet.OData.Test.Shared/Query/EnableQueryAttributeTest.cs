@@ -69,6 +69,44 @@ namespace Microsoft.AspNet.OData.Test.Query
 {
     public class EnableQueryAttributeTest
     {
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(100)]
+        [InlineData(int.MaxValue)]
+        public void MatchesPatternTimeoutMilliseconds_SharesNormalizedSetting(int milliseconds)
+        {
+            var attribute = new EnableQueryAttribute();
+            Assert.Equal(250, attribute.MatchesPatternTimeoutMilliseconds);
+
+            attribute.MatchesPatternTimeoutMilliseconds = milliseconds;
+
+            Assert.Equal(milliseconds <= 0 ? 0 : Math.Min(milliseconds, int.MaxValue - 1), attribute.MatchesPatternTimeoutMilliseconds);
+            Assert.Equal(milliseconds <= 0 ? null : (TimeSpan?)TimeSpan.FromMilliseconds(Math.Min(milliseconds, int.MaxValue - 1)), attribute.MatchesPatternTimeout);
+
+            attribute.MatchesPatternTimeout = TimeSpan.FromTicks(1234567);
+            Assert.Equal(123, attribute.MatchesPatternTimeoutMilliseconds);
+        }
+
+        [Fact]
+        public void MatchesPatternTimeout_RoundTripsAndClearsSharedSetting()
+        {
+            var attribute = new EnableQueryAttribute();
+            Assert.Equal(ODataQuerySettings.DefaultMatchesPatternTimeout, attribute.MatchesPatternTimeout);
+
+            attribute.MatchesPatternTimeout = TimeSpan.FromMilliseconds(100);
+            Assert.Equal(TimeSpan.FromMilliseconds(100), attribute.MatchesPatternTimeout);
+            Assert.Equal(100, attribute.MatchesPatternTimeoutMilliseconds);
+
+            attribute.MatchesPatternTimeout = null;
+            Assert.Null(attribute.MatchesPatternTimeout);
+            Assert.Equal(0, attribute.MatchesPatternTimeoutMilliseconds);
+
+            attribute.MatchesPatternTimeout = TimeSpan.FromDays(30);
+            Assert.Equal(ODataQuerySettings.MaxMatchesPatternTimeout, attribute.MatchesPatternTimeout);
+            Assert.Equal(int.MaxValue - 1, attribute.MatchesPatternTimeoutMilliseconds);
+        }
+
         public static List<Customer> CustomerList = new List<Customer>()
         {
             new Customer(){ Name = "B" },
@@ -289,6 +327,35 @@ namespace Microsoft.AspNet.OData.Test.Query
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
         }
 #if NETCORE // Following functionality is only supported in NetCore.
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void OnActionExecuted_MatchesPatternTimeoutReturnsBadRequest(bool count)
+        {
+            const string routeName = "odata";
+            IEdmModel model = new CustomersModelWithInheritance().Model;
+            var configuration = RoutingConfigurationFactory.Create();
+            configuration.Filter().Count();
+            var request = RequestFactory.CreateFromModel(model, "http://localhost/odata/Customers?$filter=matchesPattern(Name,'(a%2B)%2B$')" + (count ? "&$count=true" : string.Empty), routeName, new ODataPath());
+            IPerRouteContainer perRouteContainer = configuration.ServiceProvider.GetRequiredService<IPerRouteContainer>();
+            Action<IContainerBuilder> configure = ODataRouteBuilderExtensions.ConfigureDefaultServices(configuration, builder => builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, services => model));
+            IServiceProvider provider = perRouteContainer.CreateODataRootContainer(routeName, configure);
+            request.ODataFeature().RequestContainer = provider;
+            request.HttpContext.RequestServices = provider;
+            ActionDescriptor descriptor = ControllerDescriptorFactory.Create(configuration, "CustomersController", typeof(CustomersController)).First(action => action.ActionName.StartsWith("Get", StringComparison.OrdinalIgnoreCase));
+            var context = new ActionExecutedContext(new ActionContext(request.HttpContext, new RouteData(), descriptor), new List<IFilterMetadata>(), new CustomersController());
+            context.Result = new ObjectResult(new[] { new Customer { Name = new string('a', 40) + "!" } }.AsQueryable()) { StatusCode = 200 };
+            var attribute = new EnableQueryAttribute { MatchesPatternTimeoutMilliseconds = 10 };
+            if (!count)
+            {
+                attribute.PageSize = 1;
+            }
+
+            attribute.OnActionExecuted(context);
+
+            Assert.IsType<BadRequestObjectResult>(context.Result);
+        }
+
         [Fact]
         public void OnActionExecuted_HandlesStatusCodesCorrectly()
         {

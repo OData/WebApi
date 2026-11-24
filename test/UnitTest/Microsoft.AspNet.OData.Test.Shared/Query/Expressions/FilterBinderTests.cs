@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Interfaces;
@@ -1052,7 +1053,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange & Act & Assert
             var filters = VerifyQueryDeserialization(
                 "matchesPattern(ProductName, 'A\\wc')",
-                "$it => $it.ProductName.IsMatch(\"A\\wc\", ECMAScript)",
+                "$it => $it.ProductName.IsMatch(\"A\\wc\", ECMAScript, 00:00:00.2500000)",
                 NotTesting);
 
             // Arrange & Act & Assert
@@ -1063,6 +1064,93 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             RunFilters(filters, new Product { ProductName = "Abd" }, new { WithNullPropagation = false, WithoutNullPropagation = false });
             
             RunFilters(filters, new Product { ProductName = "Aθd" }, new { WithNullPropagation = false, WithoutNullPropagation = false }); // ECMAScript has strict matching of \w
+        }
+
+        [Theory]
+        [InlineData(HandleNullPropagationOption.False)]
+        [InlineData(HandleNullPropagationOption.True)]
+        public void StringMatchesPattern_TimeoutBoundsEvaluation(HandleNullPropagationOption nullPropagation)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Product>("Products");
+            IEdmModel model = builder.GetEdmModel();
+            var parser = new ODataQueryOptionParser(model, model.FindDeclaredEntitySet("Products").EntityType(), model.FindDeclaredEntitySet("Products"), new Dictionary<string, string> { { "$filter", "matchesPattern(ProductName, '(a+)+$')" } });
+            FilterClause clause = parser.ParseFilter();
+            var settings = new ODataQuerySettings { HandleNullPropagation = nullPropagation, MatchesPatternTimeout = TimeSpan.FromMilliseconds(10) };
+            Expression<Func<Product, bool>> expression = FilterBinder.Bind<Product>(clause, model, WebApiAssembliesResolverFactory.Create(), settings);
+            var product = new Product { ProductName = new string('a', 40) + "!" };
+
+            Assert.Throws<RegexMatchTimeoutException>(() => expression.Compile()(product));
+        }
+
+        [Theory]
+        [InlineData(HandleNullPropagationOption.False, 0)]
+        [InlineData(HandleNullPropagationOption.True, 0)]
+        [InlineData(HandleNullPropagationOption.False, 1)]
+        [InlineData(HandleNullPropagationOption.True, 1)]
+        [InlineData(HandleNullPropagationOption.False, 2)]
+        [InlineData(HandleNullPropagationOption.True, 2)]
+        public void StringMatchesPattern_OptOutSelectsCorrectOverload(HandleNullPropagationOption nullPropagation, int timeoutMode)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Product>("Products");
+            IEdmModel model = builder.GetEdmModel();
+            var parser = new ODataQueryOptionParser(model, model.FindDeclaredEntitySet("Products").EntityType(), model.FindDeclaredEntitySet("Products"), new Dictionary<string, string> { { "$filter", "matchesPattern(ProductName, '^A')" } });
+            var settings = new ODataQuerySettings { HandleNullPropagation = nullPropagation };
+            if (timeoutMode != 0)
+            {
+                settings.MatchesPatternTimeout = timeoutMode == 2 ? null : (TimeSpan?)TimeSpan.FromMilliseconds(100);
+            }
+
+            Expression<Func<Product, bool>> expression = FilterBinder.Bind<Product>(parser.ParseFilter(), model, WebApiAssembliesResolverFactory.Create(), settings);
+
+            Expression body = expression.Body;
+            if (nullPropagation == HandleNullPropagationOption.True)
+            {
+                body = Assert.IsAssignableFrom<BinaryExpression>(body).Left;
+                body = Assert.IsAssignableFrom<ConditionalExpression>(body).IfFalse;
+                body = Assert.IsAssignableFrom<UnaryExpression>(body).Operand;
+            }
+
+            var call = Assert.IsAssignableFrom<MethodCallExpression>(body);
+            Assert.Equal(typeof(Regex), call.Method.DeclaringType);
+            Assert.Equal("IsMatch", call.Method.Name);
+            Assert.Equal(timeoutMode == 2 ? 3 : 4, call.Method.GetParameters().Length);
+            Assert.Equal(RegexOptions.ECMAScript, Assert.IsType<ConstantExpression>(call.Arguments[2]).Value);
+            if (timeoutMode != 2)
+            {
+                Assert.Equal(typeof(TimeSpan), call.Method.GetParameters()[3].ParameterType);
+                Assert.Equal(timeoutMode == 0 ? ODataQuerySettings.DefaultMatchesPatternTimeout : TimeSpan.FromMilliseconds(100), Assert.IsType<ConstantExpression>(call.Arguments[3]).Value);
+            }
+
+            Assert.True(expression.Compile()(new Product { ProductName = "Alice" }));
+        }
+
+        [Theory]
+        [InlineData(HandleNullPropagationOption.False)]
+        [InlineData(HandleNullPropagationOption.True)]
+        public void NonMatchesPatternFilter_WithTimeoutConfigured_Unaffected(HandleNullPropagationOption nullPropagation)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Product>("Products");
+            IEdmModel model = builder.GetEdmModel();
+            var parser = new ODataQueryOptionParser(model, model.FindDeclaredEntitySet("Products").EntityType(), model.FindDeclaredEntitySet("Products"), new Dictionary<string, string> { { "$filter", "startswith(ProductName, 'Abc')" } });
+            var settings = new ODataQuerySettings { HandleNullPropagation = nullPropagation, MatchesPatternTimeout = TimeSpan.FromMilliseconds(100) };
+            Expression<Func<Product, bool>> expression = FilterBinder.Bind<Product>(parser.ParseFilter(), model, WebApiAssembliesResolverFactory.Create(), settings);
+
+            Expression body = expression.Body;
+            if (nullPropagation == HandleNullPropagationOption.True)
+            {
+                body = Assert.IsAssignableFrom<BinaryExpression>(body).Left;
+                body = Assert.IsAssignableFrom<ConditionalExpression>(body).IfFalse;
+                body = Assert.IsAssignableFrom<UnaryExpression>(body).Operand;
+            }
+
+            var call = Assert.IsAssignableFrom<MethodCallExpression>(body);
+            Assert.Equal(typeof(string), call.Method.DeclaringType);
+            Assert.Equal("StartsWith", call.Method.Name);
+            Assert.Single(call.Arguments);
+            Assert.True(expression.Compile()(new Product { ProductName = "Abcd" }));
         }
 
         [Fact]

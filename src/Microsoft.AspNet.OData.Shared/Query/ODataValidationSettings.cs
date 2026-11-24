@@ -19,11 +19,13 @@ namespace Microsoft.AspNet.OData.Query
         private const int MinMaxSkip = 0;
         private const int MinMaxTop = 0;
         private const int MinMaxExpansionDepth = 0;
+        private const int MinMaxSelectExpandNodeCount = 0;
         private const int MinMaxNodeCount = 1;
         private const int MinMaxAnyAllExpressionDepth = 1;
         private const int MinMaxOrderByNodeCount = 1;
         private const int MinMaxFunctionCallDepth = 1;
         internal const int DefaultMaxExpansionDepth = 2;
+        internal const int DefaultMaxSelectExpandNodeCount = 500;
 
         private AllowedArithmeticOperators _allowedArithmeticOperators = AllowedArithmeticOperators.All;
         private AllowedFunctions _allowedFunctions = AllowedFunctions.AllFunctions;
@@ -35,6 +37,7 @@ namespace Microsoft.AspNet.OData.Query
         private int _maxAnyAllExpressionDepth = 1;
         private int _maxNodeCount = 100;
         private int _maxExpansionDepth = DefaultMaxExpansionDepth;
+        private int? _maxSelectExpandNodeCount;
         private int _maxOrderByNodeCount = 5;
         private int _maxFunctionCallDepth = ODataQuerySettings.DefaultMaxFunctionCallDepth;
 
@@ -294,6 +297,28 @@ namespace Microsoft.AspNet.OData.Query
                     throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxExpansionDepth);
                 }
                 _maxExpansionDepth = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of $select and $expand items allowed across the whole projection tree
+        /// of a single request.
+        /// </summary>
+        /// <remarks>
+        /// When <c>null</c> (the default), the limit is inherited from <see cref="DefaultQuerySettings"/>.
+        /// Set this property to 0 to disable the check.
+        /// </remarks>
+        public int? MaxSelectExpandNodeCount
+        {
+            get { return _maxSelectExpandNodeCount; }
+            set
+            {
+                if (value.HasValue && value.Value < MinMaxSelectExpandNodeCount)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, MinMaxSelectExpandNodeCount);
+                }
+
+                _maxSelectExpandNodeCount = value;
             }
         }
     }

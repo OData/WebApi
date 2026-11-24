@@ -72,6 +72,16 @@ namespace Microsoft.AspNet.OData.Extensions
             }
         }
 
+        public static void MaxSelectExpandNodeCount(this IServiceProvider serviceProvider, int maxNodeCount)
+        {
+            if (serviceProvider == null)
+            {
+                throw Error.ArgumentNull(nameof(serviceProvider));
+            }
+
+            serviceProvider.GetDefaultQuerySettings().MaxSelectExpandNodeCount = maxNodeCount;
+        }
+
         public static void Expand(this IServiceProvider serviceProvider, QueryOptionSetting setting)
         {
             if (serviceProvider == null)

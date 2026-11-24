@@ -374,6 +374,26 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Gets or sets the maximum number of $select and $expand items allowed across the whole projection tree
+        /// of a single request.
+        /// </summary>
+        /// <remarks>
+        /// The default value is 500. Set to 0 to disable the check for this endpoint.
+        /// </remarks>
+        public int MaxSelectExpandNodeCount
+        {
+            get
+            {
+                return _validationSettings.MaxSelectExpandNodeCount ??
+                    ODataValidationSettings.DefaultMaxSelectExpandNodeCount;
+            }
+            set
+            {
+                _validationSettings.MaxSelectExpandNodeCount = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum number of expressions that can be present in the $orderby.
         /// </summary>
         public int MaxOrderByNodeCount

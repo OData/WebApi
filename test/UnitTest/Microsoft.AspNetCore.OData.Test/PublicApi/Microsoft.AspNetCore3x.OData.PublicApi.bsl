@@ -587,6 +587,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	int MaxFunctionCallDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
 	int MaxOrderByNodeCount  { public get; public set; }
+	int MaxSelectExpandNodeCount  { public get; public set; }
 	int MaxSkip  { public get; public set; }
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
@@ -2315,6 +2316,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataEndpointRouteBuilderE
 	[
 	ExtensionAttribute(),
 	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MaxSelectExpandNodeCount (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, int maxNodeCount)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MaxTop (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, System.Nullable`1[[System.Int32]] maxTopValue)
 
 	[
@@ -2476,6 +2482,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtension
 	ExtensionAttribute(),
 	]
 	public static ODataRoute MapODataServiceRoute (Microsoft.AspNetCore.Routing.IRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, IODataPathHandler pathHandler, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions, ODataBatchHandler batchHandler)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IRouteBuilder MaxSelectExpandNodeCount (Microsoft.AspNetCore.Routing.IRouteBuilder builder, int maxNodeCount)
 
 	[
 	ExtensionAttribute(),
@@ -2958,6 +2969,7 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	bool EnableOrderBy  { public get; public set; }
 	bool EnableSelect  { public get; public set; }
 	bool EnableSkipToken  { public get; public set; }
+	int MaxSelectExpandNodeCount  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
@@ -3105,6 +3117,7 @@ public class Microsoft.AspNet.OData.Query.ODataValidationSettings {
 	int MaxFunctionCallDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
 	int MaxOrderByNodeCount  { public get; public set; }
+	System.Nullable`1[[System.Int32]] MaxSelectExpandNodeCount  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxSkip  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }

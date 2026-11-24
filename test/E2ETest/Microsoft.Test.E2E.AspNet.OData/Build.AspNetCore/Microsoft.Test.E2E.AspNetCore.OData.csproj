@@ -1549,6 +1549,9 @@
     <Compile Include="..\QueryComposition\ValidatorTests.cs">
       <Link>QueryComposition\ValidatorTests.cs</Link>
     </Compile>
+    <Compile Include="..\SelectExpandNodeCount\SelectExpandNodeCountTests.cs">
+      <Link>SelectExpandNodeCount\SelectExpandNodeCountTests.cs</Link>
+    </Compile>
     <Compile Include="..\Routing\ActionRoutingConventionTests.cs">
       <Link>Routing\ActionRoutingConventionTests.cs</Link>
     </Compile>

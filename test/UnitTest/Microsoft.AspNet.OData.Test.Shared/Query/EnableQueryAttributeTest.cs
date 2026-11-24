@@ -103,6 +103,21 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Act & Assert
             Assert.Equal(HandleNullPropagationOption.Default, attribute.HandleNullPropagation);
             Assert.True(attribute.EnsureStableOrdering);
+            Assert.Equal(500, attribute.MaxSelectExpandNodeCount);
+        }
+
+        [Fact]
+        public void MaxSelectExpandNodeCount_Property_RoundTrips()
+        {
+            ReflectionAssert.IntegerProperty(
+                new EnableQueryAttribute(),
+                o => o.MaxSelectExpandNodeCount,
+                expectedDefaultValue: 500,
+                minLegalValue: 0,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: -1,
+                illegalUpperValue: null,
+                roundTripTestValue: 10);
         }
 
         [Fact]

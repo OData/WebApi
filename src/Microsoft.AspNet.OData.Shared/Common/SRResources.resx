@@ -670,6 +670,9 @@
   <data name="ParameterAliasMustBeInCurlyBraces" xml:space="preserve">
     <value>Parameter alias '{0}' in segment '{1}' does not start with '{{' or ends with '}}'.</value>
   </data>
+  <data name="ParameterAliasExpansionLimitExceeded" xml:space="preserve">
+    <value>The parameter alias expansion count exceeds the maximum allowed value of '{0}'.</value>
+  </data>
   <data name="EmptyKeyTemplate" xml:space="preserve">
     <value>Key template value '{0}' for key segment '{1}' is empty.</value>
   </data>

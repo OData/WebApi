@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Xunit;
@@ -72,6 +73,62 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Assert
             var constantNode = Assert.IsType<ConstantNode>(translatedNode);
             Assert.Null(constantNode.Value);
+        }
+
+        [Fact]
+        public void ReturnsNull_ParameterAliasMappedToNull()
+        {
+            var translator = new ParameterAliasNodeTranslator(
+                new Dictionary<string, SingleValueNode> { { "@p", null } });
+            var parameterAliasNode = new ParameterAliasNode("@p", null);
+
+            QueryNode translatedNode = parameterAliasNode.Accept(translator);
+
+            var constantNode = Assert.IsType<ConstantNode>(translatedNode);
+            Assert.Null(constantNode.Value);
+        }
+
+        [Fact]
+        public void CanTranslate_ParameterAliasChainAtExpansionLimit()
+        {
+            var parameterAliasNode = new ParameterAliasNode("@p0", null);
+            IDictionary<string, SingleValueNode> parameterAliasNodes =
+                CreateParameterAliasChain(ParameterAliasNodeTranslator.MaxParameterAliasExpansionCount);
+            var translator = new ParameterAliasNodeTranslator(parameterAliasNodes);
+
+            QueryNode translatedNode = parameterAliasNode.Accept(translator);
+
+            var constantNode = Assert.IsType<ConstantNode>(translatedNode);
+            Assert.Equal(123, constantNode.Value);
+        }
+
+        [Fact]
+        public void ThrowsODataException_ParameterAliasChainBeyondExpansionLimit()
+        {
+            var parameterAliasNode = new ParameterAliasNode("@p0", null);
+            IDictionary<string, SingleValueNode> parameterAliasNodes =
+                CreateParameterAliasChain(ParameterAliasNodeTranslator.MaxParameterAliasExpansionCount + 1);
+            var translator = new ParameterAliasNodeTranslator(parameterAliasNodes);
+
+            ExceptionAssert.Throws<ODataException>(
+                () => parameterAliasNode.Accept(translator),
+                "The parameter alias expansion count exceeds the maximum allowed value of '100'.");
+        }
+
+        [Fact]
+        public void ThrowsODataException_CyclicParameterAliases()
+        {
+            var parameterAliasNodes = new Dictionary<string, SingleValueNode>
+            {
+                { "@first", new ParameterAliasNode("@second", null) },
+                { "@second", new ParameterAliasNode("@first", null) }
+            };
+            var translator = new ParameterAliasNodeTranslator(parameterAliasNodes);
+            var parameterAliasNode = new ParameterAliasNode("@first", null);
+
+            ExceptionAssert.Throws<ODataException>(
+                () => parameterAliasNode.Accept(translator),
+                "The parameter alias expansion count exceeds the maximum allowed value of '100'.");
         }
 
         [Fact]
@@ -362,6 +419,19 @@ namespace Microsoft.AspNet.OData.Test.Query
                 new Dictionary<string, SingleValueNode> { { "@p", _parameterAliasMappedNode } });
             QueryNode translatedNode = filterClause.Expression.Accept(translator);
             return translatedNode;
+        }
+
+        private static IDictionary<string, SingleValueNode> CreateParameterAliasChain(int expansionCount)
+        {
+            var parameterAliasNodes = new Dictionary<string, SingleValueNode>();
+
+            for (int i = 0; i < expansionCount - 1; i++)
+            {
+                parameterAliasNodes.Add("@p" + i, new ParameterAliasNode("@p" + (i + 1), null));
+            }
+
+            parameterAliasNodes.Add("@p" + (expansionCount - 1), new ConstantNode(123));
+            return parameterAliasNodes;
         }
 
         private class ParameterAliasCustomer

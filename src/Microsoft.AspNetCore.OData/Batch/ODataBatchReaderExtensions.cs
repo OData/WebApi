@@ -163,8 +163,7 @@ namespace Microsoft.AspNet.OData.Batch
             // other paths and Content-ID references that resolve outside the service root via
             // dot-segment traversal (e.g. $1/../../../other) are both rejected here.  The service
             // root is derived from the outer batch request's own path (mapped as
-            // "{routePrefix}/$batch") rather than IODataFeature.RoutePrefix, which is not
-            // populated in the conventional (non-endpoint) routing pipeline this code runs in.
+            // "{routePrefix}/$batch"), including when callers bypass batch middleware.
             string serviceRoot = BuildServiceRootPath(originalContext.Request.Path, originalContext.Request.PathBase);
             if (!IsPathWithinServiceRoot(requestUri.AbsolutePath, serviceRoot))
             {
@@ -464,20 +463,29 @@ namespace Microsoft.AspNet.OData.Batch
                 || requestPath.StartsWith(serviceRoot + "/", StringComparison.OrdinalIgnoreCase);
         }
 
+        internal static string GetRoutePrefix(this PathString path)
+        {
+            int endIndex = path.Value.Length - 1;
+            while (endIndex > 0 && path.Value[endIndex] == '/')
+            {
+                endIndex--;
+            }
+
+            int lastSeparatorIndex = path.Value.LastIndexOf('/', endIndex);
+            return lastSeparatorIndex <= 0 ? string.Empty : path.Value.Substring(1, lastSeparatorIndex - 1);
+        }
+
         // Builds the expected path prefix for the OData service root, combining the ASP.NET Core
         // path base (for apps mounted under a sub-path) with the OData route prefix.  The route
         // prefix is derived from the outer batch request's own path, which is always mapped as
-        // "{routePrefix}/$batch" (see ODataRouteBuilderExtensions.MapODataServiceRoute), rather
-        // than IODataFeature.RoutePrefix, which is not populated by the conventional (non-endpoint)
-        // routing pipeline this code runs in.
+        // "{routePrefix}/$batch" (see ODataRouteBuilderExtensions.MapODataServiceRoute), including
+        // when callers bypass batch middleware.
         private static string BuildServiceRootPath(PathString batchRequestPath, PathString pathBase)
         {
             string basePart = pathBase.HasValue ? pathBase.Value.TrimEnd('/') : string.Empty;
 
-            string batchPath = batchRequestPath.HasValue ? batchRequestPath.Value : string.Empty;
-            string trimmedBatchPath = batchPath.TrimEnd('/');
-            int lastSlash = trimmedBatchPath.LastIndexOf('/');
-            string routePrefixPart = lastSlash > 0 ? trimmedBatchPath.Substring(0, lastSlash) : string.Empty;
+            string routePrefix = batchRequestPath.HasValue ? batchRequestPath.GetRoutePrefix() : string.Empty;
+            string routePrefixPart = string.IsNullOrEmpty(routePrefix) ? string.Empty : "/" + routePrefix;
 
             string combined = basePart + routePrefixPart;
             return string.IsNullOrEmpty(combined) ? "/" : combined;

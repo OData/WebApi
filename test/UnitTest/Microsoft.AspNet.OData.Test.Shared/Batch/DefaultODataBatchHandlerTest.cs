@@ -1075,8 +1075,14 @@ Content-Transfer-Encoding: binary
 
 GET {endpoint}/BatchTestSecurityHeaderCustomers HTTP/1.1
 Host: localhost
+Authorization: Bearer inner-token
+Cookie: session=inner
+Proxy-Authorization: Basic inner-proxy
 X-Forwarded-For: 10.0.0.1
+X-MS-Client-Principal: inner-principal
 X-MS-Client-Principal-Id: test-user-id
+X-MS-API-ROLE: inner-role
+X-MS-REQ-AUTHENTICATED: false
 
 
 --{batchRef}--
@@ -1090,6 +1096,60 @@ X-MS-Client-Principal-Id: test-user-id
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             var responseContent = await response.Content.ReadAsStringAsync();
             Assert.Contains("XForwardedFor=,PrincipalId=", responseContent);
+            Assert.Contains("Authorization=,Cookie=,ProxyAuthorization=", responseContent);
+            Assert.Contains("ClientPrincipal=,ApiRole=,RequestAuthenticated=", responseContent);
+        }
+
+        [Fact]
+        public async Task SendAsync_DoesNotOverrideInheritedAuthenticationHeadersFromSubRequest()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestSecurityHeaderCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestSecurityHeaderCustomer>("BatchTestSecurityHeaderCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.TryAddWithoutValidation("Authorization", "Bearer outer-token");
+            batchRequest.Headers.TryAddWithoutValidation("Cookie", "session=outer");
+            batchRequest.Headers.TryAddWithoutValidation("Proxy-Authorization", "Basic outer-proxy");
+            batchRequest.Headers.TryAddWithoutValidation("X-MS-Client-Principal", "outer-principal");
+            batchRequest.Headers.TryAddWithoutValidation("X-MS-API-ROLE", "outer-role");
+            batchRequest.Headers.TryAddWithoutValidation("X-MS-REQ-AUTHENTICATED", "true");
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestSecurityHeaderCustomers HTTP/1.1
+Host: localhost
+Authorization: Bearer inner-token
+Cookie: session=inner
+Proxy-Authorization: Basic inner-proxy
+X-MS-Client-Principal: inner-principal
+X-MS-API-ROLE: inner-role
+X-MS-REQ-AUTHENTICATED: false
+
+
+--{batchRef}--
+";
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            batchRequest.Content = httpContent;
+
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Authorization=Bearer outer-token,Cookie=session=outer,ProxyAuthorization=Basic outer-proxy", responseContent);
+            Assert.Contains("ClientPrincipal=outer-principal,ApiRole=outer-role,RequestAuthenticated=true", responseContent);
         }
 
         [Fact]
@@ -1289,7 +1349,15 @@ Host: other.example.com
             string xForwardedFor = HttpContext.Request.Headers["X-Forwarded-For"].ToString();
             string principalId = HttpContext.Request.Headers["X-MS-Client-Principal-Id"].ToString();
             string host = HttpContext.Request.Host.Value;
-            return $"XForwardedFor={xForwardedFor},PrincipalId={principalId},Host={host}";
+            string authorization = HttpContext.Request.Headers["Authorization"].ToString();
+            string cookie = HttpContext.Request.Headers["Cookie"].ToString();
+            string proxyAuthorization = HttpContext.Request.Headers["Proxy-Authorization"].ToString();
+            string clientPrincipal = HttpContext.Request.Headers["X-MS-Client-Principal"].ToString();
+            string apiRole = HttpContext.Request.Headers["X-MS-API-ROLE"].ToString();
+            string requestAuthenticated = HttpContext.Request.Headers["X-MS-REQ-AUTHENTICATED"].ToString();
+            return $"XForwardedFor={xForwardedFor},PrincipalId={principalId},Host={host},"
+                + $"Authorization={authorization},Cookie={cookie},ProxyAuthorization={proxyAuthorization},"
+                + $"ClientPrincipal={clientPrincipal},ApiRole={apiRole},RequestAuthenticated={requestAuthenticated}";
         }
     }
 

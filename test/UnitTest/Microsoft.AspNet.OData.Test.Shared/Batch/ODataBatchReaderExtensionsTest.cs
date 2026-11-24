@@ -97,8 +97,13 @@ Content-Transfer-Encoding: binary
 GET http://localhost/odata/Customers HTTP/1.1
 Host: other.example.com
 Authorization: Bearer test-token
+Cookie: session=inner
+Proxy-Authorization: Basic inner-proxy
 X-Forwarded-For: 10.0.0.1
+X-MS-Client-Principal: inner-principal
 X-MS-Client-Principal-Id: test-user-id
+X-MS-API-ROLE: inner-role
+X-MS-REQ-AUTHENTICATED: false
 X-Custom-Header: retained
 
 
@@ -115,8 +120,13 @@ X-Custom-Header: retained
             HttpRequestMessage subRequest = Assert.IsType<OperationRequestItem>(Assert.Single(requests)).Request;
             Assert.Null(subRequest.Headers.Host);
             Assert.False(subRequest.Headers.Contains("Authorization"));
+            Assert.False(subRequest.Headers.Contains("Cookie"));
+            Assert.False(subRequest.Headers.Contains("Proxy-Authorization"));
             Assert.False(subRequest.Headers.Contains("X-Forwarded-For"));
+            Assert.False(subRequest.Headers.Contains("X-MS-Client-Principal"));
             Assert.False(subRequest.Headers.Contains("X-MS-Client-Principal-Id"));
+            Assert.False(subRequest.Headers.Contains("X-MS-API-ROLE"));
+            Assert.False(subRequest.Headers.Contains("X-MS-REQ-AUTHENTICATED"));
             Assert.Equal("retained", Assert.Single(subRequest.Headers.GetValues("X-Custom-Header")));
         }
 

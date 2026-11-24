@@ -438,6 +438,271 @@ namespace Microsoft.AspNet.OData.Test.Query
             }
         }
 
+        [Theory]
+        [InlineData("compute(Id as ItemId)/compute(Commission add 1 as Result)", 11)]
+        [InlineData("compute(Id as ItemId)/compute(ItemId add 1 as NextId)/compute(Commission add NextId as Result)", 12)]
+        [InlineData("compute(Id as ItemId)/compute(Instance/Address/Commission add 1 as Result)", 21)]
+        [InlineData("compute(Id as ItemId)/compute(substring(Instance/HiddenName,0,20) as Result)", null)]
+        [InlineData("compute(Id as ItemId)/compute(substring(Instance/Profile/Label,0,20) as Result)", null)]
+        [InlineData("compute(Id as ItemId)/compute(substring(Instance/DisplayName,0,3) as Result)", "Ali")]
+        public void ApplyTo_TransformedPropertiesHonorEdmBoundaries(string apply, object expected)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.EntityType<TransformedOpenCustomer>().Ignore(customer => customer.HiddenName);
+            builder.EntityType<TransformedOpenCustomer>().Ignore(customer => customer.Profile);
+            builder.EntityType<TransformedOpenCustomer>().Property(customer => customer.Name).Name = "DisplayName";
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1, Name = "Alice", HiddenName = "secret", Profile = new TransformedOpenProfile { Label = "secret" }, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } }, DynamicProperties = new Dictionary<string, object> { { "Commission", 10 } } } }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            var result = Assert.Single(results.Cast<DynamicTypeWrapper>());
+            Assert.Equal(expected, result.Values["Result"]);
+        }
+
+        [Fact]
+        public void ApplyTo_GroupByReturnsNullForAnIgnoredPropertyAfterCompute()
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.EntityType<TransformedOpenCustomer>().Ignore(customer => customer.HiddenName);
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            const string apply = "compute(Id as ItemId)/groupby((Instance/HiddenName))";
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1, HiddenName = "first secret" }, new TransformedOpenCustomer { Id = 2, HiddenName = "second secret" } }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            Assert.Null(Assert.Single(results.Cast<DynamicTypeWrapper>()).Values["HiddenName"]);
+        }
+
+        [Fact]
+        public void ApplyTo_GroupedResultsCannotExposeWrapperClrProperties()
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            const string apply = "groupby((Id))/groupby((Values))";
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1 } }.AsQueryable();
+
+            Assert.Throws<ODataException>(() => option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }));
+        }
+
+        [Theory]
+        [InlineData("compute(Id as ItemId)/filter(Commission eq 10)")]
+        [InlineData("compute(Id as ItemId)/filter(Instance/Address/Commission eq 20)")]
+        public void ApplyTo_TransformedFilterUsesOriginalDynamicPropertySource(string apply)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } }, DynamicProperties = new Dictionary<string, object> { { "Commission", 10 } } } }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            Assert.Single(results.Cast<DynamicTypeWrapper>());
+        }
+
+        [Theory]
+        [InlineData("Instance/Address/Commission", false, false)]
+        [InlineData("Instance/Address/Commission", true, false)]
+        [InlineData("Instance/Address/Commission", true, true)]
+        [InlineData("Address/Commission", false, false)]
+        [InlineData("Address/Commission", true, false)]
+        [InlineData("Address/Commission", true, true)]
+        public void ApplyTo_TransformedFilterPreservesNullPropagationForComplexOpenProperty(string propertyPath, bool hasAddress, bool hasDictionary)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            string apply = "compute(Id as ItemId)/filter(" + propertyPath + " eq 20)";
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var address = hasAddress ? new TransformedOpenAddress { DynamicProperties = hasDictionary ? new Dictionary<string, object>() : null } : null;
+            var customers = new[]
+            {
+                new TransformedOpenCustomer { Id = 1, Address = address },
+                new TransformedOpenCustomer { Id = 2, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } } },
+                new TransformedOpenCustomer { Id = 3, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 10 } } } }
+            }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            Assert.Equal(2, Assert.Single(results.Cast<DynamicTypeWrapper>()).Values["ItemId"]);
+        }
+
+        [Theory]
+        [InlineData("Instance/Address/Commission", false, false)]
+        [InlineData("Instance/Address/Commission", true, false)]
+        [InlineData("Instance/Address/Commission", true, true)]
+        [InlineData("Address/Commission", false, false)]
+        [InlineData("Address/Commission", true, false)]
+        [InlineData("Address/Commission", true, true)]
+        public void ApplyTo_TransformedComputePreservesNullPropagationForComplexOpenProperty(string propertyPath, bool hasAddress, bool hasDictionary)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            string apply = "compute(Id as ItemId)/compute(" + propertyPath + " add 1 as Result)";
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var address = hasAddress ? new TransformedOpenAddress { DynamicProperties = hasDictionary ? new Dictionary<string, object>() : null } : null;
+            var customers = new[]
+            {
+                new TransformedOpenCustomer { Id = 1, Address = address },
+                new TransformedOpenCustomer { Id = 2, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } } }
+            }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }).Cast<DynamicTypeWrapper>().ToArray();
+
+            Assert.Equal(2, results.Length);
+            Assert.Null(results[0].Values["Result"]);
+            Assert.Equal(21, results[1].Values["Result"]);
+        }
+
+        [Theory]
+        [InlineData("compute(Id as ItemId)/filter(Instance/Profile/Address/Commission eq 20)", true)]
+        [InlineData("compute(Id as ItemId)/filter(Instance/Profile/Address/BuildingNumber eq 20)", true)]
+        [InlineData("compute(Id as ItemId)/compute(Instance/Profile/Address/Commission add 1 as Result)", false)]
+        [InlineData("compute(Id as ItemId)/compute(Instance/Profile/Address/BuildingNumber add 1 as Result)", false)]
+        [InlineData("compute(Id as ItemId)/compute(ItemId add 1 as NextId)/compute(Instance/Profile/Address/Commission add 1 as Result)", false)]
+        public void ApplyTo_TransformedPathsPreserveNullPropagationAcrossNestedComplexSegments(string apply, bool isFilter)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>().Property(address => address.HouseNumber).Name = "BuildingNumber";
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[]
+            {
+                new TransformedOpenCustomer { Id = 1 },
+                new TransformedOpenCustomer { Id = 2, Profile = new TransformedOpenProfile() },
+                new TransformedOpenCustomer { Id = 3, Profile = new TransformedOpenProfile { Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", null } } } } },
+                new TransformedOpenCustomer { Id = 4, Profile = new TransformedOpenProfile { Address = new TransformedOpenAddress { HouseNumber = 20, DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } } } }
+            }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }).Cast<DynamicTypeWrapper>().ToArray();
+
+            if (isFilter)
+            {
+                Assert.Equal(4, Assert.Single(results).Values["ItemId"]);
+            }
+            else
+            {
+                Assert.Equal(4, results.Length);
+                Assert.Null(results[0].Values["Result"]);
+                Assert.Null(results[1].Values["Result"]);
+                Assert.Null(results[2].Values["Result"]);
+                Assert.Equal(21, results[3].Values["Result"]);
+            }
+        }
+
+        [Fact]
+        public void ApplyTo_TransformedFilterMatchesNullComplexOpenProperty()
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            const string apply = "compute(Id as ItemId)/filter(Instance/Address/Commission eq null)";
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[]
+            {
+                new TransformedOpenCustomer { Id = 1 },
+                new TransformedOpenCustomer { Id = 2, Address = new TransformedOpenAddress() },
+                new TransformedOpenCustomer { Id = 3, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object>() } },
+                new TransformedOpenCustomer { Id = 4, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", null } } } },
+                new TransformedOpenCustomer { Id = 5, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } } }
+            }.AsQueryable();
+
+            var results = option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            Assert.Equal(new[] { 1, 2, 3, 4 }, results.Cast<DynamicTypeWrapper>().Select(result => (int)result.Values["ItemId"]).ToArray());
+        }
+
+        [Theory]
+        [InlineData("compute(Id as ItemId)/filter(Instance/Address/Commission eq 20)")]
+        [InlineData("compute(Id as ItemId)/compute(Instance/Address/Commission add 1 as Result)")]
+        [InlineData("compute(Id as ItemId)/compute(Address/Commission add 1 as Result)")]
+        public void ApplyTo_TransformedPathsDoNotPropagateNullWhenDisabled(string apply)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1 } }.AsQueryable();
+
+            Assert.Throws<NullReferenceException>(() => option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }).Cast<DynamicTypeWrapper>().ToArray());
+        }
+
+        [Theory]
+        [InlineData("compute(Id as ItemId)/filter(Instance/Address/Commission eq 20)", true)]
+        [InlineData("compute(Id as ItemId)/filter(Address/Commission eq 20)", true)]
+        [InlineData("compute(Id as ItemId)/compute(Instance/Address/Commission add 1 as Result)", false)]
+        [InlineData("compute(Id as ItemId)/compute(Address/Commission add 1 as Result)", false)]
+        public void ApplyTo_TransformedPathsReadComplexPropertiesWhenNullPropagationDisabled(string apply, bool isFilter)
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<TransformedOpenCustomer>("Customers");
+            builder.ComplexType<TransformedOpenAddress>();
+            var model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(TransformedOpenCustomer));
+            var parser = new ODataQueryOptionParser(model, context.ElementType, null, new Dictionary<string, string> { { "$apply", apply } });
+            var option = new ApplyQueryOption(apply, context, parser);
+            var customers = new[] { new TransformedOpenCustomer { Id = 1, Address = new TransformedOpenAddress { DynamicProperties = new Dictionary<string, object> { { "Commission", 20 } } } } }.AsQueryable();
+
+            var result = Assert.Single(option.ApplyTo(customers, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }).Cast<DynamicTypeWrapper>());
+
+            Assert.Equal(isFilter ? 1 : 21, result.Values[isFilter ? "ItemId" : "Result"]);
+        }
+
+        public class TransformedOpenCustomer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string HiddenName { get; set; }
+            public TransformedOpenProfile Profile { get; set; }
+            public TransformedOpenAddress Address { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
+        }
+
+        public class TransformedOpenProfile
+        {
+            public string Label { get; set; }
+            public TransformedOpenAddress Address { get; set; }
+        }
+
+        public class TransformedOpenAddress
+        {
+            public int? HouseNumber { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
+        }
+
         // Legal apply queries usable against CustomerApplyTestData.
         // Tuple is: apply, expected number
         public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestApplies

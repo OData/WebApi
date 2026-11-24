@@ -279,11 +279,36 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
             {
-                return GetFlattenedPropertyExpression(openNode.Name) ?? Expression.Property(Bind(openNode.Source), openNode.Name);
-            }
-            PropertyInfo prop = GetDynamicPropertyContainer(openNode);
+                Expression flattenedProperty = GetFlattenedPropertyExpression(GetFullPropertyPath(openNode));
+                if (flattenedProperty != null)
+                {
+                    return flattenedProperty;
+                }
 
-            var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
+                if (!HasInstancePropertyContainer)
+                {
+                    throw new ODataException(Error.Format(SRResources.PropertyOrPathWasRemovedFromContext, GetFullPropertyPath(openNode)));
+                }
+            }
+
+            Expression source = HasInstancePropertyContainer ? BindTransformedOpenPropertySource(openNode.Source) : null;
+            if (HasInstancePropertyContainer)
+            {
+                if (source.Type == typeof(object))
+                {
+                    return CreateNestedOpenPropertyAccess(source, openNode.Name);
+                }
+
+                PropertyInfo declaredProperty = GetDeclaredClrProperty(source.Type, openNode.Name, Model);
+                if (declaredProperty != null)
+                {
+                    IEdmProperty edmProperty = (Model.GetEdmType(source.Type) as IEdmStructuredType)?.FindProperty(openNode.Name);
+                    return edmProperty == null ? Expression.Property(source, declaredProperty) : CreatePropertyAccessExpression(source, edmProperty, GetFullPropertyPath(openNode));
+                }
+            }
+
+            PropertyInfo prop = HasInstancePropertyContainer ? GetDynamicPropertyContainer(source.Type, openNode.Kind) : GetDynamicPropertyContainer(openNode);
+            Expression propertyAccessExpression = HasInstancePropertyContainer ? Expression.Property(source, prop) : BindPropertyAccessExpression(openNode, prop);
             var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
                 DictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
             var containsKeyExpression = Expression.Call(propertyAccessExpression,
@@ -294,6 +319,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
                 var dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+                if (source != null && IsNullable(source.Type))
+                {
+                    dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(Expression.NotEqual(source, Expression.Constant(null, source.Type)), dynamicDictIsNotNullAndContainsKey);
+                }
+
                 return Expression.Condition(
                     dynamicDictIsNotNullAndContainsKey,
                     readDictionaryIndexerExpression,
@@ -306,6 +336,32 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     readDictionaryIndexerExpression,
                     nullExpression);
             }
+        }
+
+        private Expression BindTransformedOpenPropertySource(QueryNode node)
+        {
+            Expression root = UnwrapComputeWrapper(Parameter);
+            if (node is ResourceRangeVariableReferenceNode)
+            {
+                return root;
+            }
+
+            if (node is SingleValueOpenPropertyAccessNode openNode)
+            {
+                if (openNode.Name == "Instance" && openNode.Source is ResourceRangeVariableReferenceNode)
+                {
+                    return root;
+                }
+
+                return BindDynamicPropertyAccessQueryNode(openNode);
+            }
+
+            if (node is SingleComplexNode complexNode)
+            {
+                return CreatePropertyAccessExpression(BindTransformedOpenPropertySource(complexNode.Source), complexNode.Property, GetFullPropertyPath(complexNode));
+            }
+
+            return Bind(node);
         }
 
         private Expression BindPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode, PropertyInfo prop)

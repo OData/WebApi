@@ -13,6 +13,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -97,6 +98,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.ResourceRangeVariableReference:
+                    if (baseElement != null)
+                    {
+                        return baseElement;
+                    }
+
                     return this.LambdaParameter.Type.IsGenericType && this.LambdaParameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
                         ? (Expression)Expression.Property(this.LambdaParameter, "Source")
                         : this.LambdaParameter;
@@ -111,7 +117,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source, baseElement), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
-                    return GetFlattenedPropertyExpression(openNode.Name) ?? CreateOpenPropertyAccessExpression(openNode);
+                    if (baseElement != null && openNode.Name == "Instance" && openNode.Source is ResourceRangeVariableReferenceNode)
+                    {
+                        return baseElement;
+                    }
+
+                    return GetFlattenedPropertyExpression(openNode.Name) ?? CreateOpenPropertyAccessExpression(openNode, baseElement);
                 case QueryNodeKind.None:
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = (SingleNavigationNode)node;
@@ -137,50 +148,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        /// <summary>
-        /// Gets the CLR <see cref="PropertyInfo"/> that a property segment binds to, mapping the
-        /// segment's EDM name to the CLR property name. Returns null for a dynamic (open) property, which
-        /// the caller then reads from the dynamic property container.
-        /// </summary>
-        /// <param name="instanceType">The runtime CLR type of the value being accessed.</param>
-        /// <param name="propertyName">The property name from the URI segment (the EDM name).</param>
-        /// <param name="model">The Edm model.</param>
-        /// <returns>
-        /// The <see cref="PropertyInfo"/> to bind for a property declared in the model (resolved by its
-        /// CLR name), or null when the segment is an undeclared member of a type that is in the model
-        /// (whether open or not), so the caller resolves it from the dynamic container or treats it as
-        /// absent rather than binding a CLR member that is not part of the model.
-        /// </returns>
-        private static PropertyInfo GetDeclaredClrProperty(Type instanceType, string propertyName, IEdmModel model)
+        private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode, Expression baseElement = null)
         {
-            if (model != null && model.GetEdmType(instanceType) is IEdmStructuredType structuredType)
+            Expression sourceAccessor = BindAccessor(openNode.Source, baseElement ?? (HasInstancePropertyContainer ? UnwrapComputeWrapper(LambdaParameter) : null));
+            if (EdmLibHelpers.IsDynamicTypeWrapper(sourceAccessor.Type))
             {
-                IEdmProperty edmProperty = structuredType.FindProperty(propertyName);
-                if (edmProperty != null)
-                {
-                    // Declared in the model: bind by the CLR name, which can differ from the EDM name
-                    // (e.g. a [DataMember(Name=...)] or builder .Name rename). Fall through to the dynamic
-                    // container (null) rather than throwing if the CLR name cannot be resolved.
-                    string clrPropertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, model);
-                    return clrPropertyName != null ? instanceType.GetProperty(clrPropertyName) : null;
-                }
-
-                // The name is not declared on this modeled type. Whether the type is open (a dynamic
-                // member) or not (a CLR member deliberately excluded from the model, e.g. via [NotMapped]
-                // or Ignore()), it must not bind to the CLR member. Return null so the caller resolves it
-                // from the dynamic container (open type) or treats it as absent, consistent with how a
-                // genuinely dynamic name on the same type is handled.
-                return null;
+                throw new ODataException(Error.Format(SRResources.PropertyOrPathWasRemovedFromContext, openNode.Name));
             }
 
-            // A type that is not in the model (e.g. an intermediate transformation result such as a
-            // grouping or flattening wrapper): bind the CLR property directly by the segment name.
-            return instanceType.GetProperty(propertyName);
-        }
-
-        private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)
-        {
-            Expression sourceAccessor = BindAccessor(openNode.Source);
+            if (sourceAccessor.Type == typeof(object))
+            {
+                return CreateNestedOpenPropertyAccess(sourceAccessor, openNode.Name);
+            }
 
             // If the segment names a property declared in the model, bind to it directly (e.g. it exists
             // on the source type after an earlier $apply transformation), mapping the EDM name to the CLR
@@ -188,11 +167,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             PropertyInfo declaredClrProperty = GetDeclaredClrProperty(sourceAccessor.Type, openNode.Name, Model);
             if (declaredClrProperty != null)
             {
-                return Expression.Property(sourceAccessor, declaredClrProperty);
+                IEdmProperty edmProperty = (Model.GetEdmType(sourceAccessor.Type) as IEdmStructuredType)?.FindProperty(openNode.Name);
+                return edmProperty == null ? Expression.Property(sourceAccessor, declaredClrProperty) : CreatePropertyAccessExpression(sourceAccessor, edmProperty, GetFullPropertyPath(openNode));
             }
 
             // Property doesn't exists go for dynamic properties dictionary
-            PropertyInfo prop = GetDynamicPropertyContainer(openNode);
+            PropertyInfo prop = GetDynamicPropertyContainer(sourceAccessor.Type, openNode.Kind);
             MemberExpression propertyAccessExpression = Expression.Property(sourceAccessor, prop.Name);
             IndexExpression readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
                             DictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
@@ -204,6 +184,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
                 var dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+                if (IsNullable(sourceAccessor.Type))
+                {
+                    dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(Expression.NotEqual(sourceAccessor, Expression.Constant(null, sourceAccessor.Type)), dynamicDictIsNotNullAndContainsKey);
+                }
+
                 return Expression.Condition(
                     dynamicDictIsNotNullAndContainsKey,
                     readDictionaryIndexerExpression,

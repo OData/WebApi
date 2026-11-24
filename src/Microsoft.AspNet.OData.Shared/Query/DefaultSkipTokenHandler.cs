@@ -13,6 +13,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
@@ -293,14 +294,7 @@ namespace Microsoft.AspNet.OData.Query
             foreach (IEdmProperty edmProperty in tokenProperties)
             {
                 string key = edmProperty.Name;
-                string clrPropertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, context.Model);
-                var clrProperty = clrPropertyName == null ? null : context.ElementClrType.GetProperty(clrPropertyName);
-                if (clrProperty == null || !clrProperty.CanRead || clrProperty.GetIndexParameters().Length != 0)
-                {
-                    throw new ODataException(SRResources.SkipTokenParseError);
-                }
-
-                MemberExpression property = Expression.Property(param, clrProperty);
+                MemberExpression property = Expression.Property(param, GetClrPropertyForSkipToken(edmProperty, context));
                 Tuple<object, Type> propertyValue = propertyValuePairs[edmProperty];
 
                 object value = propertyValue.Item1;
@@ -404,6 +398,18 @@ namespace Microsoft.AspNet.OData.Query
 
             Expression whereLambda = Expression.Lambda(where, param);
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
+        }
+
+        private static PropertyInfo GetClrPropertyForSkipToken(IEdmProperty edmProperty, ODataQueryContext context)
+        {
+            string clrPropertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, context.Model);
+            PropertyInfo clrProperty = clrPropertyName == null ? null : context.ElementClrType.GetProperty(clrPropertyName);
+            if (clrProperty == null || !clrProperty.CanRead || clrProperty.GetIndexParameters().Length != 0)
+            {
+                throw new ODataException(SRResources.SkipTokenParseError);
+            }
+
+            return clrProperty;
         }
 
         /// <summary>

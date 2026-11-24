@@ -569,6 +569,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             SingleValueNode parent = null;
             switch (node.Kind)
             {
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    var openNode = (SingleValueOpenPropertyAccessNode)node;
+                    path = openNode.Name;
+                    parent = openNode.Source;
+                    break;
                 case QueryNodeKind.SingleComplexNode:
                     var complexNode = (SingleComplexNode)node;
                     path = complexNode.Property.Name;
@@ -605,15 +610,24 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>Returns CLR property for dynamic properties container.</returns>
         protected PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
         {
+            return GetDynamicPropertyContainer(openNode.Source.TypeReference, openNode.Kind);
+        }
+
+        internal PropertyInfo GetDynamicPropertyContainer(Type sourceType, QueryNodeKind nodeKind)
+        {
+            return GetDynamicPropertyContainer(Model.GetEdmTypeReference(sourceType), nodeKind);
+        }
+
+        private PropertyInfo GetDynamicPropertyContainer(IEdmTypeReference edmTypeReference, QueryNodeKind nodeKind)
+        {
             IEdmStructuredType edmStructuredType;
-            IEdmTypeReference edmTypeReference = openNode.Source.TypeReference;
             if (edmTypeReference == null)
             {
                 // The source segment is itself an open/dynamic property, so it has no known EDM type
                 // from which to resolve a dynamic-property container (e.g. a nested open path such as
                 // A/B/C where A is dynamic). Surface a clean query error instead of dereferencing a
                 // null type reference, which would otherwise bubble up as a raw ArgumentNullException.
-                throw new ODataException(Error.Format(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name));
+                throw new ODataException(Error.Format(SRResources.QueryNodeBindingNotSupported, nodeKind, typeof(FilterBinder).Name));
             }
 
             if (edmTypeReference.IsEntity())
@@ -626,10 +640,66 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else
             {
-                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
+                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, nodeKind, typeof(FilterBinder).Name);
             }
 
             return EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
+        }
+
+        internal static Expression UnwrapComputeWrapper(Expression source)
+        {
+            while (source.Type.IsGenericType && source.Type.GetGenericTypeDefinition() == typeof(ComputeWrapper<>))
+            {
+                source = Expression.Property(source, "Instance");
+            }
+
+            return source;
+        }
+
+        internal static PropertyInfo GetDeclaredClrProperty(Type instanceType, string propertyName, IEdmModel model)
+        {
+            if (model.GetEdmType(instanceType) is IEdmStructuredType structuredType)
+            {
+                IEdmProperty edmProperty = structuredType.FindProperty(propertyName);
+                string clrPropertyName = edmProperty == null ? null : EdmLibHelpers.GetClrPropertyName(edmProperty, model);
+                return clrPropertyName == null ? null : instanceType.GetProperty(clrPropertyName);
+            }
+
+            return EdmLibHelpers.IsDynamicTypeWrapper(instanceType) ? null : instanceType.GetProperty(propertyName);
+        }
+
+        internal Expression CreateNestedOpenPropertyAccess(Expression source, string propertyName)
+        {
+            MethodInfo accessor = typeof(ExpressionBinderBase).GetMethod(nameof(GetNestedOpenPropertyValue), BindingFlags.Static | BindingFlags.NonPublic);
+            Expression access = Expression.Call(accessor, source, Expression.Constant(propertyName), Expression.Constant(Model, typeof(IEdmModel)), Expression.Constant(QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True));
+            return QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True
+                ? Expression.Condition(Expression.Equal(source, NullConstant), NullConstant, access)
+                : access;
+        }
+
+        private static object GetNestedOpenPropertyValue(object instance, string propertyName, IEdmModel model, bool handleNullPropagation)
+        {
+            Type instanceType = instance.GetType();
+            PropertyInfo declaredProperty = GetDeclaredClrProperty(instanceType, propertyName, model);
+            if (declaredProperty != null)
+            {
+                return declaredProperty.GetValue(instance);
+            }
+
+            IEdmStructuredType structuredType = model.GetEdmType(instanceType) as IEdmStructuredType;
+            if (structuredType == null || !structuredType.IsOpen)
+            {
+                throw new ODataException(Error.Format(SRResources.QueryNodeBindingNotSupported, QueryNodeKind.SingleValueOpenPropertyAccess, typeof(FilterBinder).Name));
+            }
+
+            PropertyInfo container = EdmLibHelpers.GetDynamicPropertyDictionary(structuredType, model);
+            var dictionary = (IDictionary<string, object>)container.GetValue(instance);
+            if (handleNullPropagation && dictionary == null)
+            {
+                return null;
+            }
+
+            return dictionary.TryGetValue(propertyName, out object value) ? value : null;
         }
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
@@ -1273,7 +1343,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else
             {
                 return GetFlattenedPropertyExpression(propertyPath)
-                    ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, (this.HasInstancePropertyContainer && !propertyPath.Contains("\\") ? "Instance\\" : String.Empty) + propertyName));
+                    ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, (this.HasInstancePropertyContainer && source.Type.IsGenericType && source.Type.GetGenericTypeDefinition() == typeof(ComputeWrapper<>) && !propertyPath.Contains("\\") ? "Instance\\" : String.Empty) + propertyName));
             }
         }
 

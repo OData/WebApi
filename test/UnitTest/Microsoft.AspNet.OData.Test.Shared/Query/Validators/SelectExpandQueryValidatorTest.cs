@@ -28,6 +28,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
             "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
             "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.";
 
+        public const string MaxSelectExpandNodeCountExceededErrorString =
+            "The number of $select and $expand items in the request exceeds the maximum number allowed of '{0}'. " +
+            "To increase the limit, set the 'MaxSelectExpandNodeCount' property on EnableQueryAttribute or ODataValidationSettings.";
+
         public SelectExpandQueryValidatorTest()
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -365,6 +369,219 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
             ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 "The property 'Orders' cannot be used in the $expand query option.");
+        }
+
+        [Theory]
+        [InlineData("P1,P2,P3", null, 2)]
+        [InlineData(null, "Child,Other", 1)]
+        [InlineData("P1,P2", "Child", 2)]
+        [InlineData(null, "Child($select=P1,P2)", 2)]
+        [InlineData(null, "Child($expand=Other)", 1)]
+        public void Validate_Throws_WhenSelectExpandNodeCountExceedsLimit(
+            string select,
+            string expand,
+            int maximum)
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+            SelectExpandQueryOption option =
+                new SelectExpandQueryOption(select, expand, CreateSelectExpandNodeCountContext());
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                MaxExpansionDepth = 0,
+                MaxSelectExpandNodeCount = maximum
+            };
+
+            ExceptionAssert.Throws<ODataException>(
+                () => validator.Validate(option, settings),
+                String.Format(
+                    CultureInfo.CurrentCulture,
+                    MaxSelectExpandNodeCountExceededErrorString,
+                    maximum));
+        }
+
+        [Theory]
+        [InlineData("P1,P2,P3", null, 3)]
+        [InlineData(null, "Child", 1)]
+        [InlineData(null, "Child($select=P1,P2)", 3)]
+        public void Validate_DoesNotThrow_WhenSelectExpandNodeCountIsWithinLimit(
+            string select,
+            string expand,
+            int maximum)
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+            SelectExpandQueryOption option =
+                new SelectExpandQueryOption(select, expand, CreateSelectExpandNodeCountContext());
+
+            ExceptionAssert.DoesNotThrow(
+                () => validator.Validate(
+                    option,
+                    new ODataValidationSettings
+                    {
+                        MaxExpansionDepth = 0,
+                        MaxSelectExpandNodeCount = maximum
+                    }));
+        }
+
+        [Fact]
+        public void Validate_DollarSelectWildcard_CountsAsSingleNode()
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+            SelectExpandQueryOption option =
+                new SelectExpandQueryOption("*", null, CreateSelectExpandNodeCountContext());
+
+            ExceptionAssert.DoesNotThrow(
+                () => validator.Validate(
+                    option,
+                    new ODataValidationSettings
+                    {
+                        MaxExpansionDepth = 0,
+                        MaxSelectExpandNodeCount = 1
+                    }));
+        }
+
+        [Fact]
+        public void Validate_UsesGlobalSelectExpandNodeCount_WhenEndpointSettingIsUnset()
+        {
+            DefaultQuerySettings defaultSettings = new DefaultQuerySettings
+            {
+                EnableExpand = true,
+                EnableSelect = true,
+                MaxSelectExpandNodeCount = 2
+            };
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(defaultSettings);
+            SelectExpandQueryOption option =
+                new SelectExpandQueryOption("P1,P2,P3", null, CreateSelectExpandNodeCountContext());
+
+            ExceptionAssert.Throws<ODataException>(
+                () => validator.Validate(option, new ODataValidationSettings { MaxExpansionDepth = 0 }),
+                String.Format(
+                    CultureInfo.CurrentCulture,
+                    MaxSelectExpandNodeCountExceededErrorString,
+                    2));
+        }
+
+        [Fact]
+        public void Validate_EndpointSelectExpandNodeCount_OverridesGlobalLimit()
+        {
+            DefaultQuerySettings defaultSettings = new DefaultQuerySettings
+            {
+                EnableExpand = true,
+                EnableSelect = true,
+                MaxSelectExpandNodeCount = 2
+            };
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(defaultSettings);
+            SelectExpandQueryOption option =
+                new SelectExpandQueryOption("P1,P2,P3", null, CreateSelectExpandNodeCountContext());
+
+            ExceptionAssert.DoesNotThrow(
+                () => validator.Validate(
+                    option,
+                    new ODataValidationSettings
+                    {
+                        MaxExpansionDepth = 0,
+                        MaxSelectExpandNodeCount = 3
+                    }));
+        }
+
+        [Fact]
+        public void Validate_DollarLevels_MultipliesSelectExpandNodeCount()
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+            ODataValidationSettings settings = new ODataValidationSettings
+            {
+                MaxExpansionDepth = 100,
+                MaxSelectExpandNodeCount = 24
+            };
+
+            ExceptionAssert.Throws<ODataException>(
+                () => validator.Validate(
+                    new SelectExpandQueryOption(
+                        null,
+                        "Child($select=P1,P2,P3,P4;$levels=5)",
+                        CreateSelectExpandNodeCountContext()),
+                    settings),
+                String.Format(
+                    CultureInfo.CurrentCulture,
+                    MaxSelectExpandNodeCountExceededErrorString,
+                    24));
+        }
+
+        [Theory]
+        [InlineData(null, 5)]
+        [InlineData(4, 11)]
+        public void Validate_DollarLevelsMax_MultipliesSelectExpandNodeCount_WhenExpansionDepthIsUnlimited(
+            int? levelsMaxLiteralExpansionDepth,
+            int maximum)
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+            SelectExpandQueryOption option = new SelectExpandQueryOption(
+                null,
+                "Child($select=P1,P2;$levels=max)",
+                CreateSelectExpandNodeCountContext());
+            if (levelsMaxLiteralExpansionDepth.HasValue)
+            {
+                option.LevelsMaxLiteralExpansionDepth = levelsMaxLiteralExpansionDepth.Value;
+            }
+
+            ExceptionAssert.Throws<ODataException>(
+                () => validator.Validate(
+                    option,
+                    new ODataValidationSettings
+                    {
+                        MaxExpansionDepth = 0,
+                        MaxSelectExpandNodeCount = maximum
+                    }),
+                String.Format(
+                    CultureInfo.CurrentCulture,
+                    MaxSelectExpandNodeCountExceededErrorString,
+                    maximum));
+        }
+
+        [Fact]
+        public void Validate_ZeroSelectExpandNodeCount_DisablesLimit()
+        {
+            SelectExpandQueryValidator validator =
+                new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true, EnableSelect = true });
+
+            ExceptionAssert.DoesNotThrow(
+                () => validator.Validate(
+                    new SelectExpandQueryOption(
+                        null,
+                        "Child($select=P1,P2,P3,P4;$levels=50)",
+                        CreateSelectExpandNodeCountContext()),
+                    new ODataValidationSettings
+                    {
+                        MaxExpansionDepth = 100,
+                        MaxSelectExpandNodeCount = 0
+                    }));
+        }
+
+        private static ODataQueryContext CreateSelectExpandNodeCountContext()
+        {
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<SelectExpandNodeCountEntity>("Entities");
+            ODataQueryContext context =
+                new ODataQueryContext(builder.GetEdmModel(), typeof(SelectExpandNodeCountEntity));
+            context.RequestContainer = new MockContainer();
+            context.DefaultQuerySettings.EnableExpand = true;
+            context.DefaultQuerySettings.EnableSelect = true;
+            return context;
+        }
+
+        public class SelectExpandNodeCountEntity
+        {
+            public int Id { get; set; }
+            public string P1 { get; set; }
+            public string P2 { get; set; }
+            public string P3 { get; set; }
+            public string P4 { get; set; }
+            public SelectExpandNodeCountEntity Child { get; set; }
+            public SelectExpandNodeCountEntity Other { get; set; }
         }
 
         [Theory]

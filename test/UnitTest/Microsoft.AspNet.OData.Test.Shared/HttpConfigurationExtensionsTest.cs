@@ -381,7 +381,8 @@ namespace Microsoft.AspNet.OData.Test
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.Filter().Count(QueryOptionSetting.Disabled).Expand().OrderBy().MaxTop(10);
+            config.Filter().Count(QueryOptionSetting.Disabled).Expand().OrderBy().MaxTop(10)
+                .MaxSelectExpandNodeCount(25);
             DefaultQuerySettings defaultQuerySettings = config.GetDefaultQuerySettings();
 
             // Assert
@@ -390,6 +391,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.True(defaultQuerySettings.EnableExpand);
             Assert.True(defaultQuerySettings.EnableOrderBy);
             Assert.Equal(10, defaultQuerySettings.MaxTop);
+            Assert.Equal(25, defaultQuerySettings.MaxSelectExpandNodeCount);
         }
 
         private static IODataPathHandler GetPathHandler(HttpConfiguration config)

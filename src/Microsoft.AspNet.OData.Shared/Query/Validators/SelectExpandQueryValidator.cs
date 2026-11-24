@@ -59,7 +59,17 @@ namespace Microsoft.AspNet.OData.Query.Validators
             _orderByQueryValidator = new OrderByModelLimitationsValidator(selectExpandQueryOption.Context,
                 _defaultQuerySettings.EnableOrderBy);
             _selectExpandQueryOption = selectExpandQueryOption;
-            ValidateRestrictions(null, 0, selectExpandQueryOption.SelectExpandClause, null, validationSettings);
+            int maxSelectExpandNodeCount = validationSettings.MaxSelectExpandNodeCount ??
+                _defaultQuerySettings.MaxSelectExpandNodeCount;
+            SelectExpandNodeCounter selectExpandNodeCounter = new SelectExpandNodeCounter(maxSelectExpandNodeCount);
+            ValidateRestrictions(
+                null,
+                0,
+                selectExpandQueryOption.SelectExpandClause,
+                null,
+                validationSettings,
+                selectExpandNodeCounter,
+                1);
 
             if (validationSettings.MaxExpansionDepth > 0)
             {
@@ -292,7 +302,9 @@ namespace Microsoft.AspNet.OData.Query.Validators
             int currentDepth,
             SelectExpandClause selectExpandClause,
             IEdmNavigationProperty navigationProperty,
-            ODataValidationSettings validationSettings)
+            ODataValidationSettings validationSettings,
+            SelectExpandNodeCounter selectExpandNodeCounter,
+            long projectionWeight)
         {
             IEdmModel edmModel = _selectExpandQueryOption.Context.Model;
             int? depth = remainDepth;
@@ -318,6 +330,9 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
+                long itemWeight = GetProjectionWeight(selectItem, validationSettings, selectExpandNodeCounter, projectionWeight);
+                selectExpandNodeCounter.Increment(itemWeight);
+
                 ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
                 if (expandItem != null)
                 {
@@ -370,11 +385,88 @@ namespace Microsoft.AspNet.OData.Query.Validators
                     }
 
                     ValidateRestrictions(remainDepth, currentDepth + 1, expandItem.SelectAndExpand, property,
-                        validationSettings);
+                        validationSettings,
+                        selectExpandNodeCounter,
+                        itemWeight);
                     remainDepth = depth;
                 }
 
                 ValidateSelectItem(selectItem, pathProperty, pathStructuredType, edmModel);
+            }
+        }
+
+        private long GetProjectionWeight(SelectItem selectItem, ODataValidationSettings validationSettings, SelectExpandNodeCounter selectExpandNodeCounter, long projectionWeight)
+        {
+            ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+            if (expandItem == null || expandItem.LevelsOption == null)
+            {
+                return projectionWeight;
+            }
+
+            int maxExpansionDepth = validationSettings.MaxExpansionDepth;
+            long levels;
+            if (expandItem.LevelsOption.IsMaxLevel)
+            {
+                levels = maxExpansionDepth > 0
+                    ? maxExpansionDepth
+                    : _selectExpandQueryOption.LevelsMaxLiteralExpansionDepth < 0
+                        ? ODataValidationSettings.DefaultMaxExpansionDepth
+                        : _selectExpandQueryOption.LevelsMaxLiteralExpansionDepth;
+            }
+            else
+            {
+                levels = expandItem.LevelsOption.Level;
+            }
+
+            if (maxExpansionDepth > 0 && levels > maxExpansionDepth)
+            {
+                levels = maxExpansionDepth;
+            }
+
+            return levels > 1
+                ? selectExpandNodeCounter.ScaleWeight(projectionWeight, levels)
+                : projectionWeight;
+        }
+
+        private sealed class SelectExpandNodeCounter
+        {
+            private readonly int _maximum;
+            private int _count;
+
+            public SelectExpandNodeCounter(int maximum)
+            {
+                _maximum = maximum;
+            }
+
+            public void Increment(long weight)
+            {
+                if (_maximum <= 0)
+                {
+                    return;
+                }
+
+                if ((long)_count + weight > _maximum)
+                {
+                    throw new ODataException(Error.Format(
+                        SRResources.MaxSelectExpandNodeCountExceeded,
+                        _maximum,
+                        "MaxSelectExpandNodeCount"));
+                }
+
+                _count += (int)weight;
+            }
+
+            public long ScaleWeight(long weight, long multiplier)
+            {
+                if (_maximum <= 0)
+                {
+                    return weight;
+                }
+
+                long ceiling = (long)_maximum + 1;
+                long boundedMultiplier = multiplier < ceiling ? multiplier : ceiling;
+                long scaledWeight = weight * boundedMultiplier;
+                return scaledWeight < ceiling ? scaledWeight : ceiling;
             }
         }
     }

@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.OData.Query
     public class DefaultQuerySettings
     {
         private int? _maxTop = 0;
+        private int _maxSelectExpandNodeCount = ODataValidationSettings.DefaultMaxSelectExpandNodeCount;
 
         /// <summary>
         /// Gets or sets a value indicating whether navigation property can be expanded.
@@ -65,6 +66,28 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
+        /// Gets or sets the global maximum number of $select and $expand items allowed across the whole projection
+        /// tree of a single request.
+        /// </summary>
+        /// <remarks>The default value is 500. Set to 0 to disable the check globally.</remarks>
+        public int MaxSelectExpandNodeCount
+        {
+            get
+            {
+                return _maxSelectExpandNodeCount;
+            }
+            set
+            {
+                if (value < 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 0);
+                }
+
+                _maxSelectExpandNodeCount = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the service will use skiptoken or not.
         /// </summary>
         public bool EnableSkipToken { get; set; }
@@ -78,6 +101,7 @@ namespace Microsoft.AspNet.OData.Query
             this.EnableSelect = settings.EnableSelect;
             this.EnableSkipToken = settings.EnableSkipToken;
             this.MaxTop = settings.MaxTop;
+            this.MaxSelectExpandNodeCount = settings.MaxSelectExpandNodeCount;
         }
     }
 }

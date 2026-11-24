@@ -1522,6 +1522,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The number of $select and $expand items in the request exceeds the maximum number allowed of '{0}'. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings..
+        /// </summary>
+        internal static string MaxSelectExpandNodeCountExceeded
+        {
+            get
+            {
+                return ResourceManager.GetString("MaxSelectExpandNodeCountExceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to MemberExpressions must be bound to the LambdaExpression parameter..
         /// </summary>
         internal static string MemberExpressionsMustBeBoundToLambdaParameter

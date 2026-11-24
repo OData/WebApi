@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal(100, querySettings.MaxNodeCount);
             Assert.Null(querySettings.MaxSkip);
             Assert.Null(querySettings.MaxTop);
+            Assert.Null(querySettings.MaxSelectExpandNodeCount);
         }
 
         [Fact]
@@ -164,6 +165,20 @@ namespace Microsoft.AspNet.OData.Test.Query
              illegalLowerValue: -1,
              illegalUpperValue: null,
              roundTripTestValue: 100);
+        }
+
+        [Fact]
+        public void MaxSelectExpandNodeCount_Property_RoundTrips()
+        {
+            ReflectionAssert.NullableIntegerProperty<ODataValidationSettings, int>(
+                new ODataValidationSettings(),
+                o => o.MaxSelectExpandNodeCount,
+                expectedDefaultValue: null,
+                minLegalValue: 0,
+                maxLegalValue: int.MaxValue,
+                illegalLowerValue: -1,
+                illegalUpperValue: null,
+                roundTripTestValue: 500);
         }
 
         [Fact]

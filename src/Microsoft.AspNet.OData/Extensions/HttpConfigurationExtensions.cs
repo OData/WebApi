@@ -125,6 +125,17 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Sets the maximum number of $select and $expand items allowed across the whole projection tree of a
+        /// single request.
+        /// </summary>
+        public static HttpConfiguration MaxSelectExpandNodeCount(this HttpConfiguration configuration, int maxNodeCount)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.MaxSelectExpandNodeCount = maxNodeCount;
+            return configuration;
+        }
+
+        /// <summary>
         /// Sets the EnableExpand of <see cref="DefaultQuerySettings"/> in the configuration,
         /// depends on <see cref="QueryOptionSetting"/>.
         /// Todo: change QueryOptionSetting to SelectExpandType.

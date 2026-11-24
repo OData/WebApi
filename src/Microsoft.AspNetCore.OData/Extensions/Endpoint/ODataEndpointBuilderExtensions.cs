@@ -77,6 +77,21 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Sets the maximum number of $select and $expand items allowed across the whole projection tree of a
+        /// single request.
+        /// </summary>
+        public static IEndpointRouteBuilder MaxSelectExpandNodeCount(this IEndpointRouteBuilder builder, int maxNodeCount)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            builder.ServiceProvider.MaxSelectExpandNodeCount(maxNodeCount);
+            return builder;
+        }
+
+        /// <summary>
         /// Sets the EnableExpand of <see cref="DefaultQuerySettings"/> in route builder,
         /// depends on <see cref="QueryOptionSetting"/>.
         /// </summary>

@@ -8,6 +8,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,6 +57,7 @@ namespace Microsoft.AspNet.OData.Batch
                 IServiceProvider rootContainer = perRouteContainer.GetODataRootContainer(routeName);
                 ODataBatchHandler batchHandler = rootContainer.GetRequiredService<ODataBatchHandler>();
 
+                request.ODataFeature().RoutePrefix = request.Path.GetRoutePrefix();
                 await batchHandler.ProcessBatchAsync(context, next);
             }
             else

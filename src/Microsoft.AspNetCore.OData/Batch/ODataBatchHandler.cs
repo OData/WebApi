@@ -9,8 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -78,6 +80,12 @@ namespace Microsoft.AspNet.OData.Batch
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
+            }
+
+            string routePrefix = request.ODataFeature().RoutePrefix;
+            if (routePrefix != null)
+            {
+                return new Uri(UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBase, new PathString(routePrefix.Length == 0 ? "/" : "/" + routePrefix.TrimEnd('/') + "/")));
             }
 
             return request.GetODataBatchBaseUri(ODataRouteName, ODataRoute);

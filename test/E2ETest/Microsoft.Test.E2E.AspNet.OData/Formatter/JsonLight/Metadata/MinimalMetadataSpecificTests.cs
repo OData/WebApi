@@ -21,6 +21,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
+    [Collection("JsonLightMetadata")] // Shared static random-data table across servers; run serially under parallel execution
     public class MinimalMetadataSpecificTests : WebHostTestBase
     {
         public MinimalMetadataSpecificTests(WebHostTestFixture fixture)

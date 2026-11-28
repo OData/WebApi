@@ -41,6 +41,7 @@ using HttpClientExtensions = System.Net.Http.HttpClientExtensions;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
+    [Collection("Singleton")] // Shared static singleton controller state across servers; run serially under parallel execution
     public class SingletonTest : WebHostTestBase
     {
         private const string NameSpace = "Microsoft.Test.E2E.AspNet.OData.Singleton";

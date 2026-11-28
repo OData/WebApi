@@ -27,6 +27,8 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 {
+    // Shared LocalDB instance: serialized in the "Database" collection to avoid concurrent DROP/CREATE DATABASE deadlock under parallel runs.
+    [Collection("Database")]
     public class DateAndTimeOfDayWithEfTest : WebHostTestBase
     {
         public DateAndTimeOfDayWithEfTest(WebHostTestFixture fixture)
